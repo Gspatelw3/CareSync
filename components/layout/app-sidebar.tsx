@@ -83,7 +83,7 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
               className={[
                 "flex min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition",
                 isActive
-                  ? "care-brand-gradient text-white shadow-sm shadow-[var(--care-primary)]/20"
+                  ? "bg-[var(--care-surface)] text-slate-950"
                   : "text-slate-600 hover:bg-[var(--care-surface)] hover:text-slate-950",
               ].join(" ")}
               href={item.href}
