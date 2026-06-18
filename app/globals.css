@@ -3,11 +3,27 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --care-primary: #1a6fa8;
+  --care-primary-dark: #123d5b;
+  --care-accent: #85c9f0;
+  --care-mint: #4ec3a0;
+  --care-surface: #f4fafd;
+  --care-panel-text: #d8eef8;
+  --care-soft-text: #e7f7f2;
+  --care-border: #cfe8f5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-care-primary: var(--care-primary);
+  --color-care-primary-dark: var(--care-primary-dark);
+  --color-care-accent: var(--care-accent);
+  --color-care-mint: var(--care-mint);
+  --color-care-surface: var(--care-surface);
+  --color-care-panel-text: var(--care-panel-text);
+  --color-care-soft-text: var(--care-soft-text);
+  --color-care-border: var(--care-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
