@@ -4,13 +4,16 @@
   --background: #ffffff;
   --foreground: #171717;
   --care-primary: #1a6fa8;
-  --care-primary-dark: #123d5b;
-  --care-accent: #85c9f0;
-  --care-mint: #4ec3a0;
-  --care-surface: #f4fafd;
-  --care-panel-text: #d8eef8;
-  --care-soft-text: #e7f7f2;
-  --care-border: #cfe8f5;
+  --care-primary-dark: #104d73;
+  --care-primary-deep: #0b3046;
+  --care-secondary: #0e8e72;
+  --care-secondary-dark: #0a6b56;
+  --care-accent: #6b9eb8;
+  --care-mint: #7ddbba;
+  --care-surface: #eef7fa;
+  --care-panel-text: #d9eef6;
+  --care-soft-text: #ddf8ee;
+  --care-border: #bfdde9;
 }
 
 @theme inline {
@@ -18,6 +21,9 @@
   --color-foreground: var(--foreground);
   --color-care-primary: var(--care-primary);
   --color-care-primary-dark: var(--care-primary-dark);
+  --color-care-primary-deep: var(--care-primary-deep);
+  --color-care-secondary: var(--care-secondary);
+  --color-care-secondary-dark: var(--care-secondary-dark);
   --color-care-accent: var(--care-accent);
   --color-care-mint: var(--care-mint);
   --color-care-surface: var(--care-surface);
@@ -39,4 +45,58 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes auth-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auth-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.auth-panel {
+  animation: auth-panel-in 650ms ease-out both;
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--care-primary) 34%, transparent), transparent 34%),
+    linear-gradient(135deg, var(--care-primary-deep), #0d4054 54%, var(--care-secondary-dark));
+}
+
+.auth-card {
+  animation: auth-card-in 520ms ease-out 120ms both;
+}
+
+.care-brand-gradient {
+  background: linear-gradient(135deg, var(--care-primary), var(--care-secondary));
+}
+
+.care-brand-gradient-vertical {
+  background: linear-gradient(180deg, var(--care-primary), var(--care-secondary));
+}
+
+.auth-logo-mark {
+  opacity: 0.98;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-panel,
+  .auth-card {
+    animation: none;
+  }
 }

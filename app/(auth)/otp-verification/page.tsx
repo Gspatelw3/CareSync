@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { Button } from "@/components/ui/button";
 
 export default function OtpVerificationPage() {
   return (
@@ -39,21 +40,13 @@ export default function OtpVerificationPage() {
           />
         </div>
 
-        <button
-          className="h-11 rounded-md bg-[var(--care-primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--care-primary-dark)] focus:outline-none focus:ring-4 focus:ring-[var(--care-accent)]/35"
-          type="submit"
-        >
-          Verify OTP
-        </button>
+        <Button type="submit">Verify OTP</Button>
       </form>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
-        <button
-          className="font-medium text-[var(--care-primary)] hover:text-[var(--care-primary-dark)]"
-          type="button"
-        >
+        <Button className="font-medium" size="link" variant="ghost">
           Resend code
-        </button>
+        </Button>
         <Link
           className="font-medium text-slate-600 hover:text-slate-950"
           href="/login"

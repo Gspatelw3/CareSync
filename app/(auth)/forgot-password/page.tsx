@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { Button } from "@/components/ui/button";
 
 export default function ForgotPasswordPage() {
   return (
@@ -36,12 +37,7 @@ export default function ForgotPasswordPage() {
           />
         </div>
 
-        <button
-          className="h-11 rounded-md bg-[var(--care-primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--care-primary-dark)] focus:outline-none focus:ring-4 focus:ring-[var(--care-accent)]/35"
-          type="submit"
-        >
-          Send OTP
-        </button>
+        <Button type="submit">Send OTP</Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-600">

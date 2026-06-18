@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   return (
@@ -60,12 +61,7 @@ export default function LoginPage() {
           />
         </div>
 
-        <button
-          className="h-11 rounded-md bg-[var(--care-primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--care-primary-dark)] focus:outline-none focus:ring-4 focus:ring-[var(--care-accent)]/35"
-          type="submit"
-        >
-          Continue
-        </button>
+        <Button type="submit">Continue</Button>
       </form>
     </AuthShell>
   );
