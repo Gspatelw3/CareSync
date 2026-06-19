@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
 import { SvgIcon } from "@/components/layout/page-shell";
 import { iconPaths } from "@/lib/icons";
+import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
 
 export const metadata: Metadata = {
   title: "Beds | Care Sync",
@@ -44,20 +45,12 @@ export default function InpatientPage() {
         description="Bed allocation, ward management, admissions, and discharge tracking."
         actions={
           <>
-            <Link
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-white px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
-              href="/inpatient"
-            >
-              <SvgIcon className="size-4" paths={iconPaths.filter} />
+            <SecondaryButton icon={<SvgIcon className="size-4" paths={iconPaths.filter} />} message="Opening ward filter options.">
               Filter wards
-            </Link>
-            <Link
-              className="care-brand-gradient inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:brightness-95"
-              href="/inpatient"
-            >
-              <SvgIcon className="size-4" paths={iconPaths.plus} />
+            </SecondaryButton>
+            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="Bed allocation form opened.">
               Allocate bed
-            </Link>
+            </ActionButton>
           </>
         }
       />

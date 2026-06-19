@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { ActionButton } from "@/components/ui/action-buttons";
 
 type PlaceholderPageProps = {
   activeHref: string;
@@ -40,13 +41,9 @@ export function PlaceholderPage({
               >
                 Back to dashboard
               </Link>
-              <button
-                className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-md border border-[var(--care-border)] bg-white px-4 text-sm font-semibold text-slate-400"
-                disabled
-                type="button"
-              >
+              <ActionButton message={`${primaryAction} action triggered.`}>
                 {primaryAction}
-              </button>
+              </ActionButton>
             </div>
           </div>
         </section>

@@ -12,7 +12,8 @@ export type IconName =
   | "plus"
   | "search"
   | "settings"
-  | "wallet";
+  | "wallet"
+  | "x";
 
 export const iconPaths: Record<IconName, string[]> = {
   activity: ["M4 12h4l2-6 4 12 2-6h4"],
@@ -49,4 +50,5 @@ export const iconPaths: Record<IconName, string[]> = {
     "M19 12a7.2 7.2 0 0 0-.1-1l2-1.5-2-3.5-2.4 1a7.8 7.8 0 0 0-1.8-1L14.4 3h-4.8l-.3 3a7.8 7.8 0 0 0-1.8 1l-2.4-1-2 3.5 2 1.5a7.2 7.2 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.8 7.8 0 0 0 1.8 1l.3 3h4.8l.3-3a7.8 7.8 0 0 0 1.8-1l2.4 1 2-3.5-2-1.5c.1-.3.1-.7.1-1",
   ],
   wallet: ["M4 7h16v12H4z", "M4 7l3-4h10l3 4", "M15 13h5"],
+  x: ["M18 6 6 18", "M6 6l12 12"],
 };

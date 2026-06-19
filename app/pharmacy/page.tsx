@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
 import { SvgIcon } from "@/components/layout/page-shell";
 import { iconPaths } from "@/lib/icons";
+import { ActionButton } from "@/components/ui/action-buttons";
 
 export const metadata: Metadata = {
   title: "Pharmacy | Care Sync",
@@ -53,13 +54,9 @@ export default function PharmacyPage() {
                 type="search"
               />
             </div>
-            <Link
-              className="care-brand-gradient inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:brightness-95"
-              href="/pharmacy"
-            >
-              <SvgIcon className="size-4" paths={iconPaths.plus} />
+            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="Inventory update form opened.">
               Update inventory
-            </Link>
+            </ActionButton>
           </>
         }
       />
