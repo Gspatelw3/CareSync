@@ -170,7 +170,7 @@ export default function DashboardPage() {
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
         <AppSidebar activeHref="/dashboard" />
 
-        <section className="px-4 py-5 sm:px-6 lg:px-8">
+        <section className="px-4 py-5 sm:px-6 lg:px-8 lg:h-screen overflow-y-auto">
           <header className="flex flex-col gap-4 border-b border-[var(--care-border)] pb-5 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--care-primary)]">
