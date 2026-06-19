@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
+import { StatusBadge } from "@/components/layout/page-shell";
 
 type ReportItem = {
   name: string;
@@ -17,10 +18,10 @@ type ViewAllButtonProps = {
   reports: ReportItem[];
 };
 
-const statusColor: Record<string, string> = {
-  Generated: "bg-[color:var(--care-mint)]/20 text-[var(--care-secondary-dark)] ring-1 ring-[color:var(--care-mint)]/60",
-  "Auto-generated": "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-  Draft: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+const statusVariant: Record<string, "default" | "warning" | "danger" | "info"> = {
+  Generated: "default",
+  "Auto-generated": "info",
+  Draft: "warning",
 };
 
 export function ViewAllButton({ label, title, subtitle, reports }: ViewAllButtonProps) {
@@ -54,14 +55,9 @@ export function ViewAllButton({ label, title, subtitle, reports }: ViewAllButton
                   {report.period} · Updated {report.updated}
                 </p>
               </div>
-              <span
-                className={[
-                  "inline-flex w-fit shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
-                  statusColor[report.status] || "bg-slate-50 text-slate-700 ring-1 ring-slate-200",
-                ].join(" ")}
-              >
+              <StatusBadge variant={statusVariant[report.status] || "default"}>
                 {report.status}
-              </span>
+              </StatusBadge>
             </div>
           ))}
         </div>

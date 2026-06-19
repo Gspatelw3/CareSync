@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
+import { SearchInput } from "@/components/ui/search-input";
+import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
 
 export const metadata: Metadata = {
   title: "Pharmacy | Care Sync",
@@ -46,31 +47,54 @@ export default function PharmacyPage() {
         description="Medication inventory, dispensing queues, reorder levels, and stock alerts."
         actions={
           <>
-            <div className="relative">
-              <SvgIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" paths={iconPaths.search} />
-              <input
-                className="h-10 w-52 rounded-md border border-[var(--care-border)] bg-white pl-9 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[var(--care-primary)]"
-                placeholder="Search inventory..."
-                type="search"
-              />
-            </div>
-            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="Inventory update form opened.">
-              Update inventory
-            </ActionButton>
+            <SearchInput placeholder="Search inventory..." />
+            <ActionModal
+              title="Update Inventory"
+              subtitle="Add stock or update inventory levels for a medication."
+              confirmLabel="Update inventory"
+              trigger={
+                <ActionButton icon={<Plus className="size-4" />} message="">
+                  Update inventory
+                </ActionButton>
+              }
+            >
+              <FormSection title="Medication">
+                <FormField
+                  label="Select medication"
+                  type="select"
+                  options={[
+                    { label: "Atorvastatin 20mg", value: "MED-001" },
+                    { label: "Amoxicillin 500mg", value: "MED-002" },
+                    { label: "Insulin Glargine", value: "MED-003" },
+                    { label: "Saline IV 0.9%", value: "MED-004" },
+                    { label: "Paracetamol 500mg", value: "MED-005" },
+                    { label: "Omeprazole 20mg", value: "MED-006" },
+                    { label: "Ceftriaxone 1g", value: "MED-007" },
+                    { label: "Morphine 10mg", value: "MED-008" },
+                    { label: "Metformin 500mg", value: "MED-009" },
+                    { label: "Lorazepam 2mg", value: "MED-010" },
+                  ]}
+                />
+              </FormSection>
+              <FormSection title="Stock Update">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="Add quantity" type="number" placeholder="0" />
+                  <FormField label="New reorder level" type="number" placeholder="0" />
+                </div>
+                <FormField label="Batch / Lot number" placeholder="e.g. BATCH-2026-07" />
+                <FormField label="Expiry date" type="date" />
+              </FormSection>
+              <FormSection title="Notes">
+                <FormField label="Remarks" type="textarea" placeholder="Reason for update, supplier info..." />
+              </FormSection>
+            </ActionModal>
           </>
         }
       />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => (
-          <div className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5" key={item.label}>
-            <p className="text-sm font-medium text-slate-600">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{item.value}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-[var(--care-secondary)]">{item.delta}</span>
-              <span className="text-slate-500">{item.detail}</span>
-            </div>
-          </div>
+          <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} detail={item.detail} />
         ))}
       </div>
 

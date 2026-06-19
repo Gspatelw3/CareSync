@@ -47,6 +47,31 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--care-border);
+  opacity: 0.6;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--care-border);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--care-border) transparent;
+}
+
 @keyframes auth-panel-in {
   from {
     opacity: 0;

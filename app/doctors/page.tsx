@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
+import { SearchInput } from "@/components/ui/search-input";
+import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
 
 export const metadata: Metadata = {
   title: "Doctors | Care Sync",
@@ -36,31 +37,80 @@ export default function DoctorsPage() {
         description="Doctor directory, profiles, department coverage, and schedule management."
         actions={
           <>
-            <div className="relative">
-              <SvgIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" paths={iconPaths.search} />
-              <input
-                className="h-10 w-52 rounded-md border border-[var(--care-border)] bg-white pl-9 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[var(--care-primary)]"
-                placeholder="Search doctors..."
-                type="search"
-              />
-            </div>
-            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="New doctor registration form opened.">
-              Add doctor
-            </ActionButton>
+            <SearchInput placeholder="Search doctors..." />
+            <ActionModal
+              title="Add Doctor"
+              subtitle="Register a new doctor in the system."
+              confirmLabel="Add doctor"
+              trigger={
+                <ActionButton icon={<Plus className="size-4" />} message="">
+                  Add doctor
+                </ActionButton>
+              }
+            >
+              <FormSection title="Personal Information">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="First name" placeholder="e.g. Kavya" />
+                  <FormField label="Last name" placeholder="e.g. Rao" />
+                </div>
+                <FormField label="Phone number" placeholder="+91 98765 43210" />
+                <FormField label="Email" placeholder="kavya.rao@caresync.com" />
+              </FormSection>
+              <FormSection title="Professional Details">
+                <FormField
+                  label="Specialization"
+                  type="select"
+                  options={[
+                    { label: "Cardiology", value: "cardiology" },
+                    { label: "Orthopedics", value: "orthopedics" },
+                    { label: "General Medicine", value: "general" },
+                    { label: "Neurology", value: "neurology" },
+                    { label: "Pediatrics", value: "pediatrics" },
+                    { label: "Obstetrics", value: "obstetrics" },
+                    { label: "Pulmonology", value: "pulmonology" },
+                    { label: "Dermatology", value: "dermatology" },
+                  ]}
+                />
+                <FormField
+                  label="Department"
+                  type="select"
+                  options={[
+                    { label: "Cardiology", value: "cardiology" },
+                    { label: "Orthopedics", value: "orthopedics" },
+                    { label: "General", value: "general" },
+                    { label: "Neurology", value: "neurology" },
+                    { label: "Pediatrics", value: "pediatrics" },
+                    { label: "Obstetrics", value: "obstetrics" },
+                    { label: "Respiratory", value: "respiratory" },
+                    { label: "Dermatology", value: "dermatology" },
+                  ]}
+                />
+                <FormField label="License number" placeholder="e.g. MCI-2024-0042" />
+              </FormSection>
+              <FormSection title="Schedule">
+                <FormField
+                  label="Working days"
+                  type="select"
+                  options={[
+                    { label: "Mon–Fri", value: "weekdays" },
+                    { label: "Mon–Sat", value: "weekdays-sat" },
+                    { label: "Tue–Sat", value: "tue-sat" },
+                    { label: "Wed–Sun", value: "wed-sun" },
+                  ]}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="Start time" type="text" placeholder="9 AM" />
+                  <FormField label="End time" type="text" placeholder="5 PM" />
+                </div>
+              </FormSection>
+            </ActionModal>
           </>
         }
       />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => (
-          <div className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5" key={item.label}>
-            <p className="text-sm font-medium text-slate-600">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{item.value}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-[var(--care-secondary)]">{item.delta}</span>
-              <span className="text-slate-500">{item.detail}</span>
-            </div>
-          </div>
+          <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} detail={item.detail} />
         ))}
       </div>
 

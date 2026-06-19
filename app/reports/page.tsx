@@ -5,10 +5,12 @@ import {
     PageHeader,
     Card,
     StatusBadge,
+    StatCard,
 } from "@/components/layout/page-shell";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
+import { SearchInput } from "@/components/ui/search-input";
+import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
 import { ViewAllButton } from "@/components/ui/view-all-button";
 
 export const metadata: Metadata = {
@@ -129,55 +131,66 @@ export default function ReportsPage() {
                 description="Operational reports, utilization trends, revenue summaries, and clinical performance views."
                 actions={
                     <>
-                        <div className="relative">
-                            <SvgIcon
-                                className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
-                                paths={iconPaths.search}
-                            />
-                            <input
-                                className="h-10 w-52 rounded-md border border-[var(--care-border)] bg-white pl-9 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[var(--care-primary)]"
-                                placeholder="Search reports..."
-                                type="search"
-                            />
-                        </div>
-                        <ActionButton
-                            className="care-brand-gradient"
-                            icon={
-                                <SvgIcon
-                                    className="size-4"
-                                    paths={iconPaths.plus}
-                                />
+                        <SearchInput placeholder="Search reports..." />
+                        <ActionModal
+                            title="Generate Report"
+                            subtitle="Create a new report from available templates."
+                            confirmLabel="Generate report"
+                            trigger={
+                                <ActionButton className="care-brand-gradient" icon={<Plus className="size-4" />} message="">
+                                    Generate report
+                                </ActionButton>
                             }
-                            message="Report generation started. You will be notified when ready."
-                            type="info"
                         >
-                            Generate report
-                        </ActionButton>
+                            <FormSection title="Report Template">
+                                <FormField
+                                    label="Category"
+                                    type="select"
+                                    options={[
+                                        { label: "Clinical Reports", value: "clinical" },
+                                        { label: "Financial Reports", value: "financial" },
+                                        { label: "Operational Reports", value: "operational" },
+                                        { label: "Compliance Reports", value: "compliance" },
+                                    ]}
+                                />
+                                <FormField
+                                    label="Report type"
+                                    type="select"
+                                    options={[
+                                        { label: "Patient Admission Summary", value: "admission" },
+                                        { label: "Monthly Revenue Summary", value: "revenue" },
+                                        { label: "Bed Occupancy Trends", value: "occupancy" },
+                                        { label: "Infection Control Audit", value: "infection" },
+                                        { label: "Custom report", value: "custom" },
+                                    ]}
+                                />
+                            </FormSection>
+                            <FormSection title="Parameters">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField label="Start date" type="date" />
+                                    <FormField label="End date" type="date" />
+                                </div>
+                                <FormField
+                                    label="Format"
+                                    type="select"
+                                    options={[
+                                        { label: "PDF", value: "pdf" },
+                                        { label: "Excel", value: "excel" },
+                                        { label: "CSV", value: "csv" },
+                                    ]}
+                                />
+                            </FormSection>
+                            <FormSection title="Notes">
+                                <FormField label="Additional notes" type="textarea" placeholder="Any specific data points or filters..." />
+                            </FormSection>
+                        </ActionModal>
                     </>
                 }
             />
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {stats.map((item) => (
-                    <div
-                        className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5"
-                        key={item.label}
-                    >
-                        <p className="text-sm font-medium text-slate-600">
-                            {item.label}
-                        </p>
-                        <p className="mt-2 text-3xl font-semibold text-slate-950">
-                            {item.value}
-                        </p>
-                        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-                            <span className="font-semibold text-[var(--care-secondary)]">
-                                {item.delta}
-                            </span>
-                            <span className="text-slate-500">
-                                {item.detail}
-                            </span>
-                        </div>
-                    </div>
+                    <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} detail={item.detail} />
                 ))}
             </div>
 

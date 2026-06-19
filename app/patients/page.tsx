@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
+import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { SearchInput } from "@/components/ui/search-input";
 
 export const metadata: Metadata = {
   title: "Patients | Care Sync",
@@ -36,31 +37,72 @@ export default function PatientsPage() {
         description="Patient registry, intake, profiles, and medical history."
         actions={
           <>
-            <div className="relative">
-              <SvgIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" paths={iconPaths.search} />
-              <input
-                className="h-10 w-52 rounded-md border border-[var(--care-border)] bg-white pl-9 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[var(--care-primary)]"
-                placeholder="Search patients..."
-                type="search"
-              />
-            </div>
-            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="New patient registration form opened.">
-              Add patient
-            </ActionButton>
+            <SearchInput placeholder="Search patients..." />
+            <ActionModal
+              title="Add Patient"
+              subtitle="Register a new patient in the system."
+              confirmLabel="Add patient"
+              trigger={
+                <ActionButton icon={<Plus className="size-4" />} message="">
+                  Add patient
+                </ActionButton>
+              }
+            >
+              <FormSection title="Personal Information">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="First name" placeholder="e.g. Meera" />
+                  <FormField label="Last name" placeholder="e.g. Iyer" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    label="Gender"
+                    type="select"
+                    options={[
+                      { label: "Male", value: "male" },
+                      { label: "Female", value: "female" },
+                      { label: "Other", value: "other" },
+                    ]}
+                  />
+                  <FormField label="Age" type="number" placeholder="e.g. 38" />
+                </div>
+                <FormField label="Phone number" placeholder="+91 98765 43210" />
+                <FormField label="Email" placeholder="patient@email.com" />
+              </FormSection>
+              <FormSection title="Medical Details">
+                <FormField
+                  label="Department"
+                  type="select"
+                  options={[
+                    { label: "Cardiology", value: "cardiology" },
+                    { label: "Orthopedics", value: "orthopedics" },
+                    { label: "General", value: "general" },
+                    { label: "Neurology", value: "neurology" },
+                    { label: "Pediatrics", value: "pediatrics" },
+                    { label: "Obstetrics", value: "obstetrics" },
+                  ]}
+                />
+                <FormField
+                  label="Assign doctor"
+                  type="select"
+                  options={[
+                    { label: "Dr. Kavya Rao", value: "D-042" },
+                    { label: "Dr. Neil Shah", value: "D-041" },
+                    { label: "Dr. Amina Khan", value: "D-040" },
+                    { label: "Dr. Amit Verma", value: "D-039" },
+                    { label: "Dr. Sneha Kapoor", value: "D-038" },
+                    { label: "Dr. Priya Mehta", value: "D-037" },
+                  ]}
+                />
+                <FormField label="Medical history" type="textarea" placeholder="Any pre-existing conditions, allergies..." />
+              </FormSection>
+            </ActionModal>
           </>
         }
       />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => (
-          <div className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5" key={item.label}>
-            <p className="text-sm font-medium text-slate-600">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{item.value}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-[var(--care-secondary)]">{item.delta}</span>
-              <span className="text-slate-500">{item.detail}</span>
-            </div>
-          </div>
+          <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} detail={item.detail} />
         ))}
       </div>
 

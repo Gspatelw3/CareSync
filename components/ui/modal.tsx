@@ -1,8 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useCallback } from "react";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { X } from "lucide-react";
 
 type ModalProps = {
   open: boolean;
@@ -10,9 +9,10 @@ type ModalProps = {
   title: string;
   subtitle?: string;
   children: ReactNode;
+  footer?: ReactNode;
 };
 
-export function Modal({ open, onClose, title, subtitle, children }: ModalProps) {
+export function Modal({ open, onClose, title, subtitle, children, footer }: ModalProps) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -42,8 +42,8 @@ export function Modal({ open, onClose, title, subtitle, children }: ModalProps) 
       />
 
       {/* Modal panel */}
-      <div className="relative z-10 mx-4 w-full max-w-4xl rounded-xl border border-slate-200 bg-white shadow-2xl">
-        {/* Header */}
+      <div className="relative z-10 mx-4 flex w-full max-w-4xl flex-col rounded-xl border border-slate-200 bg-white shadow-2xl">
+        {/* Header — sticky at top */}
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h2 className="text-xl font-semibold text-slate-950">{title}</h2>
@@ -57,14 +57,21 @@ export function Modal({ open, onClose, title, subtitle, children }: ModalProps) 
             type="button"
             aria-label="Close"
           >
-            <SvgIcon className="size-5" paths={iconPaths.x} />
+            <X className="size-5" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="max-h-[70vh] overflow-y-auto px-6 py-5">
+        {/* Body — scrollable */}
+        <div className="max-h-[55vh] overflow-y-auto px-6 py-5">
           {children}
         </div>
+
+        {/* Footer — sticky at bottom */}
+        {footer && (
+          <div className="border-t border-slate-100 px-6 py-4">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

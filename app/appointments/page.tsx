@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { Calendar, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
+import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
 
 export const metadata: Metadata = {
   title: "Appointments | Care Sync",
@@ -42,26 +42,130 @@ export default function AppointmentsPage() {
         description="Calendar views, appointment lists, booking, and check-ins."
         actions={
           <>
-            <SecondaryButton icon={<SvgIcon className="size-4" paths={iconPaths.calendar} />} message="Opening calendar view.">
-              Calendar view
-            </SecondaryButton>
-            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="New appointment booking form opened.">
-              Book appointment
-            </ActionButton>
+            <ActionModal
+              title="Calendar View"
+              subtitle="Weekly appointment calendar — click a slot to view details."
+              confirmLabel="Close"
+              trigger={
+                <SecondaryButton icon={<Calendar className="size-4" />} message="">
+                  Calendar view
+                </SecondaryButton>
+              }
+            >
+              <div className="rounded-lg border border-slate-200">
+                <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                    <div className="border-r border-slate-200 px-2 py-3 last:border-r-0" key={d}>{d}</div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 text-center text-sm">
+                  {Array.from({ length: 30 }).map((_, i) => {
+                    const day = i + 1;
+                    const hasAppt = [1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26, 29].includes(day);
+                    const isToday = day === 19;
+                    return (
+                      <div
+                        className={`border-b border-r border-slate-100 px-1 py-3 last:border-r-0 ${
+                          isToday ? "bg-[var(--care-mint)]/10 ring-1 ring-inset ring-[var(--care-primary)] font-semibold" : ""
+                        }`}
+                        key={day}
+                      >
+                        <span className={isToday ? "text-[var(--care-primary)]" : "text-slate-700"}>{day}</span>
+                        {hasAppt && (
+                          <div className="mt-1 mx-auto h-1.5 w-1.5 rounded-full bg-[var(--care-primary)]" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-slate-500 text-center">
+                Showing June 2026 · Dots indicate scheduled appointments · <span className="font-semibold text-[var(--care-primary)]">19 Jun</span> is today
+              </p>
+            </ActionModal>
+            <ActionModal
+              title="Book Appointment"
+              subtitle="Schedule a new patient appointment."
+              confirmLabel="Book appointment"
+              trigger={
+                <ActionButton icon={<Plus className="size-4" />} message="">
+                  Book appointment
+                </ActionButton>
+              }
+            >
+              <FormSection title="Patient">
+                <FormField
+                  label="Patient name"
+                  type="select"
+                  options={[
+                    { label: "Meera Iyer", value: "P-1024" },
+                    { label: "Arjun Menon", value: "P-1023" },
+                    { label: "Priya Nair", value: "P-1022" },
+                    { label: "Rohan Das", value: "P-1021" },
+                    { label: "Sneha Patel", value: "P-1020" },
+                    { label: "Vikram Singh", value: "P-1019" },
+                    { label: "Anita Sharma", value: "P-1018" },
+                    { label: "Deepak Kumar", value: "P-1017" },
+                  ]}
+                />
+              </FormSection>
+              <FormSection title="Schedule">
+                <FormField label="Date" type="date" />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="Time" type="text" placeholder="e.g. 10:00" />
+                  <FormField
+                    label="Type"
+                    type="select"
+                    options={[
+                      { label: "Consultation", value: "consultation" },
+                      { label: "Follow-up", value: "followup" },
+                      { label: "Check-up", value: "checkup" },
+                      { label: "Surgery prep", value: "surgery" },
+                      { label: "Vaccination", value: "vaccination" },
+                      { label: "ECG", value: "ecg" },
+                      { label: "Physiotherapy", value: "physio" },
+                    ]}
+                  />
+                </div>
+              </FormSection>
+              <FormSection title="Care Team">
+                <FormField
+                  label="Department"
+                  type="select"
+                  options={[
+                    { label: "Cardiology", value: "cardiology" },
+                    { label: "Orthopedics", value: "orthopedics" },
+                    { label: "General", value: "general" },
+                    { label: "Neurology", value: "neurology" },
+                    { label: "Pediatrics", value: "pediatrics" },
+                    { label: "Obstetrics", value: "obstetrics" },
+                    { label: "Dermatology", value: "dermatology" },
+                    { label: "Pulmonology", value: "pulmonology" },
+                  ]}
+                />
+                <FormField
+                  label="Doctor"
+                  type="select"
+                  options={[
+                    { label: "Dr. Kavya Rao", value: "D-042" },
+                    { label: "Dr. Neil Shah", value: "D-041" },
+                    { label: "Dr. Amina Khan", value: "D-040" },
+                    { label: "Dr. Amit Verma", value: "D-039" },
+                    { label: "Dr. Sneha Kapoor", value: "D-038" },
+                    { label: "Dr. Priya Mehta", value: "D-037" },
+                    { label: "Dr. Rajesh Gupta", value: "D-036" },
+                    { label: "Dr. Sunita Reddy", value: "D-035" },
+                  ]}
+                />
+              </FormSection>
+            </ActionModal>
           </>
         }
       />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => (
-          <div className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5" key={item.label}>
-            <p className="text-sm font-medium text-slate-600">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{item.value}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-[var(--care-secondary)]">{item.delta}</span>
-              <span className="text-slate-500">{item.detail}</span>
-            </div>
-          </div>
+          <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} detail={item.detail} />
         ))}
       </div>
 

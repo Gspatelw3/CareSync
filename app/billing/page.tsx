@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { Filter, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
+import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
 
 export const metadata: Metadata = {
   title: "Billing | Care Sync",
@@ -44,26 +44,101 @@ export default function BillingPage() {
         description="Invoices, payment history, insurance claims, and pending balances."
         actions={
           <>
-            <SecondaryButton icon={<SvgIcon className="size-4" paths={iconPaths.filter} />} message="Opening invoice status filter options.">
-              Filter by status
-            </SecondaryButton>
-            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="New invoice creation form opened.">
-              Create invoice
-            </ActionButton>
+            <ActionModal
+              title="Filter Invoices"
+              subtitle="Filter by status, date range, or insurance provider."
+              confirmLabel="Apply filters"
+              trigger={
+                <SecondaryButton icon={<Filter className="size-4" />} message="">
+                  Filter by status
+                </SecondaryButton>
+              }
+            >
+              <FormSection title="Status">
+                <FormField
+                  label="Invoice status"
+                  type="select"
+                  options={[
+                    { label: "All", value: "all" },
+                    { label: "Paid", value: "paid" },
+                    { label: "Partial", value: "partial" },
+                    { label: "Pending", value: "pending" },
+                  ]}
+                />
+              </FormSection>
+              <FormSection title="Date Range">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="From" type="date" />
+                  <FormField label="To" type="date" />
+                </div>
+              </FormSection>
+              <FormSection title="Insurance">
+                <FormField
+                  label="Provider"
+                  type="select"
+                  options={[
+                    { label: "All providers", value: "all" },
+                    { label: "Star Health", value: "star" },
+                    { label: "ICICI Lombard", value: "icici" },
+                    { label: "NIA", value: "nia" },
+                    { label: "Apollo Munich", value: "apollo" },
+                    { label: "Self-pay", value: "self" },
+                  ]}
+                />
+              </FormSection>
+            </ActionModal>
+            <ActionModal
+              title="Create Invoice"
+              subtitle="Generate a new invoice for a patient."
+              confirmLabel="Create invoice"
+              trigger={
+                <ActionButton icon={<Plus className="size-4" />} message="">
+                  Create invoice
+                </ActionButton>
+              }
+            >
+              <FormSection title="Patient Information">
+                <FormField
+                  label="Patient"
+                  type="select"
+                  options={[
+                    { label: "Meera Iyer", value: "P-1024" },
+                    { label: "Arjun Menon", value: "P-1023" },
+                    { label: "Sita Verma", value: "P-1021" },
+                    { label: "Vikram Singh", value: "P-1019" },
+                    { label: "Rohan Das", value: "P-1021" },
+                    { label: "Aisha Patel", value: "P-1020" },
+                    { label: "Lakshmi Nair", value: "P-1018" },
+                    { label: "Deepak Kumar", value: "P-1017" },
+                  ]}
+                />
+              </FormSection>
+              <FormSection title="Service Details">
+                <FormField label="Service description" placeholder="e.g. Cardiology consultation" />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="Amount" type="number" placeholder="0.00" />
+                  <FormField label="Insurance covered" type="number" placeholder="0.00" />
+                </div>
+                <FormField
+                  label="Insurance provider"
+                  type="select"
+                  options={[
+                    { label: "Self-pay", value: "self" },
+                    { label: "Star Health", value: "star" },
+                    { label: "ICICI Lombard", value: "icici" },
+                    { label: "NIA", value: "nia" },
+                    { label: "Apollo Munich", value: "apollo" },
+                  ]}
+                />
+              </FormSection>
+            </ActionModal>
           </>
         }
       />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => (
-          <div className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5" key={item.label}>
-            <p className="text-sm font-medium text-slate-600">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{item.value}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-[var(--care-secondary)]">{item.delta}</span>
-              <span className="text-slate-500">{item.detail}</span>
-            </div>
-          </div>
+          <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} detail={item.detail} />
         ))}
       </div>
 

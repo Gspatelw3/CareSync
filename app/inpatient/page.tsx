@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge } from "@/components/layout/page-shell";
-import { SvgIcon } from "@/components/layout/page-shell";
-import { iconPaths } from "@/lib/icons";
+import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { Filter, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
+import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
 
 export const metadata: Metadata = {
   title: "Beds | Care Sync",
@@ -45,26 +45,122 @@ export default function InpatientPage() {
         description="Bed allocation, ward management, admissions, and discharge tracking."
         actions={
           <>
-            <SecondaryButton icon={<SvgIcon className="size-4" paths={iconPaths.filter} />} message="Opening ward filter options.">
-              Filter wards
-            </SecondaryButton>
-            <ActionButton icon={<SvgIcon className="size-4" paths={iconPaths.plus} />} message="Bed allocation form opened.">
-              Allocate bed
-            </ActionButton>
+            <ActionModal
+              title="Filter Wards"
+              subtitle="Filter by ward type, occupancy, or status."
+              confirmLabel="Apply filters"
+              trigger={
+                <SecondaryButton icon={<Filter className="size-4" />} message="">
+                  Filter wards
+                </SecondaryButton>
+              }
+            >
+              <FormSection title="Ward Type">
+                <FormField
+                  label="Department"
+                  type="select"
+                  options={[
+                    { label: "All wards", value: "all" },
+                    { label: "ICU", value: "icu" },
+                    { label: "Emergency", value: "emergency" },
+                    { label: "General", value: "general" },
+                    { label: "Maternity", value: "maternity" },
+                    { label: "Pediatrics", value: "pediatrics" },
+                    { label: "Isolation", value: "isolation" },
+                    { label: "Recovery", value: "recovery" },
+                  ]}
+                />
+              </FormSection>
+              <FormSection title="Occupancy">
+                <FormField
+                  label="Availability"
+                  type="select"
+                  options={[
+                    { label: "All", value: "all" },
+                    { label: "Available beds only", value: "available" },
+                    { label: "Near capacity (>80%)", value: "full" },
+                  ]}
+                />
+              </FormSection>
+              <FormSection title="Status">
+                <FormField
+                  label="Care level"
+                  type="select"
+                  options={[
+                    { label: "All levels", value: "all" },
+                    { label: "High dependency", value: "high" },
+                    { label: "Acute care", value: "acute" },
+                    { label: "Stable", value: "stable" },
+                    { label: "Post-op", value: "postop" },
+                  ]}
+                />
+              </FormSection>
+            </ActionModal>
+            <ActionModal
+              title="Allocate Bed"
+              subtitle="Assign a bed to an incoming patient."
+              confirmLabel="Allocate bed"
+              trigger={
+                <ActionButton icon={<Plus className="size-4" />} message="">
+                  Allocate bed
+                </ActionButton>
+              }
+            >
+              <FormSection title="Patient">
+                <FormField
+                  label="Patient name"
+                  type="select"
+                  options={[
+                    { label: "Meera Iyer", value: "P-1024" },
+                    { label: "Arjun Menon", value: "P-1023" },
+                    { label: "Sita Verma", value: "P-1021" },
+                    { label: "Vikram Singh", value: "P-1019" },
+                    { label: "Rohan Das", value: "P-1021" },
+                    { label: "Aisha Patel", value: "P-1020" },
+                    { label: "Lakshmi Nair", value: "P-1018" },
+                    { label: "Deepak Kumar", value: "P-1017" },
+                  ]}
+                />
+              </FormSection>
+              <FormSection title="Ward & Bed">
+                <FormField
+                  label="Ward"
+                  type="select"
+                  options={[
+                    { label: "ICU (3 available)", value: "icu" },
+                    { label: "Emergency (4 available)", value: "emergency" },
+                    { label: "General A (12 available)", value: "general-a" },
+                    { label: "General B (6 available)", value: "general-b" },
+                    { label: "Maternity (4 available)", value: "maternity" },
+                    { label: "Pediatrics (5 available)", value: "pediatrics" },
+                    { label: "Isolation (3 available)", value: "isolation" },
+                    { label: "Recovery (4 available)", value: "recovery" },
+                  ]}
+                />
+                <FormField label="Diagnosis" placeholder="e.g. Myocardial infarction" />
+              </FormSection>
+              <FormSection title="Attending">
+                <FormField
+                  label="Doctor"
+                  type="select"
+                  options={[
+                    { label: "Dr. Kavya Rao", value: "D-042" },
+                    { label: "Dr. Neil Shah", value: "D-041" },
+                    { label: "Dr. Amina Khan", value: "D-040" },
+                    { label: "Dr. Amit Verma", value: "D-039" },
+                    { label: "Dr. Sneha Kapoor", value: "D-038" },
+                    { label: "Dr. Priya Mehta", value: "D-037" },
+                  ]}
+                />
+              </FormSection>
+            </ActionModal>
           </>
         }
       />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => (
-          <div className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5" key={item.label}>
-            <p className="text-sm font-medium text-slate-600">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{item.value}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-[var(--care-secondary)]">{item.delta}</span>
-              <span className="text-slate-500">{item.detail}</span>
-            </div>
-          </div>
+          <StatCard key={item.label} label={item.label} value={item.value} delta={item.delta} detail={item.detail} />
         ))}
       </div>
 

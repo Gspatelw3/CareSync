@@ -1,8 +1,46 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  function validate() {
+    const next: { email?: string; password?: string } = {};
+
+    if (!email.trim()) {
+      next.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      next.email = "Enter a valid email address.";
+    }
+
+    if (!password) {
+      next.password = "Password is required.";
+    } else if (password.length < 6) {
+      next.password = "Password must be at least 6 characters.";
+    }
+
+    return next;
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+
+    const validationErrors = validate();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) return;
+
+    router.push("/dashboard");
+  }
+
   return (
     <AuthShell
       eyebrow="Secure login"
@@ -19,7 +57,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form action="/otp-verification" className="mt-8 grid gap-5">
+      <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
         <div className="grid gap-2">
           <label className="text-sm font-medium text-slate-800" htmlFor="email">
             Email address
@@ -32,7 +70,12 @@ export default function LoginPage() {
             placeholder="admin@caresync.com"
             required
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
+          {errors.email && (
+            <p className="text-xs text-red-600">{errors.email}</p>
+          )}
         </div>
 
         <div className="grid gap-2">
@@ -58,7 +101,12 @@ export default function LoginPage() {
             placeholder="Enter password"
             required
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
+          {errors.password && (
+            <p className="text-xs text-red-600">{errors.password}</p>
+          )}
         </div>
 
         <Button type="submit">Continue</Button>

@@ -61,7 +61,7 @@ export function StatCard({
   value: string;
   delta: string;
   detail: string;
-  icon: ReactNode;
+  icon?: ReactNode;
   href?: string;
 }) {
   const Wrapper = href ? "a" : "div";
@@ -75,9 +75,11 @@ export function StatCard({
           <p className="text-sm font-medium text-slate-600">{label}</p>
           <p className="mt-2 text-3xl font-semibold text-slate-950">{value}</p>
         </div>
-        <span className="flex size-10 items-center justify-center rounded-md bg-[var(--care-surface)] text-[var(--care-primary)]">
-          {icon}
-        </span>
+        {icon && (
+          <span className="flex size-10 items-center justify-center rounded-md bg-[var(--care-surface)] text-[var(--care-primary)]">
+            {icon}
+          </span>
+        )}
       </div>
       <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
         <span className="font-semibold text-[var(--care-secondary)]">{delta}</span>
@@ -159,21 +161,3 @@ export function Table({
   );
 }
 
-export function SvgIcon({ paths, className }: { paths: string[]; className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.8"
-      viewBox="0 0 24 24"
-    >
-      {paths.map((path) => (
-        <path d={path} key={path} />
-      ))}
-    </svg>
-  );
-}

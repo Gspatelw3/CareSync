@@ -1,35 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { StatCard } from "@/components/layout/page-shell";
+import { Activity, Bed, Calendar, UserPlus, Users } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard | Care Sync",
   description: "Care Sync hospital operations dashboard",
-};
-
-type IconName =
-  | "activity"
-  | "bed"
-  | "calendar"
-  | "doctor"
-  | "patient";
-
-const iconPaths: Record<IconName, string[]> = {
-  activity: ["M4 12h4l2-6 4 12 2-6h4"],
-  bed: ["M4 7v10", "M4 13h16v4", "M7 10h4", "M14 10h3a3 3 0 0 1 3 3"],
-  calendar: [
-    "M7 3v4",
-    "M17 3v4",
-    "M4 8h16",
-    "M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2",
-  ],
-  doctor: [
-    "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8",
-    "M5 21a7 7 0 0 1 14 0",
-    "M16 18h4",
-    "M18 16v4",
-  ],
-  patient: ["M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8", "M4 21a8 8 0 0 1 16 0"],
 };
 
 const stats = [
@@ -38,7 +15,7 @@ const stats = [
     value: "12,486",
     delta: "+8.2%",
     detail: "358 active today",
-    icon: "patient",
+    icon: Users,
     href: "/patients",
   },
   {
@@ -46,7 +23,7 @@ const stats = [
     value: "186",
     delta: "42 on duty",
     detail: "14 departments covered",
-    icon: "doctor",
+    icon: UserPlus,
     href: "/doctors",
   },
   {
@@ -54,7 +31,7 @@ const stats = [
     value: "324",
     delta: "71 pending",
     detail: "89 completed check-ins",
-    icon: "calendar",
+    icon: Calendar,
     href: "/appointments",
   },
   {
@@ -62,7 +39,7 @@ const stats = [
     value: "58",
     delta: "18 ICU",
     detail: "77% occupancy",
-    icon: "bed",
+    icon: Bed,
     href: "/inpatient",
   },
 ] satisfies {
@@ -70,7 +47,7 @@ const stats = [
   value: string;
   delta: string;
   detail: string;
-  icon: IconName;
+  icon: React.ComponentType<{ className?: string }>;
   href: string;
 }[];
 
@@ -128,25 +105,6 @@ const alerts = [
   { label: "Lab reports pending", value: "31", tone: "blue" },
 ];
 
-function Icon({ name, className }: { name: IconName; className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.8"
-      viewBox="0 0 24 24"
-    >
-      {iconPaths[name].map((path) => (
-        <path d={path} key={path} />
-      ))}
-    </svg>
-  );
-}
-
 function StatusBadge({ children }: { children: string }) {
   const isWaiting = children === "Waiting" || children === "Sample due";
 
@@ -189,47 +147,34 @@ export default function DashboardPage() {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-white px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
                 href="/appointments"
               >
-                <Icon className="size-4" name="calendar" />
+                <Calendar className="size-4" />
                 Book appointment
               </Link>
               <Link
                 className="care-brand-gradient inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:brightness-95"
                 href="/patients"
               >
-                <Icon className="size-4" name="patient" />
+                <Users className="size-4" />
                 Add patient
               </Link>
             </div>
           </header>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map((item) => (
-              <Link
-                className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5 transition hover:-translate-y-0.5 hover:shadow-md"
-                href={item.href}
-                key={item.label}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      {item.label}
-                    </p>
-                    <p className="mt-2 text-3xl font-semibold text-slate-950">
-                      {item.value}
-                    </p>
-                  </div>
-                  <span className="flex size-10 items-center justify-center rounded-md bg-[var(--care-surface)] text-[var(--care-primary)]">
-                    <Icon className="size-5" name={item.icon} />
-                  </span>
-                </div>
-                <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-semibold text-[var(--care-secondary)]">
-                    {item.delta}
-                  </span>
-                  <span className="text-slate-500">{item.detail}</span>
-                </div>
-              </Link>
-            ))}
+            {stats.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <StatCard
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                  delta={item.delta}
+                  detail={item.detail}
+                  icon={<IconComponent className="size-5" />}
+                  href={item.href}
+                />
+              );
+            })}
           </div>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
@@ -279,7 +224,7 @@ export default function DashboardPage() {
                     Operational items that need attention.
                   </p>
                 </div>
-                <Icon className="size-5 text-[var(--care-primary)]" name="activity" />
+                <Activity className="size-5 text-[var(--care-primary)]" />
               </div>
 
               <div className="mt-5 grid gap-3">
