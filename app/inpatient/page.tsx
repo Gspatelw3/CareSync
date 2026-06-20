@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-display/data-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Filter, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 
 export const metadata: Metadata = {
   title: "Beds | Care Sync",

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormField, FormSection } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 
 export function AddPatientForm() {
   return (

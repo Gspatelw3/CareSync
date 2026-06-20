@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AddPatientButton } from "@/components/layout/add-patient-button";
 import { StatCard } from "@/components/layout/page-shell";
+import { BarChart } from "@/components/charts/bar-chart";
 import { Activity, Bed, Calendar, UserPlus, Users } from "lucide-react";
 
 export const metadata: Metadata = {

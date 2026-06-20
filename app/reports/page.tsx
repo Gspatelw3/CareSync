@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-    PageShell,
-    PageHeader,
-    Card,
-    StatusBadge,
-    StatCard,
-} from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { SearchInput } from "@/components/ui/search-input";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 import { ViewAllButton } from "@/components/ui/view-all-button";
 
 export const metadata: Metadata = {

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-display/data-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
@@ -62,7 +65,7 @@ export default function PatientsPage() {
 
       <div className="mt-6">
         <Card title="Patient Registry" description="All registered patients sorted by last visit.">
-          <Table headers={["ID", "Name", "Gender", "Age", "Contact", "Department", "Doctor", "Status", "Last Visit"]}>
+          <DataTable headers={["ID", "Name", "Gender", "Age", "Contact", "Department", "Doctor", "Status", "Last Visit"]}>
             {patients.map((p) => (
               <tr className="hover:bg-slate-50 cursor-pointer" key={p.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)]">{p.id}</td>
@@ -82,7 +85,7 @@ export default function PatientsPage() {
                 <td className="px-5 py-4 text-slate-500 text-xs">{p.lastVisit}</td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         </Card>
       </div>
     </PageShell>

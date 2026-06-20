@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-display/data-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { SearchInput } from "@/components/ui/search-input";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 
 export const metadata: Metadata = {
   title: "Pharmacy | Care Sync",
@@ -100,7 +104,7 @@ export default function PharmacyPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card title="Inventory" description="Current stock levels and reorder status.">
-          <Table headers={["ID", "Name", "Category", "Stock", "Reorder At", "Expiry", "Status"]}>
+          <DataTable headers={["ID", "Name", "Category", "Stock", "Reorder At", "Expiry", "Status"]}>
             {inventory.map((item) => (
               <tr className="hover:bg-slate-50 cursor-pointer" key={item.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)] text-xs">{item.id}</td>
@@ -118,7 +122,7 @@ export default function PharmacyPage() {
                 </td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         </Card>
 
         <Card title="Dispensing Queue" description="Pending and recent dispensations.">

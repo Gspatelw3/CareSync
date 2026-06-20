@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
-import { StatusBadge } from "@/components/layout/page-shell";
+import { StatusBadge } from "@/components/data-display/status-badge";
 
 type ReportItem = {
   name: string;

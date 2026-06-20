@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-display/data-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { SearchInput } from "@/components/ui/search-input";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 
 export const metadata: Metadata = {
   title: "Doctors | Care Sync",
@@ -116,7 +120,7 @@ export default function DoctorsPage() {
 
       <div className="mt-6">
         <Card title="Doctor Directory" description="All registered doctors and their schedules.">
-          <Table headers={["ID", "Name", "Specialization", "Department", "Patients", "Schedule", "Status", "Contact"]}>
+          <DataTable headers={["ID", "Name", "Specialization", "Department", "Patients", "Schedule", "Status", "Contact"]}>
             {doctors.map((d) => (
               <tr className="hover:bg-slate-50 cursor-pointer" key={d.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)]">{d.id}</td>
@@ -133,7 +137,7 @@ export default function DoctorsPage() {
                 <td className="px-5 py-4 text-slate-700 text-xs">{d.phone}</td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         </Card>
       </div>
     </PageShell>

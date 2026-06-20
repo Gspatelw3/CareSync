@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-display/data-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Calendar, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 
 export const metadata: Metadata = {
   title: "Appointments | Care Sync",
@@ -171,7 +175,7 @@ export default function AppointmentsPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card title="Today's Schedule" description="All appointments for today, 19 June 2026.">
-          <Table headers={["Time", "Patient", "Care", "Doctor", "Type", "Status"]}>
+          <DataTable headers={["Time", "Patient", "Care", "Doctor", "Type", "Status"]}>
             {appointments.map((a) => (
               <tr className="hover:bg-slate-50 cursor-pointer" key={`${a.time}-${a.patient}`}>
                 <td className="px-5 py-4 font-semibold text-slate-950">{a.time}</td>
@@ -188,7 +192,7 @@ export default function AppointmentsPage() {
                 </td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         </Card>
 
         <div className="space-y-6">

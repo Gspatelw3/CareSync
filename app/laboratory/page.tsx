@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-display/data-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Filter, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 
 export const metadata: Metadata = {
   title: "Laboratory | Care Sync",
@@ -184,7 +188,7 @@ export default function LaboratoryPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card title="Test Requests" description="All lab requests sorted by priority.">
-          <Table headers={["ID", "Patient", "Test", "Doctor", "Requested", "Priority", "Status"]}>
+          <DataTable headers={["ID", "Patient", "Test", "Doctor", "Requested", "Priority", "Status"]}>
             {testRequests.map((r) => (
               <tr className="hover:bg-slate-50 cursor-pointer" key={r.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)] text-xs">{r.id}</td>
@@ -200,7 +204,7 @@ export default function LaboratoryPage() {
                 </td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         </Card>
 
         <Card title="Department Summary" description="Workload by lab department.">

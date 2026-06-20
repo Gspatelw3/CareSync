@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/data-display/data-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Filter, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
+import { FormField, FormSection } from "@/components/ui/forms/form-field";
 
 export const metadata: Metadata = {
   title: "Billing | Care Sync",
@@ -144,7 +148,7 @@ export default function BillingPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card title="Invoices" description="Recent invoices and payment status.">
-          <Table headers={["Invoice", "Patient", "Service", "Amount", "Insurance", "Paid", "Balance", "Date", "Status"]}>
+          <DataTable headers={["Invoice", "Patient", "Service", "Amount", "Insurance", "Paid", "Balance", "Date", "Status"]}>
             {invoices.map((inv) => (
               <tr className="hover:bg-slate-50 cursor-pointer" key={inv.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)] text-xs">{inv.id}</td>
@@ -164,7 +168,7 @@ export default function BillingPage() {
                 </td>
               </tr>
             ))}
-          </Table>
+          </DataTable>
         </Card>
 
         <Card title="Insurance Claims" description="Recent claim submissions and status.">

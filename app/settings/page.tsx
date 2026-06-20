@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { PageShell, PageHeader, Card } from "@/components/layout/page-shell";
+import { PageShell, PageHeader } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Settings | Care Sync",
