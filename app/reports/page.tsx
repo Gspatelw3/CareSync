@@ -137,7 +137,7 @@ export default function ReportsPage() {
                             subtitle="Create a new report from available templates."
                             confirmLabel="Generate report"
                             trigger={
-                                <ActionButton className="care-brand-gradient" icon={<Plus className="size-4" />} message="">
+                                <ActionButton className="care-brand-gradient w-full sm:w-auto" icon={<Plus className="size-4" />} message="">
                                     Generate report
                                 </ActionButton>
                             }

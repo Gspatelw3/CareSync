@@ -49,7 +49,7 @@ export default function BillingPage() {
               subtitle="Filter by status, date range, or insurance provider."
               confirmLabel="Apply filters"
               trigger={
-                <SecondaryButton icon={<Filter className="size-4" />} message="">
+                <SecondaryButton className="w-full sm:w-auto" icon={<Filter className="size-4" />} message="">
                   Filter by status
                 </SecondaryButton>
               }

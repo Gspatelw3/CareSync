@@ -25,7 +25,7 @@ export function ActionModal({
 
   return (
     <>
-      <div onClick={() => setOpen(true)}>{trigger}</div>
+      <div onClick={() => setOpen(true)} className="w-full sm:w-auto">{trigger}</div>
 
       <Modal
         open={open}

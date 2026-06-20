@@ -52,7 +52,7 @@ export function Modal({ open, onClose, title, subtitle, children, footer }: Moda
             )}
           </div>
           <button
-            className="flex size-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex size-8 cursor-pointer items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
             onClick={onClose}
             type="button"
             aria-label="Close"

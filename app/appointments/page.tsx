@@ -47,7 +47,7 @@ export default function AppointmentsPage() {
               subtitle="Weekly appointment calendar — click a slot to view details."
               confirmLabel="Close"
               trigger={
-                <SecondaryButton icon={<Calendar className="size-4" />} message="">
+                <SecondaryButton className="w-full sm:w-auto" icon={<Calendar className="size-4" />} message="">
                   Calendar view
                 </SecondaryButton>
               }

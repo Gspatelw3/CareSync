@@ -142,7 +142,7 @@ export default function DashboardPage() {
                 laboratory work from one operational view.
               </p>
             </div>
-            <div className="grid gap-2 sm:flex sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Link
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-white px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
                 href="/appointments"
@@ -331,7 +331,7 @@ export default function DashboardPage() {
               <div className="mt-5 grid gap-4">
                 {activities.map((activity) => (
                   <div className="flex gap-3" key={activity}>
-                    <span className="mt-1 size-2 rounded-full bg-[var(--care-mint)]" />
+                    <span className="mt-2 size-2 rounded-full bg-[var(--care-mint)]" />
                     <p className="text-sm leading-6 text-slate-700">
                       {activity}
                     </p>

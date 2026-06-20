@@ -63,7 +63,7 @@ export default function LaboratoryPage() {
               subtitle="Filter lab requests by department and priority."
               confirmLabel="Apply filters"
               trigger={
-                <SecondaryButton icon={<Filter className="size-4" />} message="">
+                <SecondaryButton className="w-full sm:w-auto" icon={<Filter className="size-4" />} message="">
                   Filter by department
                 </SecondaryButton>
               }

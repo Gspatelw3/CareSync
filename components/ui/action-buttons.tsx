@@ -15,7 +15,7 @@ export function ActionButton({ children, message, type = "success", className = 
   const { addToast } = useToast();
   return (
     <button
-      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:brightness-95 cursor-pointer ${className}`}
+      className={`inline-flex sm:w-auto w-full h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:brightness-95 cursor-pointer ${className}`}
       onClick={message ? () => addToast(message, type) : undefined}
       type="button"
     >
@@ -29,13 +29,14 @@ type SecondaryButtonProps = {
   children: ReactNode;
   message?: string;
   icon?: ReactNode;
+  className?: string;
 };
 
-export function SecondaryButton({ children, message, icon }: SecondaryButtonProps) {
+export function SecondaryButton({ children, message, icon, className }: SecondaryButtonProps) {
   const { addToast } = useToast();
   return (
     <button
-      className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-white px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)] cursor-pointer"
+      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-white px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)] cursor-pointer ${className}`}
       onClick={message ? () => addToast(message, "info") : undefined}
       type="button"
     >

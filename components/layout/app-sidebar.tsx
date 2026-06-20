@@ -1,4 +1,17 @@
-import { X, Bed, Calendar, BarChart3, UserPlus, FlaskConical, Home, Users, Pill, Settings, Wallet, LogOut } from "lucide-react";
+import {
+    X,
+    Bed,
+    Calendar,
+    BarChart3,
+    UserPlus,
+    FlaskConical,
+    Home,
+    Users,
+    Pill,
+    Settings,
+    Wallet,
+    LogOut,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -13,7 +26,11 @@ const navigationItems = [
     { label: "Billing", href: "/billing", icon: Wallet },
     { label: "Reports", href: "/reports", icon: BarChart3 },
     { label: "Settings", href: "/settings", icon: Settings },
-] satisfies { label: string; href: string; icon: React.ComponentType<{ className?: string }> }[];
+] satisfies {
+    label: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+}[];
 
 export function AppSidebar({ activeHref }: { activeHref: string }) {
     function renderNavigation() {
@@ -45,7 +62,7 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
 
     return (
         <>
-            <header className="border-b border-[var(--care-border)] bg-white px-4 py-4 sm:px-6 lg:hidden sticky top-0">
+            <header className="border-b border-[var(--care-border)] bg-white px-4 py-4 sm:px-6 lg:hidden sticky top-0 z-30">
                 <div className="flex items-center justify-between gap-4">
                     <Link className="block w-fit" href="/dashboard">
                         <Image
@@ -79,12 +96,9 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
                     />
                     <aside
                         aria-label="Mobile navigation"
-                        className="fixed inset-y-0 right-0 z-30 w-[min(86vw,340px)] translate-x-full border-l border-[var(--care-border)] bg-white p-4 shadow-2xl shadow-slate-900/20 transition-transform duration-300 ease-out peer-checked:translate-x-0"
+                        className="flex flex-col  fixed inset-y-0 right-0 z-30 w-[min(86vw,340px)] translate-x-full border-l border-[var(--care-border)] bg-white  shadow-2xl shadow-slate-900/20 transition-transform duration-300 ease-out peer-checked:translate-x-0"
                     >
-                        <div className="flex items-center justify-between gap-4 border-b border-[var(--care-border)] pb-4">
-                            <p className="text-xl font-semibold text-slate-950">
-                                Menu
-                            </p>
+                        <div className="p-5 flex items-center justify-end gap-4 border-b border-[var(--care-border)] pb-4">
                             <label
                                 className="flex size-9 cursor-pointer items-center justify-center rounded-md border border-[var(--care-border)] text-slate-600 transition hover:bg-[var(--care-surface)] hover:text-slate-950"
                                 htmlFor="mobile-navigation-toggle"
@@ -98,13 +112,22 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
                                 </span>
                             </label>
                         </div>
-                        <div className="mt-4">{renderNavigation()}</div>
+                        <div className="flex-auto overflow-y-auto p-4">
+                            {renderNavigation()}
+                            <a
+                                className="flex min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:text-red-700"
+                                href="/login"
+                            >
+                                <LogOut className="size-5 shrink-0" />
+                                Log out
+                            </a>
+                        </div>
                     </aside>
                 </div>
             </header>
 
-            <aside className="hidden border-r border-[var(--care-border)] bg-white px-5 py-5 lg:block">
-                <Link className="block w-fit" href="/dashboard">
+            <aside className="hidden h-screen border-r border-[var(--care-border)] lg:flex flex-col bg-white py-5">
+                <Link className="block w-fit mx-5" href="/dashboard">
                     <Image
                         alt="Care Sync"
                         className="h-auto"
@@ -115,9 +138,11 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
                     />
                 </Link>
 
-                <div className="mt-6">{renderNavigation()}</div>
+                <div className="mt-6 flex-auto overflow-y-auto px-5">
+                    {renderNavigation()}
+                </div>
 
-                <div className="mt-6">
+                <div className="mt-6 px-5 ">
                     <a
                         className="flex min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:text-red-700"
                         href="/login"
@@ -127,7 +152,7 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
                     </a>
                 </div>
 
-                <section className="mt-6 rounded-lg border border-[var(--care-border)] bg-[var(--care-surface)] p-4">
+                <section className="mt-6 rounded-lg border border-[var(--care-border)] bg-[var(--care-surface)] p-4 mx-5">
                     <p className="text-sm font-semibold text-slate-950">
                         Bed utilization
                     </p>

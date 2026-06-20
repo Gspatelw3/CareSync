@@ -50,7 +50,7 @@ export default function InpatientPage() {
               subtitle="Filter by ward type, occupancy, or status."
               confirmLabel="Apply filters"
               trigger={
-                <SecondaryButton icon={<Filter className="size-4" />} message="">
+                <SecondaryButton className="w-full sm:w-auto" icon={<Filter className="size-4" />} message="">
                   Filter wards
                 </SecondaryButton>
               }
