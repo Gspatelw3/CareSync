@@ -8,7 +8,7 @@ type PageShellProps = {
 
 export function PageShell({ activeHref, children }: PageShellProps) {
     return (
-        <main className="min-h-screen bg-[var(--care-surface)] text-slate-950">
+        <main className="min-h-screen bg-[var(--care-surface)] text-[var(--text-primary)]">
             <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
                 <AppSidebar activeHref={activeHref} />
                 <section className="px-4 py-5 sm:px-6 lg:px-8 lg:h-screen overflow-y-auto">
@@ -38,10 +38,10 @@ export function PageHeader({
                 <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--care-primary)]">
                     {eyebrow}
                 </p>
-                <h1 className="mt-2 text-3xl font-semibold text-slate-950">
+                <h1 className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">
                     {title}
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
                     {description}
                 </p>
             </div>
@@ -72,15 +72,15 @@ export function StatCard({
     const Wrapper = href ? "a" : "div";
     return (
         <Wrapper
-            className="rounded-lg border border-[var(--care-border)] bg-white p-4 shadow-sm shadow-[var(--care-primary)]/5 transition hover:-translate-y-0.5 hover:shadow-md"
+            className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-4 shadow-sm shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-md"
             href={href}
         >
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <p className="text-sm font-medium text-slate-600">
+                    <p className="text-sm font-medium text-[var(--text-secondary)]">
                         {label}
                     </p>
-                    <p className="mt-2 text-3xl font-semibold text-slate-950">
+                    <p className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">
                         {value}
                     </p>
                 </div>
@@ -94,7 +94,7 @@ export function StatCard({
                 <span className="font-semibold text-[var(--care-secondary)]">
                     {delta}
                 </span>
-                <span className="text-slate-500">{detail}</span>
+                <span className="text-[var(--text-muted)]">{detail}</span>
             </div>
         </Wrapper>
     );

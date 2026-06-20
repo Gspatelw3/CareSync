@@ -115,8 +115,8 @@ function StatusBadge({ children }: { children: string }) {
       className={[
         "inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-semibold",
         isWaiting
-          ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-          : "bg-[color:var(--care-mint)]/20 text-[var(--care-secondary-dark)] ring-1 ring-[color:var(--care-mint)]/60",
+          ? "bg-[var(--badge-warning-bg)] text-[var(--badge-warning-text)] ring-1 ring-[var(--badge-warning-ring)]"
+          : "dark:bg-emerald-900/40 dark:text-emerald-300 dark:ring-emerald-700/60 bg-[color:var(--care-mint)]/20 text-[var(--care-secondary-dark)] ring-1 ring-[color:var(--care-mint)]/60",
       ].join(" ")}
     >
       {children}
@@ -126,7 +126,7 @@ function StatusBadge({ children }: { children: string }) {
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-[var(--care-surface)] text-slate-950">
+    <main className="min-h-screen bg-[var(--care-surface)] text-[var(--text-primary)]">
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
         <AppSidebar activeHref="/dashboard" />
 
@@ -136,17 +136,17 @@ export default function DashboardPage() {
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--care-primary)]">
                 Hospital Command Center
               </p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-950">
+              <h1 className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">
                 Dashboard
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
                 Track patient flow, clinical capacity, billing, inventory, and
                 laboratory work from one operational view.
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Link
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-white px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-[var(--card-bg)] px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
                 href="/appointments"
               >
                 <Calendar className="size-4" />
@@ -174,13 +174,13 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
-            <section className="rounded-lg border border-[var(--care-border)] bg-white p-5 shadow-sm shadow-[var(--care-primary)]/5">
+            <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-950">
+                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                     Revenue Overview
                   </h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
                     Weekly collections across billing and claims.
                   </p>
                 </div>
@@ -189,20 +189,20 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="mt-6 flex h-64 items-end gap-3 border-b border-l border-slate-200 px-2 pb-4 sm:gap-5">
+              <div className="mt-6 flex h-64 items-end gap-3 border-b border-l border-[var(--border-default)] px-2 pb-4 sm:gap-5">
                 {revenue.map((day) => (
                   <div
                     className="flex h-full flex-1 flex-col items-center justify-end gap-2"
                     key={day.label}
                   >
-                    <span className="text-xs font-semibold text-slate-500">
+                    <span className="text-xs font-semibold text-[var(--text-muted)]">
                       {day.value}
                     </span>
                     <div
                       className="care-brand-gradient-vertical w-full rounded-t-md"
                       style={{ height: day.height }}
                     />
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-medium text-[var(--text-muted)]">
                       {day.label}
                     </span>
                   </div>
@@ -210,13 +210,13 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-[var(--care-border)] bg-white p-5 shadow-sm shadow-[var(--care-primary)]/5">
+            <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-950">
+                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                     Critical Alerts
                   </h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
                     Operational items that need attention.
                   </p>
                 </div>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
               <div className="mt-5 grid gap-3">
                 {alerts.map((alert) => (
                   <div
-                    className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-3"
+                    className="flex items-center justify-between gap-4 rounded-md border border-[var(--border-default)] p-3"
                     key={alert.label}
                   >
                     <div className="flex items-center gap-3">
@@ -240,11 +240,11 @@ export default function DashboardPage() {
                           .filter(Boolean)
                           .join(" ")}
                       />
-                      <span className="text-sm font-medium text-slate-700">
+                      <span className="text-sm font-medium text-[var(--text-secondary)]">
                         {alert.label}
                       </span>
                     </div>
-                    <span className="text-sm font-semibold text-slate-950">
+                    <span className="text-sm font-semibold text-[var(--text-primary)]">
                       {alert.value}
                     </span>
                   </div>
@@ -254,13 +254,13 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <section className="overflow-hidden rounded-lg border border-[var(--care-border)] bg-white shadow-sm shadow-[var(--care-primary)]/5">
+            <section className="overflow-hidden rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] shadow-sm shadow-[var(--shadow-card)]">
               <div className="flex flex-col gap-3 border-b border-[var(--care-border)] p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-950">
+                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                     Today's Appointments
                   </h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
                     Priority schedule and patient movement.
                   </p>
                 </div>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[680px] text-left text-sm">
-                  <thead className="bg-[var(--care-surface)] text-xs uppercase tracking-[0.12em] text-slate-500">
+                  <thead className="bg-[var(--care-surface)] text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
                     <tr>
                       <th className="px-5 py-3 font-semibold">Time</th>
                       <th className="px-5 py-3 font-semibold">Patient</th>
@@ -282,19 +282,19 @@ export default function DashboardPage() {
                       <th className="px-5 py-3 font-semibold">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[var(--table-divide)]">
                     {appointments.map((appointment) => (
-                      <tr className="hover:bg-slate-50" key={appointment.time}>
-                        <td className="px-5 py-4 font-semibold text-slate-950">
+                      <tr className="hover:bg-[var(--hover-bg)]" key={appointment.time}>
+                        <td className="px-5 py-4 font-semibold text-[var(--text-primary)]">
                           {appointment.time}
                         </td>
-                        <td className="px-5 py-4 text-slate-700">
+                        <td className="px-5 py-4 text-[var(--text-secondary)]">
                           {appointment.patient}
                         </td>
-                        <td className="px-5 py-4 text-slate-700">
+                        <td className="px-5 py-4 text-[var(--text-secondary)]">
                           {appointment.care}
                         </td>
-                        <td className="px-5 py-4 text-slate-700">
+                        <td className="px-5 py-4 text-[var(--text-secondary)]">
                           {appointment.doctor}
                         </td>
                         <td className="px-5 py-4">
@@ -307,13 +307,13 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-[var(--care-border)] bg-white p-5 shadow-sm shadow-[var(--care-primary)]/5">
+            <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-950">
+                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                     Recent Activities
                   </h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
                     Latest operational updates.
                   </p>
                 </div>
@@ -328,7 +328,7 @@ export default function DashboardPage() {
                 {activities.map((activity) => (
                   <div className="flex gap-3" key={activity}>
                     <span className="mt-2 size-2 rounded-full bg-[var(--care-mint)]" />
-                    <p className="text-sm leading-6 text-slate-700">
+                    <p className="text-sm leading-6 text-[var(--text-secondary)]">
                       {activity}
                     </p>
                   </div>

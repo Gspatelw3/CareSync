@@ -56,10 +56,10 @@ export default function AppointmentsPage() {
                 </SecondaryButton>
               }
             >
-              <div className="rounded-lg border border-slate-200">
-                <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <div className="rounded-lg border border-[var(--border-default)]">
+                <div className="grid grid-cols-7 border-b border-[var(--border-default)] bg-[var(--care-surface)] text-center text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
                   {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                    <div className="border-r border-slate-200 px-2 py-3 last:border-r-0" key={d}>{d}</div>
+                    <div className="border-r border-[var(--border-default)] px-2 py-3 last:border-r-0" key={d}>{d}</div>
                   ))}
                 </div>
                 <div className="grid grid-cols-7 text-center text-sm">
@@ -69,12 +69,12 @@ export default function AppointmentsPage() {
                     const isToday = day === 19;
                     return (
                       <div
-                        className={`border-b border-r border-slate-100 px-1 py-3 last:border-r-0 ${
+                        className={`border-b border-r border-[var(--border-light)] px-1 py-3 last:border-r-0 ${
                           isToday ? "bg-[var(--care-mint)]/10 ring-1 ring-inset ring-[var(--care-primary)] font-semibold" : ""
                         }`}
                         key={day}
                       >
-                        <span className={isToday ? "text-[var(--care-primary)]" : "text-slate-700"}>{day}</span>
+                        <span className={isToday ? "text-[var(--care-primary)]" : "text-[var(--text-secondary)]"}>{day}</span>
                         {hasAppt && (
                           <div className="mt-1 mx-auto h-1.5 w-1.5 rounded-full bg-[var(--care-primary)]" />
                         )}
@@ -83,7 +83,7 @@ export default function AppointmentsPage() {
                   })}
                 </div>
               </div>
-              <p className="mt-3 text-xs text-slate-500 text-center">
+              <p className="mt-3 text-xs text-[var(--text-muted)] text-center">
                 Showing June 2026 · Dots indicate scheduled appointments · <span className="font-semibold text-[var(--care-primary)]">19 Jun</span> is today
               </p>
             </ActionModal>
@@ -177,12 +177,12 @@ export default function AppointmentsPage() {
         <Card title="Today's Schedule" description="All appointments for today, 19 June 2026.">
           <DataTable headers={["Time", "Patient", "Care", "Doctor", "Type", "Status"]}>
             {appointments.map((a) => (
-              <tr className="hover:bg-slate-50 cursor-pointer" key={`${a.time}-${a.patient}`}>
-                <td className="px-5 py-4 font-semibold text-slate-950">{a.time}</td>
-                <td className="px-5 py-4 text-slate-700 font-medium">{a.patient}</td>
-                <td className="px-5 py-4 text-slate-700">{a.care}</td>
-                <td className="px-5 py-4 text-slate-700">{a.doctor}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{a.type}</td>
+              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={`${a.time}-${a.patient}`}>
+                <td className="px-5 py-4 font-semibold text-[var(--text-primary)]">{a.time}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)] font-medium">{a.patient}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{a.care}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{a.doctor}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{a.type}</td>
                 <td className="px-5 py-4">
                   <StatusBadge
                     variant={a.status === "Waiting" || a.status === "Sample due" ? "warning" : "default"}
@@ -196,41 +196,41 @@ export default function AppointmentsPage() {
         </Card>
 
         <div className="space-y-6">
-          <section className="rounded-lg border border-[var(--care-border)] bg-white p-5 shadow-sm shadow-[var(--care-primary)]/5">
-            <h2 className="text-lg font-semibold text-slate-950">Weekly Volume</h2>
-            <p className="mt-1 text-sm text-slate-600">Appointments by day this week.</p>
-            <div className="mt-5 flex h-48 items-end gap-2 border-b border-l border-slate-200 px-1 pb-3">
+          <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Weekly Volume</h2>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">Appointments by day this week.</p>
+            <div className="mt-5 flex h-48 items-end gap-2 border-b border-l border-[var(--border-default)] px-1 pb-3">
               {weekDays.map((day, i) => (
                 <div className="flex h-full flex-1 flex-col items-center justify-end gap-1.5" key={day}>
-                  <span className="text-[11px] font-semibold text-slate-500">{weekSlots[i]}</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">{weekSlots[i]}</span>
                   <div
                     className="care-brand-gradient-vertical w-full rounded-t-md"
                     style={{ height: `${(weekSlots[i] / weekMax) * 100}%` }}
                   />
-                  <span className="text-[11px] font-medium text-slate-500">{day}</span>
+                  <span className="text-[11px] font-medium text-[var(--text-muted)]">{day}</span>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rounded-lg border border-[var(--care-border)] bg-white p-5 shadow-sm shadow-[var(--care-primary)]/5">
-            <h2 className="text-lg font-semibold text-slate-950">Quick Stats</h2>
+          <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Quick Stats</h2>
             <div className="mt-5 grid gap-4">
-              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
-                <span className="text-sm font-medium text-slate-700">Avg. consultation time</span>
-                <span className="text-sm font-semibold text-slate-950">18 min</span>
+              <div className="flex items-center justify-between rounded-md border border-[var(--border-default)] p-3">
+                <span className="text-sm font-medium text-[var(--text-secondary)]">Avg. consultation time</span>
+                <span className="text-sm font-semibold text-[var(--text-primary)]">18 min</span>
               </div>
-              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
-                <span className="text-sm font-medium text-slate-700">Peak hour</span>
-                <span className="text-sm font-semibold text-slate-950">10:00–11:00</span>
+              <div className="flex items-center justify-between rounded-md border border-[var(--border-default)] p-3">
+                <span className="text-sm font-medium text-[var(--text-secondary)]">Peak hour</span>
+                <span className="text-sm font-semibold text-[var(--text-primary)]">10:00–11:00</span>
               </div>
-              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
-                <span className="text-sm font-medium text-slate-700">No-show rate</span>
-                <span className="text-sm font-semibold text-slate-950">4.2%</span>
+              <div className="flex items-center justify-between rounded-md border border-[var(--border-default)] p-3">
+                <span className="text-sm font-medium text-[var(--text-secondary)]">No-show rate</span>
+                <span className="text-sm font-semibold text-[var(--text-primary)]">4.2%</span>
               </div>
-              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
-                <span className="text-sm font-medium text-slate-700">Reschedule requests</span>
-                <span className="text-sm font-semibold text-slate-950">12</span>
+              <div className="flex items-center justify-between rounded-md border border-[var(--border-default)] p-3">
+                <span className="text-sm font-medium text-[var(--text-secondary)]">Reschedule requests</span>
+                <span className="text-sm font-semibold text-[var(--text-primary)]">12</span>
               </div>
             </div>
           </section>

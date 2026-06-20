@@ -17,15 +17,15 @@ const selectStyles = {
     minHeight: "2.5rem",
     borderRadius: "0.375rem",
     border: "1px solid",
-    borderColor: state.isFocused ? "var(--care-primary)" : "#e2e8f0",
-    backgroundColor: "white",
+    borderColor: state.isFocused ? "var(--care-primary)" : "var(--input-border)",
+    backgroundColor: "var(--input-bg)",
     paddingLeft: "0.75rem",
     paddingRight: "0.75rem",
     display: "flex",
     alignItems: "center",
     boxShadow: "none",
     "&:hover": {
-      borderColor: state.isFocused ? "var(--care-primary)" : "#e2e8f0",
+      borderColor: state.isFocused ? "var(--care-primary)" : "var(--input-border)",
     },
   }),
   valueContainer: (base: Record<string, unknown>) => ({
@@ -36,26 +36,26 @@ const selectStyles = {
     ...base,
     margin: 0,
     padding: 0,
-    color: "#0f172a",
+    color: "var(--input-text)",
     fontSize: "0.875rem",
   }),
   singleValue: (base: Record<string, unknown>) => ({
     ...base,
-    color: "#0f172a",
+    color: "var(--input-text)",
     fontSize: "0.875rem",
     margin: 0,
   }),
   placeholder: (base: Record<string, unknown>) => ({
     ...base,
-    color: "#94a3b8",
+    color: "var(--input-placeholder)",
     fontSize: "0.875rem",
     margin: 0,
   }),
   menu: (base: Record<string, unknown>) => ({
     ...base,
     borderRadius: "0.375rem",
-    border: "1px solid #e2e8f0",
-    backgroundColor: "white",
+    border: "1px solid var(--border-default)",
+    backgroundColor: "var(--card-bg)",
     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
     zIndex: 60,
     overflow: "hidden",
@@ -69,24 +69,24 @@ const selectStyles = {
     padding: "0.375rem 0.75rem",
     fontSize: "0.875rem",
     borderRadius: "0.25rem",
-    color: "#0f172a",
-    backgroundColor: state.isFocused ? "#f1f5f9" : "transparent",
+    color: "var(--text-primary)",
+    backgroundColor: state.isFocused ? "var(--hover-bg-strong)" : "transparent",
     cursor: "pointer",
-    "&:active": { backgroundColor: "#e2e8f0" },
+    "&:active": { backgroundColor: "var(--border-default)" },
   }),
   clearIndicator: (base: Record<string, unknown>) => ({
     ...base,
-    color: "#94a3b8",
+    color: "var(--text-muted-light)",
     cursor: "pointer",
     padding: "0.25rem",
-    "&:hover": { color: "#64748b" },
+    "&:hover": { color: "var(--text-muted)" },
   }),
   dropdownIndicator: (base: Record<string, unknown>) => ({
     ...base,
-    color: "#94a3b8",
+    color: "var(--text-muted-light)",
     cursor: "pointer",
     padding: "0.25rem",
-    "&:hover": { color: "#64748b" },
+    "&:hover": { color: "var(--text-muted)" },
   }),
   indicatorSeparator: () => ({ display: "none" }),
 };
@@ -104,7 +104,7 @@ export function FormField({
   return (
     <div>
       <label
-        className="mb-1.5 block text-sm font-semibold text-slate-700"
+        className="mb-1.5 block text-sm font-semibold text-[var(--text-secondary)]"
         htmlFor={id}
       >
         {label}
@@ -124,7 +124,7 @@ export function FormField({
         />
       ) : type === "textarea" ? (
         <textarea
-          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[var(--care-primary)]"
+          className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)] outline-none focus:border-[var(--care-primary)]"
           defaultValue={value || ""}
           id={id}
           placeholder={placeholder}
@@ -132,7 +132,7 @@ export function FormField({
         />
       ) : (
         <input
-          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[var(--care-primary)] placeholder:text-slate-400"
+          className="h-10 w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-sm text-[var(--input-text)] outline-none focus:border-[var(--care-primary)] placeholder:text-[var(--input-placeholder)]"
           defaultValue={value || ""}
           id={id}
           placeholder={placeholder}
@@ -152,7 +152,7 @@ export function FormSection({
 }) {
   return (
     <div>
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-slate-500">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">
         {title}
       </h3>
       <div className="space-y-4">{children}</div>

@@ -106,13 +106,13 @@ export default function PharmacyPage() {
         <Card title="Inventory" description="Current stock levels and reorder status.">
           <DataTable headers={["ID", "Name", "Category", "Stock", "Reorder At", "Expiry", "Status"]}>
             {inventory.map((item) => (
-              <tr className="hover:bg-slate-50 cursor-pointer" key={item.id}>
+              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={item.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)] text-xs">{item.id}</td>
-                <td className="px-5 py-4 text-slate-950 font-medium">{item.name}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{item.category}</td>
-                <td className="px-5 py-4 text-slate-700">{item.stock} {item.unit}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{item.reorder} {item.unit}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{item.expiry}</td>
+                <td className="px-5 py-4 text-[var(--text-primary)] font-medium">{item.name}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{item.category}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{item.stock} {item.unit}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{item.reorder} {item.unit}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{item.expiry}</td>
                 <td className="px-5 py-4">
                   <StatusBadge
                     variant={item.status === "Critical" ? "danger" : item.status === "Low stock" ? "warning" : "default"}
@@ -126,13 +126,13 @@ export default function PharmacyPage() {
         </Card>
 
         <Card title="Dispensing Queue" description="Pending and recent dispensations.">
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[var(--table-divide)]">
             {dispensing.map((d) => (
-              <div className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-slate-50" key={d.id}>
+              <div className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-[var(--hover-bg)]" key={d.id}>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-950">{d.patient}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{d.medication} × {d.quantity}</p>
-                  <p className="mt-0.5 text-xs text-slate-400">{d.prescribed} · {d.date}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{d.patient}</p>
+                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">{d.medication} × {d.quantity}</p>
+                  <p className="mt-0.5 text-xs text-[var(--text-muted-light)]">{d.prescribed} · {d.date}</p>
                 </div>
                 <div className="shrink-0">
                   <StatusBadge

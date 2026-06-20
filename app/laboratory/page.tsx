@@ -190,12 +190,12 @@ export default function LaboratoryPage() {
         <Card title="Test Requests" description="All lab requests sorted by priority.">
           <DataTable headers={["ID", "Patient", "Test", "Doctor", "Requested", "Priority", "Status"]}>
             {testRequests.map((r) => (
-              <tr className="hover:bg-slate-50 cursor-pointer" key={r.id}>
+              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={r.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)] text-xs">{r.id}</td>
-                <td className="px-5 py-4 text-slate-950 font-medium">{r.patient}</td>
-                <td className="px-5 py-4 text-slate-700">{r.test}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{r.doctor}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{r.requested}</td>
+                <td className="px-5 py-4 text-[var(--text-primary)] font-medium">{r.patient}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{r.test}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{r.doctor}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{r.requested}</td>
                 <td className="px-5 py-4">
                   <StatusBadge variant={reportStatus(r.priority)}>{r.priority}</StatusBadge>
                 </td>
@@ -213,16 +213,16 @@ export default function LaboratoryPage() {
               {departments.map((d) => (
                 <div className="flex flex-col gap-2" key={d.name}>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-950">{d.name}</span>
-                    <span className="text-xs text-slate-500">{d.turnaround} avg.</span>
+                    <span className="text-sm font-semibold text-[var(--text-primary)]">{d.name}</span>
+                    <span className="text-xs text-[var(--text-muted)]">{d.turnaround} avg.</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-600">{d.tests} tests this week</span>
-                    <span className={d.pending > 0 ? "font-semibold text-amber-600" : "text-slate-500"}>
+                    <span className="text-[var(--text-secondary)]">{d.tests} tests this week</span>
+                    <span className={d.pending > 0 ? "font-semibold text-[var(--badge-warning-text)]" : "text-[var(--text-muted)]"}>
                       {d.pending} pending
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-slate-100">
+                  <div className="h-2 rounded-full bg-[var(--border-light)]">
                     <div
                       className="h-2 rounded-full bg-[var(--care-primary)]"
                       style={{ width: `${((d.tests - d.pending) / d.tests) * 100}%` }}

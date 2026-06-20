@@ -122,19 +122,19 @@ export default function DoctorsPage() {
         <Card title="Doctor Directory" description="All registered doctors and their schedules.">
           <DataTable headers={["ID", "Name", "Specialization", "Department", "Patients", "Schedule", "Status", "Contact"]}>
             {doctors.map((d) => (
-              <tr className="hover:bg-slate-50 cursor-pointer" key={d.id}>
+              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={d.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)]">{d.id}</td>
-                <td className="px-5 py-4 text-slate-950 font-medium">{d.name}</td>
-                <td className="px-5 py-4 text-slate-700">{d.specialization}</td>
-                <td className="px-5 py-4 text-slate-700">{d.department}</td>
-                <td className="px-5 py-4 text-slate-700">{d.patients}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{d.schedule}</td>
+                <td className="px-5 py-4 text-[var(--text-primary)] font-medium">{d.name}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{d.specialization}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{d.department}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{d.patients}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{d.schedule}</td>
                 <td className="px-5 py-4">
                   <StatusBadge variant={d.status === "On leave" ? "warning" : "default"}>
                     {d.status}
                   </StatusBadge>
                 </td>
-                <td className="px-5 py-4 text-slate-700 text-xs">{d.phone}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)] text-xs">{d.phone}</td>
               </tr>
             ))}
           </DataTable>

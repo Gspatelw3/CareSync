@@ -49,7 +49,7 @@ export function ActionModal({
         footer={
           <div className="flex items-center justify-end gap-3">
             <button
-              className="inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-4 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg)]"
               onClick={() => setOpen(false)}
               type="button"
             >

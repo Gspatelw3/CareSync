@@ -15,7 +15,7 @@ export function DataTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[680px] text-left text-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
-        <thead className="bg-[var(--care-surface)] text-xs uppercase tracking-[0.12em] text-slate-500">
+        <thead className="bg-[var(--care-surface)] text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
           <tr>
             {headers.map((header) => (
               <th className="px-5 py-3 font-semibold" key={header}>
@@ -24,7 +24,7 @@ export function DataTable({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">{children}</tbody>
+        <tbody className="divide-y divide-[var(--table-divide)]">{children}</tbody>
       </table>
     </div>
   );

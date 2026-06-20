@@ -67,14 +67,14 @@ export default function PatientsPage() {
         <Card title="Patient Registry" description="All registered patients sorted by last visit.">
           <DataTable headers={["ID", "Name", "Gender", "Age", "Contact", "Department", "Doctor", "Status", "Last Visit"]}>
             {patients.map((p) => (
-              <tr className="hover:bg-slate-50 cursor-pointer" key={p.id}>
+              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={p.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)]">{p.id}</td>
-                <td className="px-5 py-4 text-slate-950 font-medium">{p.name}</td>
-                <td className="px-5 py-4 text-slate-700">{p.gender}</td>
-                <td className="px-5 py-4 text-slate-700">{p.age}</td>
-                <td className="px-5 py-4 text-slate-700">{p.contact}</td>
-                <td className="px-5 py-4 text-slate-700">{p.department}</td>
-                <td className="px-5 py-4 text-slate-700">{p.doctor}</td>
+                <td className="px-5 py-4 text-[var(--text-primary)] font-medium">{p.name}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{p.gender}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{p.age}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{p.contact}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{p.department}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{p.doctor}</td>
                 <td className="px-5 py-4">
                   <StatusBadge
                     variant={p.status === "Discharged" ? "info" : p.status === "ICU" ? "danger" : "default"}
@@ -82,7 +82,7 @@ export default function PatientsPage() {
                     {p.status}
                   </StatusBadge>
                 </td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{p.lastVisit}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{p.lastVisit}</td>
               </tr>
             ))}
           </DataTable>

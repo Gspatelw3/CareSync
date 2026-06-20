@@ -206,17 +206,17 @@ export default function ReportsPage() {
                             />
                         }
                     >
-                        <div className="grid gap-px bg-slate-100 sm:grid-cols-2">
+                        <div className="grid gap-px bg-[var(--border-default)] sm:grid-cols-2">
                             {category.reports.slice(0, 4).map((report) => (
                                 <div
-                                    className="flex items-center justify-between gap-4 bg-white px-5 py-4 hover:bg-slate-50"
+                                    className="flex items-center justify-between gap-4 bg-[var(--card-bg)] px-5 py-4 hover:bg-[var(--hover-bg)]"
                                     key={report.name}
                                 >
                                     <div className="min-w-0">
-                                        <p className="text-sm font-medium text-slate-950">
+                                        <p className="text-sm font-medium text-[var(--text-primary)]">
                                             {report.name}
                                         </p>
-                                        <p className="mt-0.5 text-xs text-slate-500">
+                                        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
                                             {report.period} · Updated{" "}
                                             {report.updated}
                                         </p>

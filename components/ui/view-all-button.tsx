@@ -43,15 +43,15 @@ export function ViewAllButton({ label, title, subtitle, reports }: ViewAllButton
         title={title}
         subtitle={subtitle}
       >
-        <div className="grid gap-px bg-slate-100 rounded-lg overflow-hidden sm:grid-cols-2">
+        <div className="grid gap-px bg-[var(--border-light)] rounded-lg overflow-hidden sm:grid-cols-2">
           {reports.map((report) => (
             <div
-              className="flex items-center justify-between gap-4 bg-white px-5 py-4 hover:bg-slate-50"
+              className="flex items-center justify-between gap-4 bg-[var(--card-bg)] px-5 py-4 hover:bg-[var(--hover-bg)]"
               key={report.name}
             >
               <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-950">{report.name}</p>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="text-sm font-medium text-[var(--text-primary)]">{report.name}</p>
+                <p className="mt-0.5 text-xs text-[var(--text-muted-light)]">
                   {report.period} · Updated {report.updated}
                 </p>
               </div>

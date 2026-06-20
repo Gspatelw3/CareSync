@@ -36,7 +36,7 @@ export function SecondaryButton({ children, message, icon, className }: Secondar
   const { addToast } = useToast();
   return (
     <button
-      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-white px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)] cursor-pointer ${className}`}
+      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-[var(--card-bg)] px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)] cursor-pointer ${className}`}
       onClick={message ? () => addToast(message, "info") : undefined}
       type="button"
     >

@@ -70,16 +70,16 @@ export default function SettingsPage() {
       <div className="mt-6 grid gap-6">
         {settingsGroups.map((group) => (
           <Card key={group.title} title={group.title} description={group.description}>
-            <div className="grid gap-px bg-slate-100 sm:grid-cols-2">
+            <div className="grid gap-px bg-[var(--border-default)] sm:grid-cols-2">
               {group.fields.map((field) => (
                 <div
-                  className="flex items-center justify-between gap-4 bg-white px-5 py-4 sm:pl-6"
+                  className="flex items-center justify-between gap-4 bg-[var(--card-bg)] px-5 py-4 sm:pl-6"
                   key={field.label}
                 >
-                  <span className="text-sm font-medium text-slate-700 min-w-[140px]">
+                  <span className="text-sm font-medium text-[var(--text-secondary)] min-w-[140px]">
                     {field.label}
                   </span>
-                  <span className="text-sm text-slate-950 text-right">
+                  <span className="text-sm text-[var(--text-primary)] text-right">
                     {field.value}
                   </span>
                 </div>

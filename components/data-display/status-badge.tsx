@@ -11,10 +11,10 @@ export function StatusBadge({
 }) {
   const styles: Record<StatusBadgeVariant, string> = {
     default:
-      "bg-[color:var(--care-mint)]/20 text-[var(--care-secondary-dark)] ring-1 ring-[color:var(--care-mint)]/60",
-    warning: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
-    danger: "bg-red-50 text-red-700 ring-1 ring-red-200",
-    info: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+      "bg-[var(--badge-default-bg)] text-[var(--badge-default-text)] ring-1 ring-[var(--badge-default-ring)]",
+    warning: "bg-[var(--badge-warning-bg)] text-[var(--badge-warning-text)] ring-1 ring-[var(--badge-warning-ring)]",
+    danger: "bg-[var(--badge-danger-bg)] text-[var(--badge-danger-text)] ring-1 ring-[var(--badge-danger-ring)]",
+    info: "bg-[var(--badge-info-bg)] text-[var(--badge-info-text)] ring-1 ring-[var(--badge-info-ring)]",
   };
 
   return (

@@ -150,15 +150,15 @@ export default function BillingPage() {
         <Card title="Invoices" description="Recent invoices and payment status.">
           <DataTable headers={["Invoice", "Patient", "Service", "Amount", "Insurance", "Paid", "Balance", "Date", "Status"]}>
             {invoices.map((inv) => (
-              <tr className="hover:bg-slate-50 cursor-pointer" key={inv.id}>
+              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={inv.id}>
                 <td className="px-5 py-4 font-semibold text-[var(--care-primary)] text-xs">{inv.id}</td>
-                <td className="px-5 py-4 text-slate-950 font-medium">{inv.patient}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs max-w-[140px] truncate">{inv.service}</td>
-                <td className="px-5 py-4 text-slate-700 font-medium">{inv.amount}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{inv.insurance}</td>
-                <td className="px-5 py-4 text-slate-700">{inv.paid}</td>
-                <td className="px-5 py-4 text-slate-700">{inv.balance}</td>
-                <td className="px-5 py-4 text-slate-500 text-xs">{inv.date}</td>
+                <td className="px-5 py-4 text-[var(--text-primary)] font-medium">{inv.patient}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs max-w-[140px] truncate">{inv.service}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)] font-medium">{inv.amount}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{inv.insurance}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{inv.paid}</td>
+                <td className="px-5 py-4 text-[var(--text-secondary)]">{inv.balance}</td>
+                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{inv.date}</td>
                 <td className="px-5 py-4">
                   <StatusBadge
                     variant={inv.status === "Pending" ? "danger" : inv.status === "Partial" ? "warning" : "default"}
@@ -172,16 +172,16 @@ export default function BillingPage() {
         </Card>
 
         <Card title="Insurance Claims" description="Recent claim submissions and status.">
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[var(--table-divide)]">
             {claims.map((c) => (
-              <div className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-slate-50" key={c.id}>
+              <div className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-[var(--hover-bg)]" key={c.id}>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-950">{c.patient}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{c.insurer}</p>
-                  <p className="mt-0.5 text-xs text-slate-400">{c.id} · {c.submitted}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{c.patient}</p>
+                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">{c.insurer}</p>
+                  <p className="mt-0.5 text-xs text-[var(--text-muted-light)]">{c.id} · {c.submitted}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-semibold text-slate-950">{c.amount}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{c.amount}</p>
                   <StatusBadge
                     variant={c.status === "Under review" ? "warning" : c.status === "Pending" ? "danger" : "default"}
                   >

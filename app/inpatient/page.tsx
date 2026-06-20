@@ -178,17 +178,17 @@ export default function InpatientPage() {
                   <div className="flex flex-col gap-2" key={w.ward}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-slate-950 w-24">{w.ward}</span>
-                        <span className="text-xs text-slate-500">{w.nurse}</span>
+                        <span className="text-sm font-semibold text-[var(--text-primary)] w-24">{w.ward}</span>
+                        <span className="text-xs text-[var(--text-muted)]">{w.nurse}</span>
                       </div>
                       <div className="flex items-center gap-3 text-xs">
-                        <span className="font-semibold text-slate-700">{w.occupied}/{w.beds}</span>
+                        <span className="font-semibold text-[var(--text-secondary)]">{w.occupied}/{w.beds}</span>
                         <span className={w.available > 0 ? "text-[var(--care-secondary)]" : "text-red-500"}>
                           {w.available} free
                         </span>
                       </div>
                     </div>
-                    <div className="h-2 rounded-full bg-slate-100">
+                    <div className="h-2 rounded-full bg-[var(--border-light)]">
                       <div
                         className={`h-2 rounded-full ${
                           occupancyPct > 85 ? "bg-red-400" : occupancyPct > 65 ? "bg-amber-400" : "bg-[var(--care-mint)]"
@@ -204,13 +204,13 @@ export default function InpatientPage() {
         </Card>
 
         <Card title="Current Admissions" description="Active inpatients.">
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[var(--table-divide)]">
             {admissions.map((a) => (
-              <div className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-slate-50" key={a.id}>
+              <div className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-[var(--hover-bg)]" key={a.id}>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-950">{a.patient}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{a.ward} · {a.bed}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{a.diagnosis}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{a.patient}</p>
+                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">{a.ward} · {a.bed}</p>
+                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">{a.diagnosis}</p>
                 </div>
                 <div className="shrink-0 text-right">
                   <StatusBadge
@@ -218,7 +218,7 @@ export default function InpatientPage() {
                   >
                     {a.status}
                   </StatusBadge>
-                  <p className="mt-1 text-[11px] text-slate-400">{a.admitted}</p>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted-light)]">{a.admitted}</p>
                 </div>
               </div>
             ))}

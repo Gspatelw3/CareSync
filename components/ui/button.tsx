@@ -15,7 +15,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "care-brand-gradient text-white hover:brightness-95 focus:ring-4 focus:ring-[var(--care-accent)]/35",
   secondary:
-    "border border-[var(--care-border)] bg-white text-[var(--care-primary)] hover:bg-[var(--care-surface)] focus:ring-4 focus:ring-[var(--care-accent)]/25",
+    "border border-[var(--care-border)] bg-[var(--card-bg)] text-[var(--care-primary)] hover:bg-[var(--care-surface)] focus:ring-4 focus:ring-[var(--care-accent)]/25",
   ghost:
     "bg-transparent text-[var(--care-primary)] hover:bg-[var(--care-surface)] focus:ring-4 focus:ring-[var(--care-accent)]/20",
   danger:
