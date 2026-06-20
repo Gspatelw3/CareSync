@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { AddPatientButton } from "@/components/layout/add-patient-button";
 import { StatCard } from "@/components/layout/page-shell";
 import { Activity, Bed, Calendar, UserPlus, Users } from "lucide-react";
 
@@ -150,13 +151,7 @@ export default function DashboardPage() {
                 <Calendar className="size-4" />
                 Book appointment
               </Link>
-              <Link
-                className="care-brand-gradient inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:brightness-95"
-                href="/patients"
-              >
-                <Users className="size-4" />
-                Add patient
-              </Link>
+              <AddPatientButton />
             </div>
           </header>
 

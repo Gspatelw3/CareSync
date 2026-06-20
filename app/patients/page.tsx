@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageShell, PageHeader, Card, Table, StatusBadge, StatCard } from "@/components/layout/page-shell";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
-import { ActionModal, FormField, FormSection } from "@/components/ui/action-modal";
+import { ActionModal } from "@/components/ui/action-modal";
 import { SearchInput } from "@/components/ui/search-input";
+import { AddPatientForm } from "@/components/patients/add-patient-form";
 
 export const metadata: Metadata = {
   title: "Patients | Care Sync",
@@ -38,64 +38,18 @@ export default function PatientsPage() {
         actions={
           <>
             <SearchInput placeholder="Search patients..." />
-            <ActionModal
-              title="Add Patient"
-              subtitle="Register a new patient in the system."
-              confirmLabel="Add patient"
-              trigger={
-                <ActionButton icon={<Plus className="size-4" />} message="">
-                  Add patient
-                </ActionButton>
-              }
-            >
-              <FormSection title="Personal Information">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField label="First name" placeholder="e.g. Meera" />
-                  <FormField label="Last name" placeholder="e.g. Iyer" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    label="Gender"
-                    type="select"
-                    options={[
-                      { label: "Male", value: "male" },
-                      { label: "Female", value: "female" },
-                      { label: "Other", value: "other" },
-                    ]}
-                  />
-                  <FormField label="Age" type="number" placeholder="e.g. 38" />
-                </div>
-                <FormField label="Phone number" placeholder="+91 98765 43210" />
-                <FormField label="Email" placeholder="patient@email.com" />
-              </FormSection>
-              <FormSection title="Medical Details">
-                <FormField
-                  label="Department"
-                  type="select"
-                  options={[
-                    { label: "Cardiology", value: "cardiology" },
-                    { label: "Orthopedics", value: "orthopedics" },
-                    { label: "General", value: "general" },
-                    { label: "Neurology", value: "neurology" },
-                    { label: "Pediatrics", value: "pediatrics" },
-                    { label: "Obstetrics", value: "obstetrics" },
-                  ]}
-                />
-                <FormField
-                  label="Assign doctor"
-                  type="select"
-                  options={[
-                    { label: "Dr. Kavya Rao", value: "D-042" },
-                    { label: "Dr. Neil Shah", value: "D-041" },
-                    { label: "Dr. Amina Khan", value: "D-040" },
-                    { label: "Dr. Amit Verma", value: "D-039" },
-                    { label: "Dr. Sneha Kapoor", value: "D-038" },
-                    { label: "Dr. Priya Mehta", value: "D-037" },
-                  ]}
-                />
-                <FormField label="Medical history" type="textarea" placeholder="Any pre-existing conditions, allergies..." />
-              </FormSection>
-            </ActionModal>
+              <ActionModal
+                title="Add Patient"
+                subtitle="Register a new patient in the system."
+                confirmLabel="Add patient"
+                trigger={
+                  <ActionButton icon={<Plus className="size-4" />} message="">
+                    Add patient
+                  </ActionButton>
+                }
+              >
+                <AddPatientForm />
+              </ActionModal>
           </>
         }
       />

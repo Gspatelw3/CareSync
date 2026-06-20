@@ -11,6 +11,8 @@ export type ActionModalProps = {
   children: ReactNode;
   onConfirm?: () => void;
   confirmLabel?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function ActionModal({
@@ -20,8 +22,21 @@ export function ActionModal({
   children,
   onConfirm,
   confirmLabel = "Submit",
+  open: externalOpen,
+  onOpenChange,
 }: ActionModalProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const isControlled = externalOpen !== undefined;
+  const open = isControlled ? externalOpen : internalOpen;
+
+  const setOpen = (value: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
+  };
 
   return (
     <>
