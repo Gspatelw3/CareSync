@@ -6,10 +6,8 @@ export type BarChartItem = {
 
 export function BarChart({
   data,
-  maxLabel,
 }: {
   data: BarChartItem[];
-  maxLabel?: string;
 }) {
   return (
     <div className="mt-6 flex h-64 items-end gap-3 border-b border-l border-[var(--border-default)] px-2 pb-4 sm:gap-5">

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AddPatientButton } from "@/components/layout/add-patient-button";
 import { StatCard } from "@/components/layout/page-shell";
-import { BarChart } from "@/components/charts/bar-chart";
 import { Activity, Bed, Calendar, UserPlus, Users } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -258,7 +257,7 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-3 border-b border-[var(--care-border)] p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                    Today's Appointments
+                    Today&rsquo;s Appointments
                   </h2>
                   <p className="mt-1 text-sm text-[var(--text-secondary)]">
                     Priority schedule and patient movement.

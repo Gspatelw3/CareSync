@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { DataTable } from "@/components/data-display/data-table";

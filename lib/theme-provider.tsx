@@ -24,12 +24,11 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
-  // Run once on mount to set the initial theme
+  // Sync DOM class on mount
   useEffect(() => {
     const initial = getInitialTheme();
-    setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");
   }, []);
 

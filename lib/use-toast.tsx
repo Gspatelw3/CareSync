@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, useCallback, type ReactNode } from "react";
+import { useState, createContext, useContext, useCallback, type ReactNode } from "react";
 
 type Toast = {
   id: string;
@@ -55,7 +55,7 @@ export function useToast() {
   if (!ctx) {
     return {
       toasts: [] as Toast[],
-      addToast: (_message: string, _type?: Toast["type"]) => {},
+      addToast: () => {},
     };
   }
   return ctx;
