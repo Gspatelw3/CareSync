@@ -3,7 +3,6 @@ import Link from "next/link";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { BarChart } from "@/components/charts/bar-chart";
 import { Button } from "@/components/ui/button";
 import { Activity, Calendar } from "lucide-react";
 import { AddPatientButton } from "@/components/layout/add-patient-button";

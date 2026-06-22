@@ -72,14 +72,14 @@
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
   --text-muted-light: #64748b;
-  --border-default: #334155;
-  --border-light: #1e293b;
+  --border-default: #475569;
+  --border-light: #334155;
   --hover-bg: #334155;
   --hover-bg-strong: #475569;
   --table-divide: #334155;
   --overlay-bg: rgba(0, 0, 0, 0.6);
   --input-bg: #1e293b;
-  --input-border: #334155;
+  --input-border: #475569;
   --input-text: #f1f5f9;
   --input-placeholder: #64748b;
   --sidebar-bg: #0f172a;
