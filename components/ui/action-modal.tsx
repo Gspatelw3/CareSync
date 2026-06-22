@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState, useId } from "react";
 import { Modal } from "@/components/ui/modal";
 
 export type ActionModalProps = {
@@ -24,6 +24,7 @@ export function ActionModal({
   open: externalOpen,
   onOpenChange,
 }: ActionModalProps) {
+  const formId = useId();
   const [internalOpen, setInternalOpen] = useState(false);
 
   const isControlled = externalOpen !== undefined;
@@ -58,7 +59,7 @@ export function ActionModal({
             <button
               className="care-brand-gradient inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-semibold text-white transition hover:brightness-95"
               type="submit"
-              form="action-modal-form"
+              form={formId}
             >
               {confirmLabel}
             </button>
@@ -66,7 +67,7 @@ export function ActionModal({
         }
       >
         <form
-          id="action-modal-form"
+          id={formId}
           onSubmit={(e) => {
             e.preventDefault();
             onConfirm?.();

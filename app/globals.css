@@ -21,7 +21,6 @@
   --text-secondary: #334155;     /* slate-700  (table body, alert labels) */
   --text-muted: #475569;         /* slate-600  (descriptions, sidebar inactive) */
   --text-muted-light: #64748b;   /* slate-500  (chart labels, muted detail) */
-  --text-muted-lighter: #94a3b8; /* slate-400  (placeholder, subtle text) */
   --border-default: #e2e8f0;     /* slate-200 */
   --border-light: #f1f5f9;       /* slate-100 */
   --hover-bg: #f8fafc;           /* slate-50 */
@@ -42,9 +41,9 @@
   --badge-info-bg: #eff6ff;
   --badge-info-text: #1d4ed8;
   --badge-info-ring: #bfdbfe;
-  --badge-default-bg: color-mix(in srgb, #7ddbba 20%, #ffffff);
-  --badge-default-text: #0a6b56;
-  --badge-default-ring: #7ddbba;
+  --badge-default-bg: #e4eef5;
+  --badge-default-text: #1a6fa8;
+  --badge-default-ring: #bad4e5;
   --shadow-card: rgba(26, 111, 168, 0.05);
   --shadow-sidebar: rgba(15, 23, 42, 0.2);
 }
@@ -62,7 +61,6 @@
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
   --text-muted-light: #64748b;
-  --text-muted-lighter: #475569;
   --border-default: #334155;
   --border-light: #1e293b;
   --hover-bg: #334155;
@@ -111,7 +109,6 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 /* ── Scrollbar styling ── */
@@ -133,7 +130,7 @@ body {
 
 .auth-panel {
   animation: auth-panel-in 650ms ease-out both;
-  background: radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--care-primary) 34%, transparent), transparent 34%),
+  background: radial-gradient(circle at 12% 8%, var(--care-primary), transparent 34%),
     linear-gradient(135deg, var(--care-primary-deep), #0d4054 54%, var(--care-secondary-dark));
 }
 
@@ -143,16 +140,8 @@ body {
   background: linear-gradient(135deg, var(--care-primary), var(--care-secondary));
 }
 
-.dark .care-brand-gradient {
-  background: linear-gradient(135deg, #1e55a0, #1a6fa8);
-}
-
 .care-brand-gradient-vertical {
   background: linear-gradient(180deg, var(--care-primary), var(--care-secondary));
-}
-
-.dark .care-brand-gradient-vertical {
-  background: linear-gradient(180deg, #1e55a0, #1a6fa8);
 }
 
 .auth-logo-mark { opacity: 0.98; }

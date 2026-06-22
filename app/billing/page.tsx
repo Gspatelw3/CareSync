@@ -104,16 +104,16 @@ export default function BillingPage() {
                 <FormField
                   label="Patient"
                   type="select"
-                  options={[
-                    { label: "Meera Iyer", value: "P-1024" },
-                    { label: "Arjun Menon", value: "P-1023" },
-                    { label: "Sita Verma", value: "P-1021" },
-                    { label: "Vikram Singh", value: "P-1019" },
-                    { label: "Rohan Das", value: "P-1021" },
-                    { label: "Aisha Patel", value: "P-1020" },
-                    { label: "Lakshmi Nair", value: "P-1018" },
-                    { label: "Deepak Kumar", value: "P-1017" },
-                  ]}
+                    options={[
+                      { label: "Meera Iyer", value: "P-1024" },
+                      { label: "Arjun Menon", value: "P-1023" },
+                      { label: "Sita Verma", value: "P-1022" },
+                      { label: "Vikram Singh", value: "P-1019" },
+                      { label: "Rohan Das", value: "P-1021" },
+                      { label: "Aisha Patel", value: "P-1020" },
+                      { label: "Lakshmi Nair", value: "P-1018" },
+                      { label: "Deepak Kumar", value: "P-1017" },
+                    ]}
                 />
               </FormSection>
               <FormSection title="Service Details">

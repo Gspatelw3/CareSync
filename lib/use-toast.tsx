@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, createContext, useContext, useCallback, type ReactNode } from "react";
+import { TOAST } from "@/lib/config";
 
 type Toast = {
   id: string;
@@ -23,7 +24,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+    }, TOAST.durationMs);
   }, []);
 
   return (
@@ -36,9 +37,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={t.id}
               className={[
                 "animate-in slide-in-from-right rounded-md border px-4 py-3 text-sm font-semibold shadow-lg",
-                t.type === "success" && "border-[var(--care-mint)]/60 bg-white text-[var(--care-secondary-dark)]",
-                t.type === "info" && "border-blue-200 bg-white text-blue-700",
-                t.type === "warning" && "border-amber-200 bg-white text-amber-700",
+                t.type === "success" && "border-[var(--care-mint)]/60 bg-[var(--card-bg)] text-[var(--care-secondary-dark)]",
+                t.type === "info" && "border-blue-200 bg-[var(--card-bg)] text-blue-700",
+                t.type === "warning" && "border-amber-200 bg-[var(--card-bg)] text-amber-700",
               ].filter(Boolean).join(" ")}
             >
               {t.message}

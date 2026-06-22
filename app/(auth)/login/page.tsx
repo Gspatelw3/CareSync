@@ -51,20 +51,20 @@ export default function LoginPage() {
         <p className="text-sm font-medium text-[var(--care-primary)]">
           Authentication
         </p>
-        <h2 className="mt-2 text-2xl font-semibold text-slate-950">Login</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <h2 className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">Login</h2>
+        <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
           Enter your hospital account details to continue.
         </p>
       </div>
 
       <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-slate-800" htmlFor="email">
+          <label className="text-sm font-medium text-[var(--text-secondary)]" htmlFor="email">
             Email address
           </label>
           <input
             autoComplete="email"
-            className="h-11 rounded-md border border-[var(--care-border)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30"
+            className="h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
             id="email"
             name="email"
             placeholder="admin@caresync.com"
@@ -80,9 +80,9 @@ export default function LoginPage() {
 
         <div className="grid gap-2">
           <div className="flex items-center justify-between gap-4">
-            <label
-              className="text-sm font-medium text-slate-800"
-              htmlFor="password"
+              <label
+                className="text-sm font-medium text-[var(--text-secondary)]"
+                htmlFor="password"
             >
               Password
             </label>
@@ -95,7 +95,7 @@ export default function LoginPage() {
           </div>
           <input
             autoComplete="current-password"
-            className="h-11 rounded-md border border-[var(--care-border)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30"
+            className="h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
             id="password"
             name="password"
             placeholder="Enter password"
@@ -109,7 +109,7 @@ export default function LoginPage() {
           )}
         </div>
 
-        <Button type="submit">Continue</Button>
+        <Button type="submit">Login</Button>
       </form>
     </AuthShell>
   );

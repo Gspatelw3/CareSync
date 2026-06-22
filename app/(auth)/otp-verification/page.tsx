@@ -13,22 +13,22 @@ export default function OtpVerificationPage() {
         <p className="text-sm font-medium text-[var(--care-primary)]">
           Authentication
         </p>
-        <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+        <h2 className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">
           OTP Verification
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
           Enter the 6-digit code sent to your registered email or mobile number.
         </p>
       </div>
 
       <form className="mt-8 grid gap-5">
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-slate-800" htmlFor="otp">
+          <label className="text-sm font-medium text-[var(--text-secondary)]" htmlFor="otp">
             Verification code
           </label>
           <input
             autoComplete="one-time-code"
-            className="h-12 rounded-md border border-[var(--care-border)] px-3 text-center font-mono text-xl tracking-[0.35em] outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30"
+            className="h-12 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-center font-mono text-xl tracking-[0.35em] outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
             id="otp"
             inputMode="numeric"
             maxLength={6}
@@ -47,9 +47,9 @@ export default function OtpVerificationPage() {
         <Button className="font-medium" size="link" variant="ghost">
           Resend code
         </Button>
-        <Link
-          className="font-medium text-slate-600 hover:text-slate-950"
-          href="/login"
+          <Link
+            className="font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            href="/login"
         >
           Back to login
         </Link>

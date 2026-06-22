@@ -13,22 +13,22 @@ export default function ForgotPasswordPage() {
         <p className="text-sm font-medium text-[var(--care-primary)]">
           Authentication
         </p>
-        <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+        <h2 className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">
           Forgot Password
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
           We will send a one-time verification code to your email.
         </p>
       </div>
 
       <form action="/otp-verification" className="mt-8 grid gap-5">
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-slate-800" htmlFor="email">
+          <label className="text-sm font-medium text-[var(--text-secondary)]" htmlFor="email">
             Registered email
           </label>
           <input
             autoComplete="email"
-            className="h-11 rounded-md border border-[var(--care-border)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30"
+            className="h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
             id="email"
             name="email"
             placeholder="name@hospital.com"
@@ -40,11 +40,11 @@ export default function ForgotPasswordPage() {
         <Button type="submit">Send OTP</Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
         Remembered your password?{" "}
-        <Link
-          className="font-medium text-[var(--care-primary)] hover:text-[var(--care-primary-dark)]"
-          href="/login"
+          <Link
+            className="font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            href="/login"
         >
           Back to login
         </Link>

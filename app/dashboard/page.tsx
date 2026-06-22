@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppSidebar } from "@/components/layout/app-sidebar";
+import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
+import { Card } from "@/components/ui/card";
+import { StatusBadge } from "@/components/data-display/status-badge";
+import { Activity, Calendar } from "lucide-react";
 import { AddPatientButton } from "@/components/layout/add-patient-button";
-import { StatCard } from "@/components/layout/page-shell";
-import { Activity, Bed, Calendar, UserPlus, Users } from "lucide-react";
+import { Users, UserPlus, Bed } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard | Care Sync",
@@ -43,14 +45,7 @@ const stats = [
     icon: Bed,
     href: "/inpatient",
   },
-] satisfies {
-  label: string;
-  value: string;
-  delta: string;
-  detail: string;
-  icon: React.ComponentType<{ className?: string }>;
-  href: string;
-}[];
+];
 
 const revenue = [
   { label: "Mon", value: "$42k", height: "48%" },
@@ -69,6 +64,7 @@ const appointments = [
     care: "Cardiology",
     doctor: "Dr. Kavya Rao",
     status: "Checked in",
+    statusVariant: "default" as const,
   },
   {
     time: "10:05",
@@ -76,6 +72,7 @@ const appointments = [
     care: "Orthopedics",
     doctor: "Dr. Neil Shah",
     status: "Waiting",
+    statusVariant: "warning" as const,
   },
   {
     time: "10:45",
@@ -83,6 +80,7 @@ const appointments = [
     care: "Laboratory",
     doctor: "CBC panel",
     status: "Sample due",
+    statusVariant: "warning" as const,
   },
   {
     time: "11:30",
@@ -90,6 +88,7 @@ const appointments = [
     care: "Neurology",
     doctor: "Dr. Amina Khan",
     status: "Confirmed",
+    statusVariant: "default" as const,
   },
 ];
 
@@ -106,237 +105,182 @@ const alerts = [
   { label: "Lab reports pending", value: "31", tone: "blue" },
 ];
 
-function StatusBadge({ children }: { children: string }) {
-  const isWaiting = children === "Waiting" || children === "Sample due";
-
-  return (
-    <span
-      className={[
-        "inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-semibold",
-        isWaiting
-          ? "bg-[var(--badge-warning-bg)] text-[var(--badge-warning-text)] ring-1 ring-[var(--badge-warning-ring)]"
-          : "dark:bg-emerald-900/40 dark:text-emerald-300 dark:ring-emerald-700/60 bg-[color:var(--care-mint)]/20 text-[var(--care-secondary-dark)] ring-1 ring-[color:var(--care-mint)]/60",
-      ].join(" ")}
-    >
-      {children}
-    </span>
-  );
-}
-
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-[var(--care-surface)] text-[var(--text-primary)]">
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <AppSidebar activeHref="/dashboard" />
-
-        <section className="px-4 py-5 sm:px-6 lg:px-8 lg:h-screen overflow-y-auto">
-          <header className="flex flex-col gap-4 border-b border-[var(--care-border)] pb-5 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--care-primary)]">
-                Hospital Command Center
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">
-                Dashboard
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
-                Track patient flow, clinical capacity, billing, inventory, and
-                laboratory work from one operational view.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Link
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-[var(--card-bg)] px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
-                href="/appointments"
-              >
-                <Calendar className="size-4" />
-                Book appointment
-              </Link>
-              <AddPatientButton />
-            </div>
-          </header>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <StatCard
-                  key={item.label}
-                  label={item.label}
-                  value={item.value}
-                  delta={item.delta}
-                  detail={item.detail}
-                  icon={<IconComponent className="size-5" />}
-                  href={item.href}
-                />
-              );
-            })}
+    <PageShell activeHref="/dashboard">
+      <PageHeader
+        eyebrow="Hospital Command Center"
+        title="Dashboard"
+        description="Track patient flow, clinical capacity, billing, inventory, and laboratory work from one operational view."
+        actions={
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Link
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-[var(--card-bg)] px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
+              href="/appointments"
+            >
+              <Calendar className="size-4" />
+              Book appointment
+            </Link>
+            <AddPatientButton />
           </div>
+        }
+      />
 
-          <div className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
-            <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                    Revenue Overview
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    Weekly collections across billing and claims.
-                  </p>
-                </div>
-                <div className="rounded-md bg-[color:var(--care-mint)]/20 px-3 py-2 text-sm font-semibold text-[var(--care-secondary-dark)]">
-                  $378k this week
-                </div>
-              </div>
-
-              <div className="mt-6 flex h-64 items-end gap-3 border-b border-l border-[var(--border-default)] px-2 pb-4 sm:gap-5">
-                {revenue.map((day) => (
-                  <div
-                    className="flex h-full flex-1 flex-col items-center justify-end gap-2"
-                    key={day.label}
-                  >
-                    <span className="text-xs font-semibold text-[var(--text-muted)]">
-                      {day.value}
-                    </span>
-                    <div
-                      className="care-brand-gradient-vertical w-full rounded-t-md"
-                      style={{ height: day.height }}
-                    />
-                    <span className="text-xs font-medium text-[var(--text-muted)]">
-                      {day.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                    Critical Alerts
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    Operational items that need attention.
-                  </p>
-                </div>
-                <Activity className="size-5 text-[var(--care-primary)]" />
-              </div>
-
-              <div className="mt-5 grid gap-3">
-                {alerts.map((alert) => (
-                  <div
-                    className="flex items-center justify-between gap-4 rounded-md border border-[var(--border-default)] p-3"
-                    key={alert.label}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={[
-                          "size-2.5 rounded-full",
-                          alert.tone === "red" && "bg-red-500",
-                          alert.tone === "amber" && "bg-amber-500",
-                          alert.tone === "blue" && "bg-[var(--care-primary)]",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      />
-                      <span className="text-sm font-medium text-[var(--text-secondary)]">
-                        {alert.label}
-                      </span>
-                    </div>
-                    <span className="text-sm font-semibold text-[var(--text-primary)]">
-                      {alert.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-
-          <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <section className="overflow-hidden rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] shadow-sm shadow-[var(--shadow-card)]">
-              <div className="flex flex-col gap-3 border-b border-[var(--care-border)] p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                    Today&rsquo;s Appointments
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    Priority schedule and patient movement.
-                  </p>
-                </div>
-                <Link
-                  className="text-sm font-semibold text-[var(--care-primary)] hover:text-[var(--care-primary-dark)]"
-                  href="/appointments"
-                >
-                  View calendar
-                </Link>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[680px] text-left text-sm">
-                  <thead className="bg-[var(--care-surface)] text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
-                    <tr>
-                      <th className="px-5 py-3 font-semibold">Time</th>
-                      <th className="px-5 py-3 font-semibold">Patient</th>
-                      <th className="px-5 py-3 font-semibold">Care</th>
-                      <th className="px-5 py-3 font-semibold">Assigned to</th>
-                      <th className="px-5 py-3 font-semibold">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--table-divide)]">
-                    {appointments.map((appointment) => (
-                      <tr className="hover:bg-[var(--hover-bg)]" key={appointment.time}>
-                        <td className="px-5 py-4 font-semibold text-[var(--text-primary)]">
-                          {appointment.time}
-                        </td>
-                        <td className="px-5 py-4 text-[var(--text-secondary)]">
-                          {appointment.patient}
-                        </td>
-                        <td className="px-5 py-4 text-[var(--text-secondary)]">
-                          {appointment.care}
-                        </td>
-                        <td className="px-5 py-4 text-[var(--text-secondary)]">
-                          {appointment.doctor}
-                        </td>
-                        <td className="px-5 py-4">
-                          <StatusBadge>{appointment.status}</StatusBadge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                    Recent Activities
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    Latest operational updates.
-                  </p>
-                </div>
-                <Link
-                  className="text-sm font-semibold text-[var(--care-primary)] hover:text-[var(--care-primary-dark)]"
-                  href="/reports"
-                >
-                  Reports
-                </Link>
-              </div>
-              <div className="mt-5 grid gap-4">
-                {activities.map((activity) => (
-                  <div className="flex gap-3" key={activity}>
-                    <span className="mt-2 size-2 rounded-full bg-[var(--care-mint)]" />
-                    <p className="text-sm leading-6 text-[var(--text-secondary)]">
-                      {activity}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-        </section>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <StatCard
+              key={item.label}
+              label={item.label}
+              value={item.value}
+              delta={item.delta}
+              detail={item.detail}
+              icon={<IconComponent className="size-5" />}
+              href={item.href}
+            />
+          );
+        })}
       </div>
-    </main>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
+        <Card title="Revenue Overview" description="Weekly collections across billing and claims.">
+          <div>
+            <div className="rounded-md bg-[var(--care-mint)]/20 px-3 py-2 text-sm font-semibold text-[var(--care-secondary-dark)]">
+              $378k this week
+            </div>
+            <div className="mt-6 flex h-64 items-end gap-3 border-b border-l border-[var(--border-default)] px-2 pb-4 sm:gap-5">
+              {revenue.map((day) => (
+                <div
+                  className="flex h-full flex-1 flex-col items-center justify-end gap-2"
+                  key={day.label}
+                >
+                  <span className="text-xs font-semibold text-[var(--text-muted)]">
+                    {day.value}
+                  </span>
+                  <div
+                    className="care-brand-gradient-vertical w-full rounded-t-md"
+                    style={{ height: day.height }}
+                  />
+                  <span className="text-xs font-medium text-[var(--text-muted)]">
+                    {day.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        <Card
+          title="Critical Alerts"
+          description="Operational items that need attention."
+          action={<Activity className="size-5 text-[var(--care-primary)]" />}
+        >
+          <div className="grid gap-3 p-5">
+            {alerts.map((alert) => (
+              <div
+                className="flex items-center justify-between gap-4 rounded-md border border-[var(--border-default)] p-3"
+                key={alert.label}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={[
+                      "size-2.5 rounded-full",
+                      alert.tone === "red" && "bg-red-500",
+                      alert.tone === "amber" && "bg-amber-500",
+                      alert.tone === "blue" && "bg-[var(--care-primary)]",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  />
+                  <span className="text-sm font-medium text-[var(--text-secondary)]">
+                    {alert.label}
+                  </span>
+                </div>
+                <span className="text-sm font-semibold text-[var(--text-primary)]">
+                  {alert.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <Card
+          title="Today&rsquo;s Appointments"
+          description="Priority schedule and patient movement."
+          action={
+            <Link
+              className="text-sm font-semibold text-[var(--care-primary)] hover:text-[var(--care-primary-dark)]"
+              href="/appointments"
+            >
+              View calendar
+            </Link>
+          }
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead className="bg-[var(--care-surface)] text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Time</th>
+                  <th className="px-5 py-3 font-semibold">Patient</th>
+                  <th className="px-5 py-3 font-semibold">Care</th>
+                  <th className="px-5 py-3 font-semibold">Assigned to</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--table-divide)]">
+                {appointments.map((appointment) => (
+                  <tr className="hover:bg-[var(--hover-bg)]" key={appointment.time}>
+                    <td className="px-5 py-4 font-semibold text-[var(--text-primary)]">
+                      {appointment.time}
+                    </td>
+                    <td className="px-5 py-4 text-[var(--text-secondary)]">
+                      {appointment.patient}
+                    </td>
+                    <td className="px-5 py-4 text-[var(--text-secondary)]">
+                      {appointment.care}
+                    </td>
+                    <td className="px-5 py-4 text-[var(--text-secondary)]">
+                      {appointment.doctor}
+                    </td>
+                    <td className="px-5 py-4">
+                      <StatusBadge variant={appointment.statusVariant}>
+                        {appointment.status}
+                      </StatusBadge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        <Card
+          title="Recent Activities"
+          description="Latest operational updates."
+          action={
+            <Link
+              className="text-sm font-semibold text-[var(--care-primary)] hover:text-[var(--care-primary-dark)]"
+              href="/reports"
+            >
+              Reports
+            </Link>
+          }
+        >
+          <div className="grid gap-4 p-5">
+            {activities.map((activity) => (
+              <div className="flex gap-3" key={activity}>
+                <span className="mt-2 size-2 rounded-full bg-[var(--care-mint)]" />
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                  {activity}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    </PageShell>
   );
 }
