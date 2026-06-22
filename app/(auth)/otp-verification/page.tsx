@@ -28,7 +28,7 @@ export default function OtpVerificationPage() {
           </label>
           <input
             autoComplete="one-time-code"
-            className="h-12 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-center font-mono text-xl tracking-[0.35em] outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
+            className="h-12 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-center font-mono text-xl tracking-[0.35em] outline-none transition focus:border-[var(--care-primary)] focus:ring-2 focus:ring-[var(--care-primary)]/20 placeholder:text-[var(--input-placeholder)]"
             id="otp"
             inputMode="numeric"
             maxLength={6}

@@ -2,6 +2,7 @@
 
 import { type ReactNode, useState, useId } from "react";
 import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 
 export type ActionModalProps = {
   trigger: ReactNode;
@@ -49,20 +50,21 @@ export function ActionModal({
         subtitle={subtitle}
         footer={
           <div className="flex items-center justify-end gap-3">
-            <button
-              className="inline-flex h-10 items-center justify-center rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-4 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg)]"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setOpen(false)}
               type="button"
             >
               Cancel
-            </button>
-            <button
-              className="care-brand-gradient inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-semibold text-white transition hover:brightness-95"
+            </Button>
+            <Button
               type="submit"
               form={formId}
+              size="sm"
             >
               {confirmLabel}
-            </button>
+            </Button>
           </div>
         }
       >

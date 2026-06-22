@@ -64,7 +64,7 @@ export default function LoginPage() {
           </label>
           <input
             autoComplete="email"
-            className="h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
+            className="h-10 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm placeholder:text-[var(--input-placeholder)] outline-none transition focus:border-[var(--care-primary)] focus:ring-2 focus:ring-[var(--care-primary)]/20"
             id="email"
             name="email"
             placeholder="admin@caresync.com"
@@ -95,7 +95,7 @@ export default function LoginPage() {
           </div>
           <input
             autoComplete="current-password"
-            className="h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
+            className="h-10 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-2 focus:ring-[var(--care-primary)]/20 placeholder:text-[var(--input-placeholder)]"
             id="password"
             name="password"
             placeholder="Enter password"

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type StatusBadgeVariant = "default" | "warning" | "danger" | "info";
+export type StatusBadgeVariant = "default" | "warning" | "danger" | "info" | "success";
 
 export function StatusBadge({
   children,
@@ -15,6 +15,7 @@ export function StatusBadge({
     warning: "bg-[var(--badge-warning-bg)] text-[var(--badge-warning-text)] ring-1 ring-[var(--badge-warning-ring)]",
     danger: "bg-[var(--badge-danger-bg)] text-[var(--badge-danger-text)] ring-1 ring-[var(--badge-danger-ring)]",
     info: "bg-[var(--badge-info-bg)] text-[var(--badge-info-text)] ring-1 ring-[var(--badge-info-ring)]",
+    success: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800",
   };
 
   return (

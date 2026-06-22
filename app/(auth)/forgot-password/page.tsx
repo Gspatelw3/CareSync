@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
           </label>
           <input
             autoComplete="email"
-            className="h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-4 focus:ring-[var(--care-accent)]/30 placeholder:text-[var(--input-placeholder)]"
+            className="h-10 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] px-3 text-sm outline-none transition focus:border-[var(--care-primary)] focus:ring-2 focus:ring-[var(--care-primary)]/20 placeholder:text-[var(--input-placeholder)]"
             id="email"
             name="email"
             placeholder="name@hospital.com"

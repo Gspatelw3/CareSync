@@ -15,6 +15,17 @@
   --care-soft-text: #ddf8ee;
   --care-border: #bfdde9;
 
+  /* ── Design system constants ── */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --focus-ring: 0 0 0 3px rgba(26, 111, 168, 0.25);
+  --focus-ring-offset: 1px;
+
   /* Semantic tokens for light mode - map exactly to original Tailwind values */
   --card-bg: #ffffff;
   --text-primary: #020617;       /* slate-950 */

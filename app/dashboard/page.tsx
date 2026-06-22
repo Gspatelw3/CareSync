@@ -3,6 +3,8 @@ import Link from "next/link";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
+import { BarChart } from "@/components/charts/bar-chart";
+import { Button } from "@/components/ui/button";
 import { Activity, Calendar } from "lucide-react";
 import { AddPatientButton } from "@/components/layout/add-patient-button";
 import { Users, UserPlus, Bed } from "lucide-react";
@@ -114,12 +116,11 @@ export default function DashboardPage() {
         description="Track patient flow, clinical capacity, billing, inventory, and laboratory work from one operational view."
         actions={
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Link
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--care-border)] bg-[var(--card-bg)] px-3 text-sm font-semibold text-[var(--care-primary)] transition hover:bg-[var(--care-surface)]"
-              href="/appointments"
-            >
-              <Calendar className="size-4" />
-              Book appointment
+            <Link href="/appointments">
+              <Button variant="secondary" size="sm" type="button">
+                <Calendar className="size-4" />
+                Book appointment
+              </Button>
             </Link>
             <AddPatientButton />
           </div>

@@ -782,6 +782,8 @@ To add dark mode support to a new component:
 | **react-dom** | 19.2.4 | DOM renderer for React | Required by React for web rendering |
 | **lucide-react** | ^1.21.0 | Icon library | Clean, consistent icons; tree-shakeable (only ships used icons); MIT licensed |
 | **react-select** | ^5.10.2 | Searchable select dropdowns | The most popular React select component; supports theming; accessible |
+| **react-day-picker** | ^9 | Date picker calendar | Lightweight (~10KB), fully accessible (WAI-ARIA), styled via CSS custom properties; MIT licensed |
+| **date-fns** | ^4 | Date formatting & parsing | Modular, tree-shakeable date utility library; used with react-day-picker; MIT licensed |
 | **tailwindcss** | ^5 | Utility-first CSS framework | No runtime CSS; design token system via CSS variables; responsive utilities |
 | **@tailwindcss/postcss** | ^5 | Tailwind PostCSS plugin | Required for Tailwind CSS v4 integration with Next.js |
 | **typescript** | ^5 | Type safety | Compile-time error checking; better IDE support; easier refactoring |
@@ -798,6 +800,8 @@ All dependencies are **MIT licensed** or have equivalent permissive licenses sui
 - **next, react, react-dom**: MIT
 - **lucide-react**: ISC (equivalent to MIT)
 - **react-select**: MIT
+- **react-day-picker**: MIT
+- **date-fns**: MIT
 - **tailwindcss**: MIT
 - **typescript**: Apache 2.0
 - **eslint**: MIT

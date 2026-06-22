@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Select from "react-select";
+import { DatePicker } from "@/components/ui/date-picker";
 
 type FormFieldProps = {
   label: string;
@@ -93,13 +95,27 @@ const selectStyles = {
 
 export function FormField({
   label,
-  value,
+  value: externalValue,
   placeholder,
   type = "text",
   options,
-  onChange,
+  onChange: externalOnChange,
 }: FormFieldProps) {
   const id = label.toLowerCase().replace(/\s+/g, "-");
+
+  // Internal state for uncontrolled usage (when no external value/onChange is provided).
+  // This allows form fields to track user input even without parent state management.
+  const [internalValue, setInternalValue] = useState("");
+
+  const isControlled = externalValue !== undefined;
+  const value = isControlled ? externalValue : internalValue;
+
+  const handleChange = (newValue: string) => {
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+    externalOnChange?.(newValue);
+  };
 
   return (
     <div>
@@ -114,26 +130,33 @@ export function FormField({
           inputId={id}
           options={options}
           placeholder={`Select ${label.toLowerCase()}...`}
-          defaultValue={
-            value ? options.find((o) => o.value === value) : undefined
-          }
-          onChange={(opt) => onChange?.(opt?.value ?? "")}
+          value={value ? options.find((o) => o.value === value) : null}
+          onChange={(opt) => handleChange(opt?.value ?? "")}
           isClearable
           unstyled
           styles={selectStyles}
         />
       ) : type === "textarea" ? (
         <textarea
-          className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)] outline-none focus:border-[var(--care-primary)]"
-          defaultValue={value || ""}
+          className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)] outline-none focus:border-[var(--care-primary)] focus:ring-2 focus:ring-[var(--care-primary)]/20 placeholder:text-[var(--input-placeholder)]"
+          value={value || ""}
+          onChange={(e) => handleChange(e.target.value)}
           id={id}
           placeholder={placeholder}
           rows={3}
         />
+      ) : type === "date" ? (
+        <DatePicker
+          value={value || undefined}
+          placeholder={placeholder}
+          onChange={handleChange}
+          id={id}
+        />
       ) : (
         <input
-          className="h-10 w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-sm text-[var(--input-text)] outline-none focus:border-[var(--care-primary)] placeholder:text-[var(--input-placeholder)]"
-          defaultValue={value || ""}
+          className="h-10 w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-sm text-[var(--input-text)] outline-none focus:border-[var(--care-primary)] focus:ring-2 focus:ring-[var(--care-primary)]/20 placeholder:text-[var(--input-placeholder)]"
+          value={value || ""}
+          onChange={(e) => handleChange(e.target.value)}
           id={id}
           placeholder={placeholder}
           type={type}
