@@ -38,7 +38,38 @@ const navigationItems = [
 }[];
 
 export function AppSidebar({ activeHref }: { activeHref: string }) {
-    const { theme, toggleTheme } = useTheme();
+    const { theme, toggleTheme, mounted } = useTheme();
+
+    function renderThemeToggle() {
+        return (
+            <button
+                className="flex w-full min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg-strong)] hover:text-[var(--text-primary)]"
+                onClick={toggleTheme}
+                type="button"
+                aria-label="Toggle theme"
+                title={mounted ? (theme === "dark" ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"}
+            >
+                {mounted ? (
+                    theme === "dark" ? (
+                        <>
+                            <Sun className="size-5 shrink-0" aria-hidden="true" />
+                            Light mode
+                        </>
+                    ) : (
+                        <>
+                            <Moon className="size-5 shrink-0" aria-hidden="true" />
+                            Dark mode
+                        </>
+                    )
+                ) : (
+                    <>
+                        <span className="size-5 shrink-0" aria-hidden="true" />
+                        Toggle theme
+                    </>
+                )}
+            </button>
+        );
+    }
 
     function renderNavigation() {
         return (
@@ -121,14 +152,7 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
                         </div>
                         <div className="flex-auto overflow-y-auto p-4">
                             {renderNavigation()}
-                            <button
-                                className="flex w-full min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg-strong)] hover:text-[var(--text-primary)]"
-                                onClick={toggleTheme}
-                                type="button"
-                            >
-                                {theme === "dark" ? <Sun className="size-5 shrink-0" /> : <Moon className="size-5 shrink-0" />}
-                                {theme === "dark" ? "Light mode" : "Dark mode"}
-                            </button>
+                            {renderThemeToggle()}
                             <a
                                 className="flex min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--badge-danger-bg)] hover:text-[var(--badge-danger-text)]"
                                 href="/login"
@@ -158,14 +182,7 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
                 </div>
 
                 <div className="mt-6 space-y-1 px-5">
-                    <button
-                        className="flex w-full min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg-strong)] hover:text-[var(--text-primary)]"
-                        onClick={toggleTheme}
-                        type="button"
-                    >
-                        {theme === "dark" ? <Sun className="size-5 shrink-0" /> : <Moon className="size-5 shrink-0" />}
-                        {theme === "dark" ? "Light mode" : "Dark mode"}
-                    </button>
+                    {renderThemeToggle()}
                     <a
                         className="flex min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--badge-danger-bg)] hover:text-[var(--badge-danger-text)]"
                         href="/login"
