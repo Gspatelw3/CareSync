@@ -180,7 +180,7 @@ export default function BillingPage() {
                   <p className="mt-0.5 text-xs text-[var(--text-muted-light)]">{c.id} · {c.submitted}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{c.amount}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)] mb-2">{c.amount}</p>
                   <StatusBadge
                     variant={c.status === "Under review" ? "warning" : c.status === "Pending" ? "danger" : "default"}
                   >

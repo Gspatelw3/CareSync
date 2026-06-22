@@ -185,7 +185,7 @@ export default function LaboratoryPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card title="Test Requests" description="All lab requests sorted by priority.">
           <DataTable headers={["ID", "Patient", "Test", "Doctor", "Requested", "Priority", "Status"]}>
             {testRequests.map((r) => (

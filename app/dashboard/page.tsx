@@ -143,7 +143,7 @@ export default function DashboardPage() {
         })}
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card title="Revenue Overview" description="Weekly collections across billing and claims.">
           <div>
             <div className="rounded-md bg-[var(--care-mint)]/20 px-3 py-2 text-sm font-semibold text-[var(--care-secondary-dark)]">
@@ -206,7 +206,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card
           title="Today&rsquo;s Appointments"
           description="Priority schedule and patient movement."

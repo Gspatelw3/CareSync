@@ -172,7 +172,7 @@ export default function AppointmentsPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card title="Today's Schedule" description="All appointments for today, 19 June 2026.">
           <DataTable headers={["Time", "Patient", "Care", "Doctor", "Type", "Status"]}>
             {appointments.map((a) => (
