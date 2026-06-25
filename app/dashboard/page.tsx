@@ -114,9 +114,9 @@ export default function DashboardPage() {
         title="Dashboard"
         description="Track patient flow, clinical capacity, billing, inventory, and laboratory work from one operational view."
         actions={
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center w-full sm:w-auto">
             <Link href="/appointments">
-              <Button variant="secondary" size="sm" type="button">
+              <Button variant="secondary" size="sm" type="button" className="w-full sm:w-auto">
                 <Calendar className="size-4" />
                 Book appointment
               </Button>
@@ -146,10 +146,10 @@ export default function DashboardPage() {
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card title="Revenue Overview" description="Weekly collections across billing and claims.">
           <div>
-            <div className="rounded-md bg-[var(--care-mint)]/20 px-3 py-2 text-sm font-semibold text-[var(--care-secondary-dark)]">
+            <div className="rounded-md m-3 bg-[var(--care-mint)]/20 px-3 py-2 text-sm font-semibold text-[var(--care-secondary-dark)]">
               $378k this week
             </div>
-            <div className="mt-6 flex h-64 items-end gap-3 border-b border-l border-[var(--border-default)] px-2 pb-4 sm:gap-5">
+            <div className="mt-6 flex h-64 items-end gap-3 px-6 pb-4 sm:gap-5">
               {revenue.map((day) => (
                 <div
                   className="flex h-full flex-1 flex-col items-center justify-end gap-2"
