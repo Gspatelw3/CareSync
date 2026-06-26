@@ -34,7 +34,7 @@ export function AuthShell({
               alt="Care Sync"
               height={48}
               priority
-              src="/caresync.svg"
+              src="/caresync-light.svg"
               width={162}
             />
           </div>

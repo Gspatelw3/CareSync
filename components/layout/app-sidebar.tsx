@@ -37,7 +37,13 @@ const navigationItems = [
     icon: React.ComponentType<{ className?: string }>;
 }[];
 
-export function AppSidebar({ activeHref }: { activeHref: string }) {
+export function AppSidebar({ 
+  activeHref, 
+  onNavigate 
+}: { 
+  activeHref: string;
+  onNavigate?: (href: string) => void;
+}) {
     const { theme, toggleTheme, mounted } = useTheme();
 
     function renderThemeToggle() {
@@ -78,6 +84,32 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
                     const isActive = item.href === activeHref;
                     const IconComponent = item.icon;
 
+                    const handleClick = (e: React.MouseEvent) => {
+                        if (onNavigate) {
+                            e.preventDefault();
+                            onNavigate(item.href);
+                        }
+                    };
+
+                    if (onNavigate) {
+                        return (
+                            <button
+                                type="button"
+                                className={[
+                                    "flex min-w-fit items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition w-full text-left",
+                                    isActive
+                                        ? "bg-[var(--care-surface)] text-[var(--text-primary)]"
+                                        : "text-[var(--text-secondary)] hover:bg-[var(--care-surface)] hover:text-[var(--text-primary)]",
+                                ].join(" ")}
+                                key={item.label}
+                                onClick={handleClick}
+                            >
+                                <IconComponent className="size-5 shrink-0" />
+                                {item.label}
+                            </button>
+                        );
+                    }
+
                     return (
                         <Link
                             className={[
@@ -102,7 +134,7 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
         <>
             <header className="border-b border-[var(--care-border)] bg-[var(--card-bg)] px-4 py-4 sm:px-6 lg:hidden sticky top-0 z-30">
                 <div className="flex items-center justify-between gap-4">
-                    <Link className="block w-fit" href="/dashboard">
+                    <Link className="block w-fit text-[var(--text-primary)]" href="/dashboard">
                         <Image
                             alt="Care Sync"
                             className="h-auto"
@@ -166,7 +198,7 @@ export function AppSidebar({ activeHref }: { activeHref: string }) {
             </header>
 
             <aside className="hidden h-screen border-r border-[var(--care-border)] lg:flex flex-col bg-[var(--sidebar-bg)] py-5">
-                <Link className="block w-fit mx-5" href="/dashboard">
+                <Link className="block w-fit mx-5 text-[var(--text-primary)]" href="/dashboard">
                     <Image
                         alt="Care Sync"
                         className="h-auto"

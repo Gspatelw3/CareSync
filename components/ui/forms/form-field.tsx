@@ -8,9 +8,10 @@ type FormFieldProps = {
   label: string;
   value?: string;
   placeholder?: string;
-  type?: "text" | "select" | "textarea" | "number" | "date";
+  type?: "text" | "select" | "textarea" | "number" | "date" | "tel" | "email";
   options?: { label: string; value: string }[];
   onChange?: (value: string) => void;
+  error?: string;
 };
 
 const selectStyles = {
@@ -100,6 +101,7 @@ export function FormField({
   type = "text",
   options,
   onChange: externalOnChange,
+  error,
 }: FormFieldProps) {
   const id = label.toLowerCase().replace(/\s+/g, "-");
 
@@ -125,9 +127,13 @@ export function FormField({
       >
         {label}
       </label>
+      {error && (
+        <p className="mb-1.5 text-xs text-red-600 dark:text-red-400">{error}</p>
+      )}
       {type === "select" && options ? (
         <Select
           inputId={id}
+          instanceId={id}
           options={options}
           placeholder={`Select ${label.toLowerCase()}...`}
           value={value ? options.find((o) => o.value === value) : null}

@@ -6,7 +6,7 @@ import { TOAST } from "@/lib/config";
 type Toast = {
   id: string;
   message: string;
-  type: "success" | "info" | "warning";
+  type: "success" | "info" | "warning" | "error";
 };
 
 type ToastContextType = {
@@ -41,6 +41,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 t.type === "success" && "border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-300",
                 t.type === "info" && "border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300",
                 t.type === "warning" && "border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-300",
+                t.type === "error" && "border-red-200 text-red-700 dark:border-red-800 dark:text-red-300",
               ].filter(Boolean).join(" ")}
             >
               {t.message}

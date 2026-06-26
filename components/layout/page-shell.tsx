@@ -4,13 +4,14 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 type PageShellProps = {
     activeHref: string;
     children: ReactNode;
+    onNavigate?: (href: string) => void;
 };
 
-export function PageShell({ activeHref, children }: PageShellProps) {
+export function PageShell({ activeHref, children, onNavigate }: PageShellProps) {
     return (
         <main className="min-h-screen bg-[var(--care-surface)] text-[var(--text-primary)]">
             <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-                <AppSidebar activeHref={activeHref} />
+                <AppSidebar activeHref={activeHref} onNavigate={onNavigate} />
                 <section className="px-4 py-5 sm:px-6 lg:px-8 lg:h-screen overflow-y-auto">
                     {children}
                 </section>
