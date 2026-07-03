@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type ButtonSize = "xs" | "sm" | "md" | "lg" | "link";
@@ -6,6 +6,8 @@ type ButtonSize = "xs" | "sm" | "md" | "lg" | "link";
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  icon?: ReactNode;
+  isLoading?: boolean;
 };
 
 const baseClasses =
@@ -35,6 +37,10 @@ export function Button({
   size = "md",
   type = "button",
   variant = "primary",
+  icon,
+  isLoading = false,
+  children,
+  disabled,
   ...props
 }: ButtonProps) {
   return (
@@ -48,7 +54,14 @@ export function Button({
         .filter(Boolean)
         .join(" ")}
       type={type}
+      disabled={disabled || isLoading}
       {...props}
-    />
+    >
+      {isLoading && (
+        <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      )}
+      {!isLoading && icon && <span className="flex-shrink-0">{icon}</span>}
+      {children}
+    </button>
   );
 }

@@ -1,37 +1,157 @@
-import type { Metadata } from "next";
+"use client";
+
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
-import { DataTable } from "@/components/data-display/data-table";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { Plus } from "lucide-react";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
-import { SearchInput } from "@/components/ui/search-input";
 import { ActionModal } from "@/components/ui/action-modal";
-import { FormField, FormSection } from "@/components/ui/forms/form-field";
-
-export const metadata: Metadata = {
-  title: "Doctors | Care Sync",
-};
-
-const doctors = [
-  { id: "D-042", name: "Dr. Kavya Rao", specialization: "Cardiology", department: "Cardiology", patients: 184, schedule: "Mon–Fri 9 AM–5 PM", status: "On duty", phone: "+91 99887 76655" },
-  { id: "D-041", name: "Dr. Neil Shah", specialization: "Orthopedics", department: "Orthopedics", patients: 127, schedule: "Mon–Sat 10 AM–6 PM", status: "On duty", phone: "+91 88776 65544" },
-  { id: "D-040", name: "Dr. Amina Khan", specialization: "General Medicine", department: "General", patients: 210, schedule: "Mon–Fri 8 AM–4 PM", status: "On duty", phone: "+91 77665 54433" },
-  { id: "D-039", name: "Dr. Amit Verma", specialization: "Neurology", department: "Neurology", patients: 96, schedule: "Tue–Sat 10 AM–7 PM", status: "On leave", phone: "+91 66554 43322" },
-  { id: "D-038", name: "Dr. Sneha Kapoor", specialization: "Pediatrics", department: "Pediatrics", patients: 152, schedule: "Mon–Fri 9 AM–5 PM", status: "On duty", phone: "+91 55443 32211" },
-  { id: "D-037", name: "Dr. Priya Mehta", specialization: "Obstetrics", department: "Obstetrics", patients: 138, schedule: "Mon–Sat 9 AM–4 PM", status: "On duty", phone: "+91 44332 21100" },
-  { id: "D-036", name: "Dr. Rajesh Gupta", specialization: "Pulmonology", department: "Respiratory", patients: 74, schedule: "Wed–Sun 10 AM–6 PM", status: "On duty", phone: "+91 33221 10099" },
-  { id: "D-035", name: "Dr. Sunita Reddy", specialization: "Dermatology", department: "Dermatology", patients: 89, schedule: "Mon–Fri 11 AM–7 PM", status: "On leave", phone: "+91 22110 09988" },
-];
-
-const stats = [
-  { label: "Total Doctors", value: "186", delta: "42 on duty", detail: "14 departments covered" },
-  { label: "On Duty Now", value: "42", delta: "6 in surgery", detail: "28 in consultations" },
-  { label: "On Leave", value: "8", delta: "3 sick leave", detail: "5 planned leave" },
-  { label: "Avg. Patients/Day", value: "24", delta: "−3 vs. last month", detail: "per doctor" },
-];
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useDoctorStore } from "@/lib/stores";
+import { initializeMockDoctors } from "@/lib/stores/use-doctor-store";
+import { DoctorForm } from "@/components/doctors/doctor-form";
+import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
+import { useToast } from "@/lib/use-toast";
+import { useEffect, useState } from "react";
+import type { Doctor } from "@/types";
 
 export default function DoctorsPage() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [doctorToDelete, setDoctorToDelete] = useState<string | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
+  
+  const { 
+    doctors, 
+    getFilteredDoctors, 
+    getPaginatedDoctors, 
+    deleteDoctor, 
+    bulkDelete,
+    bulkUpdateStatus,
+    searchQuery,
+    setSearchQuery,
+    filterStatus,
+    filterDepartment,
+    setFilterStatus,
+    setFilterDepartment
+  } = useDoctorStore();
+  
+  const { addToast } = useToast();
+
+  // Initialize store with mock data
+  useEffect(() => {
+    initializeMockDoctors();
+  }, []);
+
+  const filteredDoctors = getFilteredDoctors();
+  const paginatedDoctors = getPaginatedDoctors();
+
+  // Calculate dynamic stats from current data
+  const totalDoctors = doctors.length;
+  const onDutyCount = doctors.filter(d => d.status === "On duty").length;
+  const onLeaveCount = doctors.filter(d => d.status === "On leave").length;
+  const offDutyCount = doctors.filter(d => d.status === "Off duty").length;
+  const availableCount = doctors.filter(d => d.status === "Available").length;
+  const avgPatientsPerDoctor = totalDoctors > 0 
+    ? Math.round(doctors.reduce((sum, d) => sum + d.patients, 0) / totalDoctors) 
+    : 0;
+
+  const stats = [
+    { 
+      label: "Total Doctors", 
+      value: totalDoctors.toString(), 
+      delta: `${onDutyCount} on duty`, 
+      detail: `${doctors.length > 0 ? new Set(doctors.map(d => d.department)).size : 0} departments covered` 
+    },
+    { 
+      label: "On Duty Now", 
+      value: onDutyCount.toString(), 
+      delta: `${availableCount} available`, 
+      detail: `${offDutyCount} off duty` 
+    },
+    { 
+      label: "On Leave", 
+      value: onLeaveCount.toString(), 
+      delta: "Currently away", 
+      detail: "Will return soon" 
+    },
+    { 
+      label: "Avg. Patients", 
+      value: avgPatientsPerDoctor.toString(), 
+      delta: "per doctor", 
+      detail: "Total patient load" 
+    },
+  ];
+
+  const handleEdit = (doctor: Doctor) => {
+    setEditingDoctor(doctor);
+  };
+
+  const handleDelete = (id: string) => {
+    setDoctorToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (doctorToDelete) {
+      deleteDoctor(doctorToDelete);
+      addToast("Doctor deleted successfully", "success");
+      setDoctorToDelete(null);
+    }
+  };
+
+  const handleBulkDelete = (ids: string[]) => {
+    setIdsToDelete(ids);
+    setBulkDeleteConfirmOpen(true);
+  };
+
+  const confirmBulkDelete = () => {
+    bulkDelete(idsToDelete);
+    addToast(`${idsToDelete.length} doctors deleted successfully`, "success");
+    setIdsToDelete([]);
+  };
+
+  const handleBulkStatusUpdate = (ids: string[], status: string) => {
+    // TODO: Replace with API call
+    bulkUpdateStatus(ids, status as Doctor["status"]);
+    addToast(`Updated ${ids.length} doctors to ${status}`, "success");
+  };
+
+  const columns = [
+    { key: "id", label: "ID", sortable: true },
+    { key: "name", label: "Name", sortable: true },
+    { key: "specialization", label: "Specialization", sortable: true },
+    { key: "department", label: "Department", sortable: true },
+    { key: "patients", label: "Patients", sortable: true },
+    { key: "schedule", label: "Schedule", sortable: false },
+    { key: "status", label: "Status", sortable: true },
+    { key: "phone", label: "Phone", sortable: false },
+    { key: "email", label: "Email", sortable: false },
+    { key: "actions", label: "Actions", sortable: false },
+  ];
+
+  const statusFilterOptions = [
+    { label: "All Status", value: "all" },
+    { label: "On Duty", value: "On duty" },
+    { label: "Off Duty", value: "Off duty" },
+    { label: "On Leave", value: "On leave" },
+    { label: "Available", value: "Available" },
+  ];
+
+  const departmentFilterOptions = [
+    { label: "All Departments", value: "all" },
+    { label: "Cardiology", value: "Cardiology" },
+    { label: "Orthopedics", value: "Orthopedics" },
+    { label: "General", value: "General" },
+    { label: "Neurology", value: "Neurology" },
+    { label: "Pediatrics", value: "Pediatrics" },
+    { label: "Obstetrics", value: "Obstetrics" },
+    { label: "Respiratory", value: "Respiratory" },
+    { label: "Dermatology", value: "Dermatology" },
+  ];
+
   return (
     <PageShell activeHref="/doctors">
       <PageHeader
@@ -39,75 +159,13 @@ export default function DoctorsPage() {
         title="Doctors"
         description="Doctor directory, profiles, department coverage, and schedule management."
         actions={
-          <>
-            <SearchInput placeholder="Search doctors..." />
-            <ActionModal
-              title="Add Doctor"
-              subtitle="Register a new doctor in the system."
-              confirmLabel="Add doctor"
-              trigger={
-                <ActionButton icon={<Plus className="size-4" />} message="">
-                  Add doctor
-                </ActionButton>
-              }
-            >
-              <FormSection title="Personal Information">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField label="First name" placeholder="e.g. Kavya" />
-                  <FormField label="Last name" placeholder="e.g. Rao" />
-                </div>
-                <FormField label="Phone number" placeholder="+91 98765 43210" />
-                <FormField label="Email" placeholder="kavya.rao@caresync.com" />
-              </FormSection>
-              <FormSection title="Professional Details">
-                <FormField
-                  label="Specialization"
-                  type="select"
-                  options={[
-                    { label: "Cardiology", value: "cardiology" },
-                    { label: "Orthopedics", value: "orthopedics" },
-                    { label: "General Medicine", value: "general" },
-                    { label: "Neurology", value: "neurology" },
-                    { label: "Pediatrics", value: "pediatrics" },
-                    { label: "Obstetrics", value: "obstetrics" },
-                    { label: "Pulmonology", value: "pulmonology" },
-                    { label: "Dermatology", value: "dermatology" },
-                  ]}
-                />
-                <FormField
-                  label="Department"
-                  type="select"
-                  options={[
-                    { label: "Cardiology", value: "cardiology" },
-                    { label: "Orthopedics", value: "orthopedics" },
-                    { label: "General", value: "general" },
-                    { label: "Neurology", value: "neurology" },
-                    { label: "Pediatrics", value: "pediatrics" },
-                    { label: "Obstetrics", value: "obstetrics" },
-                    { label: "Respiratory", value: "respiratory" },
-                    { label: "Dermatology", value: "dermatology" },
-                  ]}
-                />
-                <FormField label="License number" placeholder="e.g. MCI-2024-0042" />
-              </FormSection>
-              <FormSection title="Schedule">
-                <FormField
-                  label="Working days"
-                  type="select"
-                  options={[
-                    { label: "Mon–Fri", value: "weekdays" },
-                    { label: "Mon–Sat", value: "weekdays-sat" },
-                    { label: "Tue–Sat", value: "tue-sat" },
-                    { label: "Wed–Sun", value: "wed-sun" },
-                  ]}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField label="Start time" type="text" placeholder="9 AM" />
-                  <FormField label="End time" type="text" placeholder="5 PM" />
-                </div>
-              </FormSection>
-            </ActionModal>
-          </>
+          <ActionButton 
+            icon={<Plus className="size-4" />} 
+            message=""
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            Add doctor
+          </ActionButton>
         }
       />
 
@@ -119,26 +177,127 @@ export default function DoctorsPage() {
 
       <div className="mt-6">
         <Card title="Doctor Directory" description="All registered doctors and their schedules.">
-          <DataTable headers={["ID", "Name", "Specialization", "Department", "Patients", "Schedule", "Status", "Contact"]}>
-            {doctors.map((d) => (
-              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={d.id}>
-                <td className="px-5 py-4 font-semibold text-[var(--care-primary)]">{d.id}</td>
-                <td className="px-5 py-4 text-[var(--text-primary)] font-medium">{d.name}</td>
-                <td className="px-5 py-4 text-[var(--text-secondary)]">{d.specialization}</td>
-                <td className="px-5 py-4 text-[var(--text-secondary)]">{d.department}</td>
-                <td className="px-5 py-4 text-[var(--text-secondary)]">{d.patients}</td>
-                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{d.schedule}</td>
-                <td className="px-5 py-4">
-                  <StatusBadge variant={d.status === "On leave" ? "warning" : "default"}>
-                    {d.status}
-                  </StatusBadge>
-                </td>
-                <td className="px-5 py-4 text-[var(--text-secondary)] text-xs">{d.phone}</td>
-              </tr>
-            ))}
-          </DataTable>
+          <EnhancedDataTable
+            columns={columns}
+            data={paginatedDoctors}
+            getRowId={(doctor) => doctor.id}
+            renderCell={(doctor, column) => {
+              switch (column.key) {
+                case "id":
+                  return <span className="font-semibold text-[var(--care-primary)] whitespace-nowrap">{doctor.id}</span>;
+                case "name":
+                  return <span className="text-[var(--text-primary)] font-medium whitespace-nowrap">{doctor.name}</span>;
+                case "status":
+                  const statusVariant = 
+                    doctor.status === "On leave" ? "warning" :
+                    doctor.status === "Off duty" ? "danger" :
+                    doctor.status === "Available" ? "info" : "default";
+                  return (
+                    <div className="whitespace-nowrap">
+                      <StatusBadge variant={statusVariant}>
+                        {doctor.status}
+                      </StatusBadge>
+                    </div>
+                  );
+                case "phone":
+                  return <span className="text-[var(--text-secondary)] whitespace-nowrap">{doctor.phone}</span>;
+                case "email":
+                  return <span className="text-[var(--text-secondary)]">{doctor.email}</span>;
+                case "actions":
+                  return (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(doctor);
+                        }}
+                        className="rounded-md p-1.5 cursor-pointer text-[var(--care-primary)] hover:bg-[var(--care-primary)]/10 transition-colors"
+                        title="Edit"
+                      >
+                        <Edit2 className="size-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(doctor.id);
+                        }}
+                        className="rounded-md p-1.5 cursor-pointer text-red-400 hover:bg-red-400/10 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  );
+                default:
+                  return <span className="text-[var(--text-secondary)]">{String(doctor[column.key as keyof Doctor] || "")}</span>;
+              }
+            }}
+            searchPlaceholder="Search by name, ID, department, or specialization..."
+            filterOptions={statusFilterOptions}
+            currentFilter={filterStatus}
+            onFilterChange={setFilterStatus}
+            departmentFilterOptions={departmentFilterOptions}
+            currentDepartmentFilter={filterDepartment}
+            onDepartmentFilterChange={setFilterDepartment}
+            onBulkDelete={handleBulkDelete}
+            onBulkStatusUpdate={handleBulkStatusUpdate}
+            emptyMessage="No doctors found"
+          />
         </Card>
       </div>
+
+      {/* Add Doctor Modal */}
+      <ActionModal
+        title="Add Doctor"
+        subtitle="Register a new doctor in the system."
+        confirmLabel="Add doctor"
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        trigger={<div />}
+        showFooter={false}
+      >
+        <DoctorForm onClose={() => setIsAddModalOpen(false)} />
+      </ActionModal>
+
+      {/* Edit Doctor Modal */}
+      <ActionModal
+        title="Edit Doctor"
+        subtitle="Update doctor information."
+        confirmLabel="Update doctor"
+        open={!!editingDoctor}
+        onOpenChange={(open) => !open && setEditingDoctor(null)}
+        trigger={<div />}
+        showFooter={false}
+      >
+        {editingDoctor && (
+          <DoctorForm 
+            doctor={editingDoctor} 
+            onClose={() => setEditingDoctor(null)}
+          />
+        )}
+      </ActionModal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Doctor"
+        description="Are you sure you want to delete this doctor? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        variant="danger"
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={bulkDeleteConfirmOpen}
+        onOpenChange={setBulkDeleteConfirmOpen}
+        title="Delete Multiple Doctors"
+        description={`Are you sure you want to delete ${idsToDelete.length} doctors? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        onConfirm={confirmBulkDelete}
+        variant="danger"
+      />
     </PageShell>
   );
 }

@@ -15,6 +15,7 @@ import {
     LogOut,
     Moon,
     Sun,
+    Bell,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,6 +31,7 @@ const navigationItems = [
     { label: "Laboratory", href: "/laboratory", icon: FlaskConical },
     { label: "Billing", href: "/billing", icon: Wallet },
     { label: "Reports", href: "/reports", icon: BarChart3 },
+    { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Settings", href: "/settings", icon: Settings },
 ] satisfies {
     label: string;

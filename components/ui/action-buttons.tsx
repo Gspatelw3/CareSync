@@ -10,15 +10,16 @@ type ActionButtonProps = {
   type?: "success" | "info" | "warning";
   className?: string;
   icon?: ReactNode;
+  onClick?: () => void;
 };
 
-export function ActionButton({ children, message, type = "success", className, icon }: ActionButtonProps) {
+export function ActionButton({ children, message, type = "success", className, icon, onClick }: ActionButtonProps) {
   const { addToast } = useToast();
   return (
     <Button
       className={`w-full sm:w-auto ${className ?? ""}`}
       size="sm"
-      onClick={message ? () => addToast(message, type) : undefined}
+      onClick={onClick || (message ? () => addToast(message, type) : undefined)}
     >
       {icon}
       {children}
@@ -31,16 +32,17 @@ type SecondaryButtonProps = {
   message?: string;
   icon?: ReactNode;
   className?: string;
+  onClick?: () => void;
 };
 
-export function SecondaryButton({ children, message, icon, className }: SecondaryButtonProps) {
+export function SecondaryButton({ children, message, icon, className, onClick }: SecondaryButtonProps) {
   const { addToast } = useToast();
   return (
     <Button
       variant="secondary"
       className={`w-full sm:w-auto ${className ?? ""}`}
       size="sm"
-      onClick={message ? () => addToast(message, "info") : undefined}
+      onClick={onClick || (message ? () => addToast(message, "info") : undefined)}
     >
       {icon}
       {children}

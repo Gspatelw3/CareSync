@@ -1,42 +1,100 @@
-import type { Metadata } from "next";
+"use client";
+
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
-import { DataTable } from "@/components/data-display/data-table";
 import { StatusBadge } from "@/components/data-display/status-badge";
 import { Calendar, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
-import { FormField, FormSection } from "@/components/ui/forms/form-field";
-
-export const metadata: Metadata = {
-  title: "Appointments | Care Sync",
-};
-
-const appointments = [
-  { time: "09:00", patient: "Ravi Kumar", care: "Cardiology", doctor: "Dr. Kavya Rao", type: "Follow-up", status: "Checked in" },
-  { time: "09:30", patient: "Neha Joshi", care: "Dermatology", doctor: "Dr. Sunita Reddy", type: "Consultation", status: "Waiting" },
-  { time: "10:00", patient: "Mohan Das", care: "Orthopedics", doctor: "Dr. Neil Shah", type: "Surgery prep", status: "Confirmed" },
-  { time: "10:30", patient: "Sita Verma", care: "General", doctor: "Dr. Amina Khan", type: "Check-up", status: "Checked in" },
-  { time: "11:00", patient: "Aisha Patel", care: "Pediatrics", doctor: "Dr. Sneha Kapoor", type: "Vaccination", status: "Waiting" },
-  { time: "11:30", patient: "Vikram Singh", care: "Neurology", doctor: "Dr. Amit Verma", type: "Follow-up", status: "Confirmed" },
-  { time: "13:00", patient: "Lakshmi Nair", care: "Obstetrics", doctor: "Dr. Priya Mehta", type: "Check-up", status: "Confirmed" },
-  { time: "14:00", patient: "Deepak Kumar", care: "Orthopedics", doctor: "Dr. Neil Shah", type: "Physiotherapy", status: "Sample due" },
-  { time: "15:00", patient: "Priya Iyer", care: "Cardiology", doctor: "Dr. Kavya Rao", type: "ECG", status: "Confirmed" },
-  { time: "16:00", patient: "Arun Mehta", care: "Pulmonology", doctor: "Dr. Rajesh Gupta", type: "Consultation", status: "Waiting" },
-];
-
-const stats = [
-  { label: "Today's Appointments", value: "324", delta: "71 pending", detail: "89 completed check-ins" },
-  { label: "Checked In", value: "42", delta: "12 in waiting", detail: "avg. 14 min wait" },
-  { label: "Cancelled Today", value: "8", delta: "3 rescheduled", detail: "5 no-shows" },
-  { label: "Next Week", value: "418", delta: "24 open slots", detail: "89% booked" },
-];
-
-const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const weekSlots = [312, 298, 324, 287, 341, 156, 89];
-const weekMax = 360;
+import { useAppointmentStore } from "@/lib/stores";
+import { initializeMockAppointments } from "@/lib/stores/use-appointment-store";
+import { AppointmentForm } from "@/components/appointments/appointment-form";
+import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
+import { useToast } from "@/lib/use-toast";
+import { useEffect, useState } from "react";
+import type { Appointment } from "@/types";
 
 export default function AppointmentsPage() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  
+  const { 
+    appointments, 
+    getFilteredAppointments, 
+    getPaginatedAppointments, 
+    deleteAppointment, 
+    bulkDelete,
+    searchQuery,
+    setSearchQuery,
+    filterStatus,
+    filterType,
+    setFilterStatus,
+    setFilterType
+  } = useAppointmentStore();
+  
+  const { addToast } = useToast();
+
+  // Initialize store with mock data
+  useEffect(() => {
+    initializeMockAppointments();
+  }, []);
+
+  const filteredAppointments = getFilteredAppointments();
+  const paginatedAppointments = getPaginatedAppointments();
+
+  const stats = [
+    { label: "Today's Appointments", value: appointments.length.toString(), delta: `${appointments.filter(a => a.status === "Waiting").length} pending`, detail: `${appointments.filter(a => a.status === "Checked in").length} completed check-ins` },
+    { label: "Checked In", value: appointments.filter(a => a.status === "Checked in").length.toString(), delta: "12 in waiting", detail: "avg. 14 min wait" },
+    { label: "Cancelled Today", value: "0", delta: "0 rescheduled", detail: "0 no-shows" },
+    { label: "Next Week", value: "418", delta: "24 open slots", detail: "89% booked" },
+  ];
+
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this appointment?")) {
+      deleteAppointment(id);
+      addToast("Appointment deleted successfully", "success");
+    }
+  };
+
+  const handleBulkDelete = (ids: string[]) => {
+    if (confirm(`Are you sure you want to delete ${ids.length} appointments?`)) {
+      bulkDelete(ids);
+      addToast(`${ids.length} appointments deleted successfully`, "success");
+    }
+  };
+
+  const columns = [
+    { key: "time", label: "Time", sortable: true },
+    { key: "patient", label: "Patient", sortable: true },
+    { key: "care", label: "Care", sortable: true },
+    { key: "doctor", label: "Doctor", sortable: true },
+    { key: "type", label: "Type", sortable: true },
+    { key: "status", label: "Status", sortable: true },
+  ];
+
+  const statusFilterOptions = [
+    { label: "All Status", value: "all" },
+    { label: "Checked in", value: "Checked in" },
+    { label: "Waiting", value: "Waiting" },
+    { label: "Confirmed", value: "Confirmed" },
+    { label: "Sample due", value: "Sample due" },
+  ];
+
+  const typeFilterOptions = [
+    { label: "All Types", value: "all" },
+    { label: "Consultation", value: "Consultation" },
+    { label: "Follow-up", value: "Follow-up" },
+    { label: "Check-up", value: "Check-up" },
+    { label: "Surgery prep", value: "Surgery prep" },
+    { label: "Vaccination", value: "Vaccination" },
+    { label: "ECG", value: "ECG" },
+    { label: "Physiotherapy", value: "Physiotherapy" },
+  ];
+
   return (
     <PageShell activeHref="/appointments">
       <PageHeader
@@ -86,82 +144,13 @@ export default function AppointmentsPage() {
                 Showing June 2026 · Dots indicate scheduled appointments · <span className="font-semibold text-[var(--care-primary)]">19 Jun</span> is today
               </p>
             </ActionModal>
-            <ActionModal
-              title="Book Appointment"
-              subtitle="Schedule a new patient appointment."
-              confirmLabel="Book appointment"
-              trigger={
-                <ActionButton icon={<Plus className="size-4" />} message="">
-                  Book appointment
-                </ActionButton>
-              }
+            <ActionButton 
+              icon={<Plus className="size-4" />} 
+              message=""
+              onClick={() => setIsAddModalOpen(true)}
             >
-              <FormSection title="Patient">
-                <FormField
-                  label="Patient name"
-                  type="select"
-                  options={[
-                    { label: "Meera Iyer", value: "P-1024" },
-                    { label: "Arjun Menon", value: "P-1023" },
-                    { label: "Priya Nair", value: "P-1022" },
-                    { label: "Rohan Das", value: "P-1021" },
-                    { label: "Sneha Patel", value: "P-1020" },
-                    { label: "Vikram Singh", value: "P-1019" },
-                    { label: "Anita Sharma", value: "P-1018" },
-                    { label: "Deepak Kumar", value: "P-1017" },
-                  ]}
-                />
-              </FormSection>
-              <FormSection title="Schedule">
-                <FormField label="Date" type="date" />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField label="Time" type="text" placeholder="e.g. 10:00" />
-                  <FormField
-                    label="Type"
-                    type="select"
-                    options={[
-                      { label: "Consultation", value: "consultation" },
-                      { label: "Follow-up", value: "followup" },
-                      { label: "Check-up", value: "checkup" },
-                      { label: "Surgery prep", value: "surgery" },
-                      { label: "Vaccination", value: "vaccination" },
-                      { label: "ECG", value: "ecg" },
-                      { label: "Physiotherapy", value: "physio" },
-                    ]}
-                  />
-                </div>
-              </FormSection>
-              <FormSection title="Care Team">
-                <FormField
-                  label="Department"
-                  type="select"
-                  options={[
-                    { label: "Cardiology", value: "cardiology" },
-                    { label: "Orthopedics", value: "orthopedics" },
-                    { label: "General", value: "general" },
-                    { label: "Neurology", value: "neurology" },
-                    { label: "Pediatrics", value: "pediatrics" },
-                    { label: "Obstetrics", value: "obstetrics" },
-                    { label: "Dermatology", value: "dermatology" },
-                    { label: "Pulmonology", value: "pulmonology" },
-                  ]}
-                />
-                <FormField
-                  label="Doctor"
-                  type="select"
-                  options={[
-                    { label: "Dr. Kavya Rao", value: "D-042" },
-                    { label: "Dr. Neil Shah", value: "D-041" },
-                    { label: "Dr. Amina Khan", value: "D-040" },
-                    { label: "Dr. Amit Verma", value: "D-039" },
-                    { label: "Dr. Sneha Kapoor", value: "D-038" },
-                    { label: "Dr. Priya Mehta", value: "D-037" },
-                    { label: "Dr. Rajesh Gupta", value: "D-036" },
-                    { label: "Dr. Sunita Reddy", value: "D-035" },
-                  ]}
-                />
-              </FormSection>
-            </ActionModal>
+              Book appointment
+            </ActionButton>
           </>
         }
       />
@@ -174,24 +163,36 @@ export default function AppointmentsPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card title="Today's Schedule" description="All appointments for today, 19 June 2026.">
-          <DataTable headers={["Time", "Patient", "Care", "Doctor", "Type", "Status"]}>
-            {appointments.map((a) => (
-              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={`${a.time}-${a.patient}`}>
-                <td className="px-5 py-4 font-semibold text-[var(--text-primary)]">{a.time}</td>
-                <td className="px-5 py-4 text-[var(--text-secondary)] font-medium">{a.patient}</td>
-                <td className="px-5 py-4 text-[var(--text-secondary)]">{a.care}</td>
-                <td className="px-5 py-4 text-[var(--text-secondary)]">{a.doctor}</td>
-                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{a.type}</td>
-                <td className="px-5 py-4">
-                  <StatusBadge
-                    variant={a.status === "Waiting" || a.status === "Sample due" ? "warning" : "default"}
-                  >
-                    {a.status}
-                  </StatusBadge>
-                </td>
-              </tr>
-            ))}
-          </DataTable>
+          <EnhancedDataTable
+            columns={columns}
+            data={paginatedAppointments}
+            getRowId={(appointment) => appointment.id}
+            renderCell={(appointment, column) => {
+              switch (column.key) {
+                case "time":
+                  return <span className="font-semibold text-[var(--text-primary)]">{appointment.time}</span>;
+                case "patient":
+                  return <span className="text-[var(--text-secondary)] font-medium">{appointment.patient}</span>;
+                case "status":
+                  return (
+                    <StatusBadge
+                      variant={appointment.status === "Waiting" || appointment.status === "Sample due" ? "warning" : "default"}
+                    >
+                      {appointment.status}
+                    </StatusBadge>
+                  );
+                default:
+                  return <span className="text-[var(--text-secondary)]">{String(appointment[column.key as keyof Appointment] || "")}</span>;
+              }
+            }}
+            searchPlaceholder="Search appointments..."
+            filterOptions={statusFilterOptions}
+            currentFilter={filterStatus}
+            onFilterChange={setFilterStatus}
+            onRowClick={handleEdit}
+            onBulkDelete={handleBulkDelete}
+            emptyMessage="No appointments found"
+          />
         </Card>
 
         <div className="space-y-6">
@@ -199,12 +200,12 @@ export default function AppointmentsPage() {
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">Weekly Volume</h2>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">Appointments by day this week.</p>
             <div className="mt-5 flex h-48 items-end gap-2 border-b border-l border-[var(--border-default)] px-1 pb-3">
-              {weekDays.map((day, i) => (
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => (
                 <div className="flex h-full flex-1 flex-col items-center justify-end gap-1.5" key={day}>
-                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">{weekSlots[i]}</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">{[312, 298, 324, 287, 341, 156, 89][i]}</span>
                   <div
                     className="care-brand-gradient-vertical w-full rounded-t-md"
-                    style={{ height: `${(weekSlots[i] / weekMax) * 100}%` }}
+                    style={{ height: `${([312, 298, 324, 287, 341, 156, 89][i] / 360) * 100}%` }}
                   />
                   <span className="text-[11px] font-medium text-[var(--text-muted)]">{day}</span>
                 </div>
@@ -235,6 +236,34 @@ export default function AppointmentsPage() {
           </section>
         </div>
       </div>
+
+      {/* Add Appointment Modal */}
+      <ActionModal
+        title="Book Appointment"
+        subtitle="Schedule a new patient appointment."
+        confirmLabel="Book appointment"
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        trigger={<div />}
+        showFooter={false}
+      >
+        <AppointmentForm onClose={() => setIsAddModalOpen(false)} />
+      </ActionModal>
+
+      {/* Edit Appointment Modal */}
+      <ActionModal
+        title="Edit Appointment"
+        subtitle="Update appointment details."
+        confirmLabel="Update appointment"
+        open={!!editingAppointment}
+        onOpenChange={(open) => !open && setEditingAppointment(null)}
+        trigger={<div />}
+        showFooter={false}
+      >
+        {editingAppointment && (
+          <AppointmentForm appointment={editingAppointment} onClose={() => setEditingAppointment(null)} />
+        )}
+      </ActionModal>
     </PageShell>
   );
 }

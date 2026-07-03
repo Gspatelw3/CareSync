@@ -23,12 +23,14 @@ export type Doctor = {
   department: string;
   patients: number;
   schedule: string;
-  status: "On duty" | "On leave";
+  status: "On duty" | "Off duty" | "On leave" | "Available";
   phone: string;
+  email: string;
 };
 
 // ── Appointment ──
 export type Appointment = {
+  id: string;
   time: string;
   patient: string;
   care: string;

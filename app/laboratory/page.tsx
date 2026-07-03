@@ -1,181 +1,116 @@
+"use client";
+
 import type { Metadata } from "next";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
-import { DataTable } from "@/components/data-display/data-table";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { Filter, Plus } from "lucide-react";
-import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
+import { Plus } from "lucide-react";
+import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
-import { FormField, FormSection } from "@/components/ui/forms/form-field";
+import { useLabStore } from "@/lib/stores";
+import { initializeMockLabTests } from "@/lib/stores/use-lab-store";
+import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
+import { useToast } from "@/lib/use-toast";
+import { useEffect, useState } from "react";
+import type { LabTestRequest } from "@/types";
 
 export const metadata: Metadata = {
   title: "Laboratory | Care Sync",
 };
 
-const testRequests = [
-  { id: "LAB-341", patient: "Meera Iyer", test: "Complete Blood Count", doctor: "Dr. Kavya Rao", requested: "19 Jun 2026", priority: "Urgent", status: "Sample collected" },
-  { id: "LAB-340", patient: "Arjun Menon", test: "X-ray Left Knee", doctor: "Dr. Neil Shah", requested: "19 Jun 2026", priority: "Normal", status: "Awaiting sample" },
-  { id: "LAB-339", patient: "Sita Verma", test: "Blood Culture", doctor: "Dr. Amina Khan", requested: "18 Jun 2026", priority: "Urgent", status: "In progress" },
-  { id: "LAB-338", patient: "Vikram Singh", test: "Troponin I", doctor: "Dr. Kavya Rao", requested: "18 Jun 2026", priority: "STAT", status: "Report ready" },
-  { id: "LAB-337", patient: "Rohan Das", test: "MRI Brain", doctor: "Dr. Amit Verma", requested: "17 Jun 2026", priority: "Normal", status: "Report ready" },
-  { id: "LAB-336", patient: "Aisha Patel", test: "Blood Glucose", doctor: "Dr. Sneha Kapoor", requested: "17 Jun 2026", priority: "Normal", status: "Reviewed" },
-  { id: "LAB-335", patient: "Lakshmi Nair", test: "Ultrasound", doctor: "Dr. Priya Mehta", requested: "16 Jun 2026", priority: "Normal", status: "Reviewed" },
-  { id: "LAB-334", patient: "Deepak Kumar", test: "Lipid Profile", doctor: "Dr. Neil Shah", requested: "16 Jun 2026", priority: "Normal", status: "Awaiting sample" },
-];
-
-const stats = [
-  { label: "Total Requests", value: "187", delta: "31 pending", detail: "this week" },
-  { label: "Awaiting Collection", value: "24", delta: "8 urgent", detail: "avg. 45 min delay" },
-  { label: "In Progress", value: "42", delta: "12 STAT", detail: "avg. 3.2 hr turnaround" },
-  { label: "Reports Ready", value: "28", delta: "14 unread", detail: "awaiting review" },
-];
-
-const reportStatus = (status: string) => {
-  if (status === "STAT") return "danger";
-  if (status === "Urgent") return "warning";
-  return "info";
-};
-
-const testStatus = (status: string) => {
-  if (status === "Report ready") return "info";
-  if (status === "Awaiting sample") return "warning";
-  if (status === "In progress") return "default";
-  if (status === "Sample collected") return "default";
-  return "default";
-};
-
-const departments = [
-  { name: "Hematology", tests: 42, pending: 8, turnaround: "2.4 hrs" },
-  { name: "Microbiology", tests: 28, pending: 6, turnaround: "4.8 hrs" },
-  { name: "Biochemistry", tests: 56, pending: 12, turnaround: "1.8 hrs" },
-  { name: "Radiology", tests: 38, pending: 5, turnaround: "3.1 hrs" },
-  { name: "Pathology", tests: 23, pending: 3, turnaround: "5.2 hrs" },
-];
-
 export default function LaboratoryPage() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingTest, setEditingTest] = useState<LabTestRequest | null>(null);
+  
+  const { 
+    labTests, 
+    getFilteredLabTests, 
+    getPaginatedLabTests, 
+    deleteLabTest, 
+    bulkDelete,
+    searchQuery,
+    setSearchQuery,
+    filterStatus,
+    filterPriority,
+    setFilterStatus,
+    setFilterPriority
+  } = useLabStore();
+  
+  const { addToast } = useToast();
+
+  // Initialize store with mock data
+  useEffect(() => {
+    initializeMockLabTests();
+  }, []);
+
+  const filteredTests = getFilteredLabTests();
+  const paginatedTests = getPaginatedLabTests();
+
+  const stats = [
+    { label: "Total Tests", value: labTests.length.toString(), delta: `${labTests.filter(t => t.status === "In progress").length} in progress`, detail: "Today" },
+    { label: "Pending", value: labTests.filter(t => t.status === "Awaiting sample" || t.status === "Sample collected").length.toString(), delta: "Awaiting processing", detail: "Sample collection" },
+    { label: "Completed", value: labTests.filter(t => t.status === "Report ready" || t.status === "Reviewed").length.toString(), delta: "Ready for review", detail: "Reports generated" },
+    { label: "STAT Tests", value: labTests.filter(t => t.priority === "STAT").length.toString(), delta: "Urgent priority", detail: "Immediate attention" },
+  ];
+
+  const handleEdit = (test: LabTestRequest) => {
+    setEditingTest(test);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this lab test request?")) {
+      deleteLabTest(id);
+      addToast("Lab test deleted successfully", "success");
+    }
+  };
+
+  const handleBulkDelete = (ids: string[]) => {
+    if (confirm(`Are you sure you want to delete ${ids.length} lab tests?`)) {
+      bulkDelete(ids);
+      addToast(`${ids.length} lab tests deleted successfully`, "success");
+    }
+  };
+
+  const columns = [
+    { key: "id", label: "ID", sortable: true },
+    { key: "patient", label: "Patient", sortable: true },
+    { key: "test", label: "Test", sortable: true },
+    { key: "doctor", label: "Doctor", sortable: true },
+    { key: "requested", label: "Requested", sortable: true },
+    { key: "priority", label: "Priority", sortable: true },
+    { key: "status", label: "Status", sortable: true },
+  ];
+
+  const statusFilterOptions = [
+    { label: "All Status", value: "all" },
+    { label: "Awaiting sample", value: "Awaiting sample" },
+    { label: "Sample collected", value: "Sample collected" },
+    { label: "In progress", value: "In progress" },
+    { label: "Report ready", value: "Report ready" },
+    { label: "Reviewed", value: "Reviewed" },
+  ];
+
+  const priorityFilterOptions = [
+    { label: "All Priority", value: "all" },
+    { label: "STAT", value: "STAT" },
+    { label: "Urgent", value: "Urgent" },
+    { label: "Normal", value: "Normal" },
+  ];
+
   return (
     <PageShell activeHref="/laboratory">
       <PageHeader
-        eyebrow="Diagnostics"
+        eyebrow="Laboratory Services"
         title="Laboratory"
-        description="Test requests, sample collection, report uploads, and review queues."
+        description="Lab test requests, sample tracking, and report management."
         actions={
-          <>
-            <ActionModal
-              title="Filter by Department"
-              subtitle="Filter lab requests by department and priority."
-              confirmLabel="Apply filters"
-              trigger={
-                <SecondaryButton className="w-full sm:w-auto" icon={<Filter className="size-4" />} message="">
-                  Filter by department
-                </SecondaryButton>
-              }
-            >
-              <FormSection title="Department">
-                <FormField
-                  label="Lab department"
-                  type="select"
-                  options={[
-                    { label: "All departments", value: "all" },
-                    { label: "Hematology", value: "hematology" },
-                    { label: "Microbiology", value: "microbiology" },
-                    { label: "Biochemistry", value: "biochemistry" },
-                    { label: "Radiology", value: "radiology" },
-                    { label: "Pathology", value: "pathology" },
-                  ]}
-                />
-              </FormSection>
-              <FormSection title="Priority">
-                <FormField
-                  label="Priority level"
-                  type="select"
-                  options={[
-                    { label: "All priorities", value: "all" },
-                    { label: "STAT", value: "stat" },
-                    { label: "Urgent", value: "urgent" },
-                    { label: "Normal", value: "normal" },
-                  ]}
-                />
-              </FormSection>
-              <FormSection title="Status">
-                <FormField
-                  label="Test status"
-                  type="select"
-                  options={[
-                    { label: "All statuses", value: "all" },
-                    { label: "Awaiting sample", value: "awaiting" },
-                    { label: "Sample collected", value: "collected" },
-                    { label: "In progress", value: "progress" },
-                    { label: "Report ready", value: "ready" },
-                    { label: "Reviewed", value: "reviewed" },
-                  ]}
-                />
-              </FormSection>
-            </ActionModal>
-            <ActionModal
-              title="Create Test Request"
-              subtitle="Submit a new laboratory test request."
-              confirmLabel="Create request"
-              trigger={
-                <ActionButton icon={<Plus className="size-4" />} message="">
-                  Create test request
-                </ActionButton>
-              }
-            >
-              <FormSection title="Patient & Doctor">
-                <FormField
-                  label="Patient"
-                  type="select"
-                  options={[
-                    { label: "Meera Iyer", value: "P-1024" },
-                    { label: "Arjun Menon", value: "P-1023" },
-                    { label: "Sita Verma", value: "P-1022" },
-                    { label: "Vikram Singh", value: "P-1019" },
-                    { label: "Rohan Das", value: "P-1021" },
-                    { label: "Aisha Patel", value: "P-1020" },
-                  ]}
-                />
-                <FormField
-                  label="Referring doctor"
-                  type="select"
-                  options={[
-                    { label: "Dr. Kavya Rao", value: "D-042" },
-                    { label: "Dr. Neil Shah", value: "D-041" },
-                    { label: "Dr. Amina Khan", value: "D-040" },
-                    { label: "Dr. Amit Verma", value: "D-039" },
-                    { label: "Dr. Sneha Kapoor", value: "D-038" },
-                    { label: "Dr. Priya Mehta", value: "D-037" },
-                  ]}
-                />
-              </FormSection>
-              <FormSection title="Test Details">
-                <FormField label="Test name" placeholder="e.g. Complete Blood Count" />
-                <FormField
-                  label="Department"
-                  type="select"
-                  options={[
-                    { label: "Hematology", value: "hematology" },
-                    { label: "Microbiology", value: "microbiology" },
-                    { label: "Biochemistry", value: "biochemistry" },
-                    { label: "Radiology", value: "radiology" },
-                    { label: "Pathology", value: "pathology" },
-                  ]}
-                />
-                <FormField
-                  label="Priority"
-                  type="select"
-                  options={[
-                    { label: "Normal", value: "normal" },
-                    { label: "Urgent", value: "urgent" },
-                    { label: "STAT", value: "stat" },
-                  ]}
-                />
-              </FormSection>
-              <FormSection title="Notes">
-                <FormField label="Clinical notes" type="textarea" placeholder="Any relevant clinical information..." />
-              </FormSection>
-            </ActionModal>
-          </>
+          <ActionButton 
+            icon={<Plus className="size-4" />} 
+            message=""
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            New test request
+          </ActionButton>
         }
       />
 
@@ -185,54 +120,106 @@ export default function LaboratoryPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <Card title="Test Requests" description="All lab requests sorted by priority.">
-          <DataTable headers={["ID", "Patient", "Test", "Doctor", "Requested", "Priority", "Status"]}>
-            {testRequests.map((r) => (
-              <tr className="hover:bg-[var(--hover-bg)] cursor-pointer" key={r.id}>
-                <td className="px-5 py-4 font-semibold text-[var(--care-primary)] text-xs">{r.id}</td>
-                <td className="px-5 py-4 text-[var(--text-primary)] font-medium">{r.patient}</td>
-                <td className="px-5 py-4 text-[var(--text-secondary)]">{r.test}</td>
-                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{r.doctor}</td>
-                <td className="px-5 py-4 text-[var(--text-muted)] text-xs">{r.requested}</td>
-                <td className="px-5 py-4">
-                  <StatusBadge variant={reportStatus(r.priority)}>{r.priority}</StatusBadge>
-                </td>
-                <td className="px-5 py-4">
-                  <StatusBadge variant={testStatus(r.status)}>{r.status}</StatusBadge>
-                </td>
-              </tr>
-            ))}
-          </DataTable>
-        </Card>
-
-        <Card title="Department Summary" description="Workload by lab department.">
-          <div className="p-5">
-            <div className="grid gap-5">
-              {departments.map((d) => (
-                <div className="flex flex-col gap-2" key={d.name}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-[var(--text-primary)]">{d.name}</span>
-                    <span className="text-xs text-[var(--text-muted)]">{d.turnaround} avg.</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[var(--text-secondary)]">{d.tests} tests this week</span>
-                    <span className={d.pending > 0 ? "font-semibold text-[var(--badge-warning-text)]" : "text-[var(--text-muted)]"}>
-                      {d.pending} pending
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-[var(--border-light)]">
-                    <div
-                      className="h-2 rounded-full bg-[var(--care-primary)]"
-                      style={{ width: `${((d.tests - d.pending) / d.tests) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="mt-6">
+        <Card title="Lab Test Requests" description="All laboratory test requests and their status.">
+          <EnhancedDataTable
+            columns={columns}
+            data={paginatedTests}
+            getRowId={(test) => test.id}
+            renderCell={(test, column) => {
+              switch (column.key) {
+                case "id":
+                  return <span className="font-semibold text-[var(--care-primary)]">{test.id}</span>;
+                case "patient":
+                  return <span className="text-[var(--text-primary)] font-medium">{test.patient}</span>;
+                case "priority":
+                  return (
+                    <StatusBadge
+                      variant={test.priority === "STAT" ? "danger" : test.priority === "Urgent" ? "warning" : "default"}
+                    >
+                      {test.priority}
+                    </StatusBadge>
+                  );
+                case "status":
+                  return (
+                    <StatusBadge
+                      variant={test.status === "Report ready" || test.status === "Reviewed" ? "info" : "default"}
+                    >
+                      {test.status}
+                    </StatusBadge>
+                  );
+                default:
+                  return <span className="text-[var(--text-secondary)]">{String(test[column.key as keyof LabTestRequest] || "")}</span>;
+              }
+            }}
+            searchPlaceholder="Search lab tests..."
+            filterOptions={statusFilterOptions}
+            currentFilter={filterStatus}
+            onFilterChange={setFilterStatus}
+            onRowClick={handleEdit}
+            onBulkDelete={handleBulkDelete}
+            emptyMessage="No lab tests found"
+          />
         </Card>
       </div>
+
+      {/* Add/Edit Modal */}
+      <ActionModal
+        title={editingTest ? "Edit Test Request" : "New Lab Test Request"}
+        subtitle={editingTest ? "Update lab test details." : "Create a new lab test request."}
+        confirmLabel={editingTest ? "Update" : "Create request"}
+        open={isAddModalOpen || !!editingTest}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsAddModalOpen(false);
+            setEditingTest(null);
+          }
+        }}
+        trigger={<div />}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Patient</label>
+            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
+              <option>Vikram Singh</option>
+              <option>Sita Verma</option>
+              <option>Lakshmi Nair</option>
+              <option>Rohan Das</option>
+              <option>Aisha Patel</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Test Type</label>
+            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
+              <option>Complete Blood Count</option>
+              <option>Chest X-Ray</option>
+              <option>Blood Glucose</option>
+              <option>MRI Brain</option>
+              <option>Urine Culture</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Priority</label>
+              <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
+                <option>Normal</option>
+                <option>Urgent</option>
+                <option>STAT</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Doctor</label>
+              <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
+                <option>Dr. Kavya Rao</option>
+                <option>Dr. Neil Shah</option>
+                <option>Dr. Amina Khan</option>
+                <option>Dr. Amit Verma</option>
+                <option>Dr. Sneha Kapoor</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </ActionModal>
     </PageShell>
   );
 }

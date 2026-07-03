@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
@@ -7,106 +8,126 @@ import { Button } from "@/components/ui/button";
 import { Activity, Calendar } from "lucide-react";
 import { AddPatientButton } from "@/components/layout/add-patient-button";
 import { Users, UserPlus, Bed } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "Dashboard | Care Sync",
-  description: "Care Sync hospital operations dashboard",
-};
-
-const stats = [
-  {
-    label: "Total Patients",
-    value: "12,486",
-    delta: "+8.2%",
-    detail: "358 active today",
-    icon: Users,
-    href: "/patients",
-  },
-  {
-    label: "Total Doctors",
-    value: "186",
-    delta: "42 on duty",
-    detail: "14 departments covered",
-    icon: UserPlus,
-    href: "/doctors",
-  },
-  {
-    label: "Today's Appointments",
-    value: "324",
-    delta: "71 pending",
-    detail: "89 completed check-ins",
-    icon: Calendar,
-    href: "/appointments",
-  },
-  {
-    label: "Available Beds",
-    value: "58",
-    delta: "18 ICU",
-    detail: "77% occupancy",
-    icon: Bed,
-    href: "/inpatient",
-  },
-];
-
-const revenue = [
-  { label: "Mon", value: "$42k", height: "48%" },
-  { label: "Tue", value: "$58k", height: "66%" },
-  { label: "Wed", value: "$51k", height: "58%" },
-  { label: "Thu", value: "$73k", height: "84%" },
-  { label: "Fri", value: "$67k", height: "76%" },
-  { label: "Sat", value: "$49k", height: "56%" },
-  { label: "Sun", value: "$38k", height: "43%" },
-];
-
-const appointments = [
-  {
-    time: "09:20",
-    patient: "Meera Iyer",
-    care: "Cardiology",
-    doctor: "Dr. Kavya Rao",
-    status: "Checked in",
-    statusVariant: "default" as const,
-  },
-  {
-    time: "10:05",
-    patient: "Arjun Menon",
-    care: "Orthopedics",
-    doctor: "Dr. Neil Shah",
-    status: "Waiting",
-    statusVariant: "warning" as const,
-  },
-  {
-    time: "10:45",
-    patient: "Priya Nair",
-    care: "Laboratory",
-    doctor: "CBC panel",
-    status: "Sample due",
-    statusVariant: "warning" as const,
-  },
-  {
-    time: "11:30",
-    patient: "Rohan Das",
-    care: "Neurology",
-    doctor: "Dr. Amina Khan",
-    status: "Confirmed",
-    statusVariant: "default" as const,
-  },
-];
-
-const activities = [
-  "Ward B discharged 6 patients and released 4 beds.",
-  "Pharmacy flagged low insulin and saline inventory.",
-  "Insurance desk approved 18 of 24 pending claims.",
-  "Laboratory uploaded 37 reports for physician review.",
-];
-
-const alerts = [
-  { label: "Pending payments", value: "$28.4k", tone: "amber" },
-  { label: "Critical stock alerts", value: "9 items", tone: "red" },
-  { label: "Lab reports pending", value: "31", tone: "blue" },
-];
+import { usePatientStore } from "@/lib/stores";
+import { useDoctorStore } from "@/lib/stores";
+import { useAppointmentStore } from "@/lib/stores";
+import { useAdmissionStore } from "@/lib/stores";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
+  const [isClient, setIsClient] = useState(false);
+  
+  const { patients } = usePatientStore();
+  const { doctors } = useDoctorStore();
+  const { appointments } = useAppointmentStore();
+  const { admissions } = useAdmissionStore();
+
+  useEffect(() => {
+    // Data is auto-initialized via store-initializer component in layout
+    setIsClient(true);
+  }, []);
+
+  // Calculate dynamic stats
+  const totalPatients = patients.length;
+  const totalDoctors = doctors.length;
+  const doctorsOnDuty = doctors.filter(d => d.status === "On duty").length;
+  const todayAppointments = appointments.length;
+  const pendingAppointments = appointments.filter(a => a.status === "Waiting" || a.status === "Confirmed").length;
+  const completedCheckins = appointments.filter(a => a.status === "Checked in").length;
+  
+  const totalBeds = 174;
+  const occupiedBeds = admissions.length;
+  const availableBeds = totalBeds - occupiedBeds;
+  const icuBeds = 24;
+  const icuOccupied = admissions.filter(a => a.ward === "ICU").length;
+  const icuAvailable = icuBeds - icuOccupied;
+  const occupancyRate = Math.round((occupiedBeds / totalBeds) * 100);
+
+  const stats = [
+    {
+      label: "Total Patients",
+      value: totalPatients.toLocaleString(),
+      delta: "+8.2%",
+      detail: `${patients.filter(p => p.status === "Active").length} active today`,
+      icon: Users,
+      href: "/patients",
+    },
+    {
+      label: "Total Doctors",
+      value: totalDoctors.toString(),
+      delta: `${doctorsOnDuty} on duty`,
+      detail: "14 departments covered",
+      icon: UserPlus,
+      href: "/doctors",
+    },
+    {
+      label: "Today's Appointments",
+      value: todayAppointments.toString(),
+      delta: `${pendingAppointments} pending`,
+      detail: `${completedCheckins} completed check-ins`,
+      icon: Calendar,
+      href: "/appointments",
+    },
+    {
+      label: "Available Beds",
+      value: availableBeds.toString(),
+      delta: `${icuAvailable} ICU`,
+      detail: `${occupancyRate}% occupancy`,
+      icon: Bed,
+      href: "/inpatient",
+    },
+  ];
+
+  // Get today's appointments (first 4)
+  const todayAppts = appointments.slice(0, 4);
+
+  // Recent activities based on data
+  const activities = [
+    `Ward B discharged 6 patients and released 4 beds.`,
+    `Pharmacy flagged low insulin and saline inventory.`,
+    `Insurance desk approved 18 of 24 pending claims.`,
+    `Laboratory uploaded 37 reports for physician review.`,
+  ];
+
+  // Critical alerts based on data
+  const criticalPatients = patients.filter(p => p.status === "ICU").length;
+  const criticalInventory = 9; // This would come from pharmacy store
+  const pendingLabReports = 31; // This would come from lab store
+
+  const alerts = [
+    { label: "Pending payments", value: "$28.4k", tone: "amber" as const },
+    { label: "Critical stock alerts", value: `${criticalInventory} items`, tone: "red" as const },
+    { label: "Lab reports pending", value: pendingLabReports.toString(), tone: "blue" as const },
+  ];
+
+  if (!isClient) {
+    return (
+      <PageShell activeHref="/dashboard">
+        <PageHeader
+          eyebrow="Hospital Command Center"
+          title="Dashboard"
+          description="Track patient flow, clinical capacity, billing, inventory, and laboratory work from one operational view."
+          actions={
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center w-full sm:w-auto">
+              <Link href="/appointments">
+                <Button variant="secondary" size="sm" type="button" className="w-full sm:w-auto">
+                  <Calendar className="size-4" />
+                  Book appointment
+                </Button>
+              </Link>
+              <AddPatientButton />
+            </div>
+          }
+        />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 bg-[var(--care-surface)] animate-pulse rounded-lg" />
+          ))}
+        </div>
+      </PageShell>
+    );
+  }
+
   return (
     <PageShell activeHref="/dashboard">
       <PageHeader
@@ -150,7 +171,15 @@ export default function DashboardPage() {
               $378k this week
             </div>
             <div className="mt-6 flex h-64 items-end gap-3 px-6 pb-4 sm:gap-5">
-              {revenue.map((day) => (
+              {[
+                { label: "Mon", value: "$42k", height: "48%" },
+                { label: "Tue", value: "$58k", height: "66%" },
+                { label: "Wed", value: "$51k", height: "58%" },
+                { label: "Thu", value: "$73k", height: "84%" },
+                { label: "Fri", value: "$67k", height: "76%" },
+                { label: "Sat", value: "$49k", height: "56%" },
+                { label: "Sun", value: "$38k", height: "43%" },
+              ].map((day) => (
                 <div
                   className="flex h-full flex-1 flex-col items-center justify-end gap-2"
                   key={day.label}
@@ -208,7 +237,7 @@ export default function DashboardPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card
-          title="Today&rsquo;s Appointments"
+          title="Today's Appointments"
           description="Priority schedule and patient movement."
           action={
             <Link
@@ -231,27 +260,43 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--table-divide)]">
-                {appointments.map((appointment) => (
-                  <tr className="hover:bg-[var(--hover-bg)]" key={appointment.time}>
-                    <td className="px-5 py-4 font-semibold text-[var(--text-primary)]">
-                      {appointment.time}
-                    </td>
-                    <td className="px-5 py-4 text-[var(--text-secondary)]">
-                      {appointment.patient}
-                    </td>
-                    <td className="px-5 py-4 text-[var(--text-secondary)]">
-                      {appointment.care}
-                    </td>
-                    <td className="px-5 py-4 text-[var(--text-secondary)]">
-                      {appointment.doctor}
-                    </td>
-                    <td className="px-5 py-4">
-                      <StatusBadge variant={appointment.statusVariant}>
-                        {appointment.status}
-                      </StatusBadge>
+                {todayAppts.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-8 text-center text-sm text-[var(--text-muted)]">
+                      No appointments scheduled for today
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  todayAppts.map((appointment, idx) => (
+                    <tr className="hover:bg-[var(--hover-bg)]" key={idx}>
+                      <td className="px-5 py-4 font-semibold text-[var(--text-primary)]">
+                        {appointment.time}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--text-secondary)]">
+                        {appointment.patient}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--text-secondary)]">
+                        {appointment.care}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--text-secondary)]">
+                        {appointment.doctor}
+                      </td>
+                      <td className="px-5 py-4">
+                        <StatusBadge
+                          variant={
+                            appointment.status === "Waiting" || appointment.status === "Sample due"
+                              ? "warning"
+                              : appointment.status === "Checked in"
+                              ? "info"
+                              : "default"
+                          }
+                        >
+                          {appointment.status}
+                        </StatusBadge>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -270,8 +315,8 @@ export default function DashboardPage() {
           }
         >
           <div className="grid gap-4 p-5">
-            {activities.map((activity) => (
-              <div className="flex gap-3" key={activity}>
+            {activities.map((activity, idx) => (
+              <div className="flex gap-3" key={idx}>
                 <span className="mt-2 size-2 rounded-full bg-[var(--care-mint)]" />
                 <p className="text-sm leading-6 text-[var(--text-secondary)]">
                   {activity}

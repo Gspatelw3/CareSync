@@ -13,6 +13,7 @@ export type ActionModalProps = {
   confirmLabel?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  showFooter?: boolean;
 };
 
 export function ActionModal({
@@ -24,6 +25,7 @@ export function ActionModal({
   confirmLabel = "Submit",
   open: externalOpen,
   onOpenChange,
+  showFooter = true,
 }: ActionModalProps) {
   const formId = useId();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -48,7 +50,7 @@ export function ActionModal({
         onClose={() => setOpen(false)}
         title={title}
         subtitle={subtitle}
-        footer={
+        footer={showFooter ? (
           <div className="flex items-center justify-end gap-3">
             <Button
               variant="secondary"
@@ -66,7 +68,7 @@ export function ActionModal({
               {confirmLabel}
             </Button>
           </div>
-        }
+        ) : undefined}
       >
         <form
           id={formId}

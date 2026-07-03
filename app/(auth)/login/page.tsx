@@ -2,15 +2,29 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/lib/stores";
+import { useToast } from "@/lib/use-toast";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login, isAuthenticated } = useAuthStore();
+  const { addToast } = useToast();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
 
   function validate() {
     const next: { email?: string; password?: string } = {};
@@ -30,7 +44,7 @@ export default function LoginPage() {
     return next;
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
     const validationErrors = validate();
@@ -38,7 +52,23 @@ export default function LoginPage() {
 
     if (Object.keys(validationErrors).length > 0) return;
 
-    router.push("/dashboard");
+    setIsLoading(true);
+
+    try {
+      // TODO: Replace with actual API call to /api/auth/login
+      const success = await login(email, password, rememberMe);
+      
+      if (success) {
+        addToast("Login successful! Welcome back.", "success");
+        router.push("/dashboard");
+      } else {
+        addToast("Invalid credentials. Please try again.", "error");
+      }
+    } catch (error) {
+      addToast("An error occurred during login.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -57,7 +87,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
+        <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
         <div className="grid gap-2">
           <label className="text-sm font-medium text-[var(--text-secondary)]" htmlFor="email">
             Email address
@@ -109,7 +139,22 @@ export default function LoginPage() {
           )}
         </div>
 
-        <Button type="submit">Login</Button>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="remember"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="size-4 rounded border-[var(--border-default)]"
+            />
+            <label htmlFor="remember" className="text-sm text-[var(--text-secondary)]">
+              Remember me
+            </label>
+          </div>
+
+          <Button type="submit" isLoading={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
+          </Button>
       </form>
     </AuthShell>
   );
