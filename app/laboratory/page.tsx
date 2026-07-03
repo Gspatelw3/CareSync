@@ -1,22 +1,18 @@
 "use client";
 
-import type { Metadata } from "next";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { FormField } from "@/components/ui/forms/form-field";
 import { useLabStore } from "@/lib/stores";
 import { initializeMockLabTests } from "@/lib/stores/use-lab-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
 import { useEffect, useState } from "react";
 import type { LabTestRequest } from "@/types";
-
-export const metadata: Metadata = {
-  title: "Laboratory | Care Sync",
-};
 
 export default function LaboratoryPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -178,45 +174,57 @@ export default function LaboratoryPage() {
         trigger={<div />}
       >
         <div className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Patient</label>
-            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-              <option>Vikram Singh</option>
-              <option>Sita Verma</option>
-              <option>Lakshmi Nair</option>
-              <option>Rohan Das</option>
-              <option>Aisha Patel</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Test Type</label>
-            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-              <option>Complete Blood Count</option>
-              <option>Chest X-Ray</option>
-              <option>Blood Glucose</option>
-              <option>MRI Brain</option>
-              <option>Urine Culture</option>
-            </select>
-          </div>
+          <FormField
+            label="Patient"
+            type="select"
+            value=""
+            onChange={() => {}}
+            options={[
+              { label: "Vikram Singh", value: "Vikram Singh" },
+              { label: "Sita Verma", value: "Sita Verma" },
+              { label: "Lakshmi Nair", value: "Lakshmi Nair" },
+              { label: "Rohan Das", value: "Rohan Das" },
+              { label: "Aisha Patel", value: "Aisha Patel" },
+            ]}
+          />
+          <FormField
+            label="Test Type"
+            type="select"
+            value=""
+            onChange={() => {}}
+            options={[
+              { label: "Complete Blood Count", value: "Complete Blood Count" },
+              { label: "Chest X-Ray", value: "Chest X-Ray" },
+              { label: "Blood Glucose", value: "Blood Glucose" },
+              { label: "MRI Brain", value: "MRI Brain" },
+              { label: "Urine Culture", value: "Urine Culture" },
+            ]}
+          />
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Priority</label>
-              <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-                <option>Normal</option>
-                <option>Urgent</option>
-                <option>STAT</option>
-              </select>
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Doctor</label>
-              <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-                <option>Dr. Kavya Rao</option>
-                <option>Dr. Neil Shah</option>
-                <option>Dr. Amina Khan</option>
-                <option>Dr. Amit Verma</option>
-                <option>Dr. Sneha Kapoor</option>
-              </select>
-            </div>
+            <FormField
+              label="Priority"
+              type="select"
+              value=""
+              onChange={() => {}}
+              options={[
+                { label: "Normal", value: "Normal" },
+                { label: "Urgent", value: "Urgent" },
+                { label: "STAT", value: "STAT" },
+              ]}
+            />
+            <FormField
+              label="Doctor"
+              type="select"
+              value=""
+              onChange={() => {}}
+              options={[
+                { label: "Dr. Kavya Rao", value: "Dr. Kavya Rao" },
+                { label: "Dr. Neil Shah", value: "Dr. Neil Shah" },
+                { label: "Dr. Amina Khan", value: "Dr. Amina Khan" },
+                { label: "Dr. Amit Verma", value: "Dr. Amit Verma" },
+                { label: "Dr. Sneha Kapoor", value: "Dr. Sneha Kapoor" },
+              ]}
+            />
           </div>
         </div>
       </ActionModal>

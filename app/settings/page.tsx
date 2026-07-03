@@ -3,6 +3,7 @@
 import { PageShell, PageHeader } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/forms/form-field";
 import { useSettingsStore } from "@/lib/stores";
 import { useToast } from "@/lib/use-toast";
 import { useTheme } from "@/lib/theme-provider";
@@ -152,32 +153,30 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Timezone</label>
-                      <select
-                        value={orgForm.timezone}
-                        onChange={(e) => setOrgForm({ ...orgForm, timezone: e.target.value })}
-                        className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm"
-                      >
-                        <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-                        <option value="America/New_York">America/New_York (EST)</option>
-                        <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
-                        <option value="Europe/London">Europe/London (GMT)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Currency</label>
-                      <select
-                        value={orgForm.currency}
-                        onChange={(e) => setOrgForm({ ...orgForm, currency: e.target.value })}
-                        className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm"
-                      >
-                        <option value="INR">INR (₹)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="GBP">GBP (£)</option>
-                      </select>
-                    </div>
+                    <FormField
+                      label="Timezone"
+                      type="select"
+                      value={orgForm.timezone}
+                      onChange={(value) => setOrgForm({ ...orgForm, timezone: value })}
+                      options={[
+                        { label: "Asia/Kolkata (IST)", value: "Asia/Kolkata" },
+                        { label: "America/New_York (EST)", value: "America/New_York" },
+                        { label: "America/Los_Angeles (PST)", value: "America/Los_Angeles" },
+                        { label: "Europe/London (GMT)", value: "Europe/London" },
+                      ]}
+                    />
+                    <FormField
+                      label="Currency"
+                      type="select"
+                      value={orgForm.currency}
+                      onChange={(value) => setOrgForm({ ...orgForm, currency: value })}
+                      options={[
+                        { label: "INR (₹)", value: "INR" },
+                        { label: "USD ($)", value: "USD" },
+                        { label: "EUR (€)", value: "EUR" },
+                        { label: "GBP (£)", value: "GBP" },
+                      ]}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

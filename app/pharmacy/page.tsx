@@ -1,22 +1,18 @@
 "use client";
 
-import type { Metadata } from "next";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { FormField } from "@/components/ui/forms/form-field";
 import { useInventoryStore } from "@/lib/stores";
 import { initializeMockInventory } from "@/lib/stores/use-inventory-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
 import { useEffect, useState } from "react";
 import type { InventoryItem } from "@/types";
-
-export const metadata: Metadata = {
-  title: "Pharmacy | Care Sync",
-};
 
 export default function PharmacyPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -181,16 +177,19 @@ export default function PharmacyPage() {
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Category</label>
-              <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-                <option>Pain Relief</option>
-                <option>Antibiotics</option>
-                <option>Diabetes</option>
-                <option>IV Fluids</option>
-                <option>PPE</option>
-              </select>
-            </div>
+            <FormField
+              label="Category"
+              type="select"
+              value={editingItem?.category || ""}
+              onChange={() => {}}
+              options={[
+                { label: "Pain Relief", value: "Pain Relief" },
+                { label: "Antibiotics", value: "Antibiotics" },
+                { label: "Diabetes", value: "Diabetes" },
+                { label: "IV Fluids", value: "IV Fluids" },
+                { label: "PPE", value: "PPE" },
+              ]}
+            />
             <div>
               <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Unit</label>
               <input

@@ -1,16 +1,11 @@
 "use client";
 
-import type { Metadata } from "next";
 import { PageShell, PageHeader } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Bell, Check, Trash2 } from "lucide-react";
 import { useNotificationStore, initializeMockNotifications } from "@/lib/stores";
 import { useToast } from "@/lib/use-toast";
 import { useEffect, useState } from "react";
-
-export const metadata: Metadata = {
-  title: "Notifications | Care Sync",
-};
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread">("all");

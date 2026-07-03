@@ -1,22 +1,18 @@
 "use client";
 
-import type { Metadata } from "next";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { FormField } from "@/components/ui/forms/form-field";
 import { useBillingStore } from "@/lib/stores";
 import { initializeMockInvoices } from "@/lib/stores/use-billing-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
 import { useEffect, useState } from "react";
 import type { Invoice } from "@/types";
-
-export const metadata: Metadata = {
-  title: "Billing | Care Sync",
-};
 
 export default function BillingPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -164,16 +160,19 @@ export default function BillingPage() {
         trigger={<div />}
       >
         <div className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Patient</label>
-            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-              <option>Meera Iyer</option>
-              <option>Arjun Menon</option>
-              <option>Priya Nair</option>
-              <option>Vikram Singh</option>
-              <option>Sneha Patel</option>
-            </select>
-          </div>
+          <FormField
+            label="Patient"
+            type="select"
+            value=""
+            onChange={() => {}}
+            options={[
+              { label: "Meera Iyer", value: "Meera Iyer" },
+              { label: "Arjun Menon", value: "Arjun Menon" },
+              { label: "Priya Nair", value: "Priya Nair" },
+              { label: "Vikram Singh", value: "Vikram Singh" },
+              { label: "Sneha Patel", value: "Sneha Patel" },
+            ]}
+          />
           <div>
             <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Service</label>
             <input
@@ -191,15 +190,18 @@ export default function BillingPage() {
                 className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm"
               />
             </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Insurance</label>
-              <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-                <option>None</option>
-                <option>Star Health</option>
-                <option>HDFC Ergo</option>
-                <option>ICICI Lombard</option>
-              </select>
-            </div>
+            <FormField
+              label="Insurance"
+              type="select"
+              value=""
+              onChange={() => {}}
+              options={[
+                { label: "None", value: "None" },
+                { label: "Star Health", value: "Star Health" },
+                { label: "HDFC Ergo", value: "HDFC Ergo" },
+                { label: "ICICI Lombard", value: "ICICI Lombard" },
+              ]}
+            />
           </div>
         </div>
       </ActionModal>

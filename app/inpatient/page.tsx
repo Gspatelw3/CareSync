@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/data-display/status-badge";
 import { Filter, Plus } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { FormField } from "@/components/ui/forms/form-field";
 import { useAdmissionStore } from "@/lib/stores";
 import { initializeMockAdmissions } from "@/lib/stores/use-admission-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
@@ -30,6 +31,9 @@ export default function InpatientPage() {
     setFilterStatus,
     setFilterWard
   } = useAdmissionStore();
+
+  const [tempFilterWard, setTempFilterWard] = useState(filterWard);
+  const [tempFilterStatus, setTempFilterStatus] = useState(filterStatus);
   
   const { addToast } = useToast();
 
@@ -115,32 +119,26 @@ export default function InpatientPage() {
                   Filter wards
                 </SecondaryButton>
               }
+              onConfirm={() => {
+                setFilterWard(tempFilterWard);
+                setFilterStatus(tempFilterStatus);
+              }}
             >
               <div className="space-y-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Ward Type</label>
-                  <select
-                    value={filterWard}
-                    onChange={(e) => setFilterWard(e.target.value)}
-                    className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm"
-                  >
-                    {wardFilterOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Status</label>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm"
-                  >
-                    {statusFilterOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
+                <FormField
+                  label="Ward Type"
+                  type="select"
+                  value={tempFilterWard}
+                  onChange={(value) => setTempFilterWard(value)}
+                  options={wardFilterOptions}
+                />
+                <FormField
+                  label="Status"
+                  type="select"
+                  value={tempFilterStatus}
+                  onChange={(value) => setTempFilterStatus(value)}
+                  options={statusFilterOptions}
+                />
               </div>
             </ActionModal>
             <ActionButton 
@@ -236,28 +234,32 @@ export default function InpatientPage() {
         trigger={<div />}
       >
         <div className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Patient</label>
-            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-              <option>Select patient...</option>
-              {admissions.map(a => (
-                <option key={a.id} value={a.patient}>{a.patient}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Ward</label>
-            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-              <option>ICU (3 available)</option>
-              <option>Emergency (4 available)</option>
-              <option>General A (12 available)</option>
-              <option>General B (6 available)</option>
-              <option>Maternity (4 available)</option>
-              <option>Pediatrics (5 available)</option>
-              <option>Isolation (3 available)</option>
-              <option>Recovery (4 available)</option>
-            </select>
-          </div>
+          <FormField
+            label="Patient"
+            type="select"
+            value=""
+            onChange={() => {}}
+            options={[
+              { label: "Select patient...", value: "" },
+              ...admissions.map(a => ({ label: a.patient, value: a.patient }))
+            ]}
+          />
+          <FormField
+            label="Ward"
+            type="select"
+            value=""
+            onChange={() => {}}
+            options={[
+              { label: "ICU (3 available)", value: "ICU" },
+              { label: "Emergency (4 available)", value: "Emergency" },
+              { label: "General A (12 available)", value: "General A" },
+              { label: "General B (6 available)", value: "General B" },
+              { label: "Maternity (4 available)", value: "Maternity" },
+              { label: "Pediatrics (5 available)", value: "Pediatrics" },
+              { label: "Isolation (3 available)", value: "Isolation" },
+              { label: "Recovery (4 available)", value: "Recovery" },
+            ]}
+          />
           <div>
             <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Diagnosis</label>
             <input
@@ -266,17 +268,20 @@ export default function InpatientPage() {
               className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm"
             />
           </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Doctor</label>
-            <select className="w-full rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-3 py-2 text-sm">
-              <option>Dr. Kavya Rao</option>
-              <option>Dr. Neil Shah</option>
-              <option>Dr. Amina Khan</option>
-              <option>Dr. Amit Verma</option>
-              <option>Dr. Sneha Kapoor</option>
-              <option>Dr. Priya Mehta</option>
-            </select>
-          </div>
+          <FormField
+            label="Doctor"
+            type="select"
+            value=""
+            onChange={() => {}}
+            options={[
+              { label: "Dr. Kavya Rao", value: "Dr. Kavya Rao" },
+              { label: "Dr. Neil Shah", value: "Dr. Neil Shah" },
+              { label: "Dr. Amina Khan", value: "Dr. Amina Khan" },
+              { label: "Dr. Amit Verma", value: "Dr. Amit Verma" },
+              { label: "Dr. Sneha Kapoor", value: "Dr. Sneha Kapoor" },
+              { label: "Dr. Priya Mehta", value: "Dr. Priya Mehta" },
+            ]}
+          />
         </div>
       </ActionModal>
     </PageShell>
