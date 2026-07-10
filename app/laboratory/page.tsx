@@ -33,10 +33,12 @@ export default function LaboratoryPage() {
   } = useLabStore();
   
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize store with mock data
   useEffect(() => {
     initializeMockLabTests();
+    setIsInitialized(true);
   }, []);
 
   const filteredTests = getFilteredLabTests();
@@ -92,6 +94,16 @@ export default function LaboratoryPage() {
     { label: "Urgent", value: "Urgent" },
     { label: "Normal", value: "Normal" },
   ];
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/laboratory">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/laboratory">

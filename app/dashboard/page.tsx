@@ -13,6 +13,7 @@ import { useDoctorStore } from "@/lib/stores";
 import { useAppointmentStore } from "@/lib/stores";
 import { useAdmissionStore } from "@/lib/stores";
 import { useEffect, useState } from "react";
+import { calculateBedStatistics, validateBedCalculations } from "@/lib/utils/bed-calculations";
 
 export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false);
@@ -35,13 +36,17 @@ export default function DashboardPage() {
   const pendingAppointments = appointments.filter(a => a.status === "Waiting" || a.status === "Confirmed").length;
   const completedCheckins = appointments.filter(a => a.status === "Checked in").length;
   
-  const totalBeds = 174;
-  const occupiedBeds = admissions.length;
-  const availableBeds = totalBeds - occupiedBeds;
-  const icuBeds = 24;
-  const icuOccupied = admissions.filter(a => a.ward === "ICU").length;
-  const icuAvailable = icuBeds - icuOccupied;
-  const occupancyRate = Math.round((occupiedBeds / totalBeds) * 100);
+  // Calculate bed statistics from single source of truth
+  const bedStats = calculateBedStatistics(admissions);
+  const { totalBeds, occupiedBeds, availableBeds, occupancyRate, icuStats } = bedStats;
+
+  // Validate calculations
+  if (isClient) {
+    const isValid = validateBedCalculations(admissions);
+    if (!isValid) {
+      console.error("Bed calculation validation failed");
+    }
+  }
 
   const stats = [
     {
@@ -71,7 +76,7 @@ export default function DashboardPage() {
     {
       label: "Available Beds",
       value: availableBeds.toString(),
-      delta: `${icuAvailable} ICU`,
+      delta: `${icuStats.available} ICU`,
       detail: `${occupancyRate}% occupancy`,
       icon: Bed,
       href: "/inpatient",

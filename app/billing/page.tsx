@@ -6,12 +6,12 @@ import { StatusBadge } from "@/components/data-display/status-badge";
 import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
-import { FormField } from "@/components/ui/forms/form-field";
 import { useBillingStore } from "@/lib/stores";
 import { initializeMockInvoices } from "@/lib/stores/use-billing-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
 import { useEffect, useState } from "react";
+import { InvoiceForm } from "./invoice-form";
 import type { Invoice } from "@/types";
 
 export default function BillingPage() {
@@ -31,10 +31,12 @@ export default function BillingPage() {
   } = useBillingStore();
   
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize store with mock data
   useEffect(() => {
     initializeMockInvoices();
+    setIsInitialized(true);
   }, []);
 
   const filteredInvoices = getFilteredInvoices();
@@ -69,6 +71,11 @@ export default function BillingPage() {
     }
   };
 
+  const handleInvoiceSubmit = () => {
+    // This will be called by the InvoiceForm
+    // The form handles its own submission logic
+  };
+
   const columns = [
     { key: "id", label: "Invoice ID", sortable: true },
     { key: "patient", label: "Patient", sortable: true },
@@ -86,6 +93,16 @@ export default function BillingPage() {
     { label: "Partial", value: "Partial" },
     { label: "Pending", value: "Pending" },
   ];
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/billing">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/billing">
@@ -149,7 +166,6 @@ export default function BillingPage() {
       <ActionModal
         title={editingInvoice ? "Edit Invoice" : "New Invoice"}
         subtitle={editingInvoice ? "Update invoice details." : "Create a new invoice."}
-        confirmLabel={editingInvoice ? "Update" : "Create invoice"}
         open={isAddModalOpen || !!editingInvoice}
         onOpenChange={(open) => {
           if (!open) {
@@ -158,52 +174,15 @@ export default function BillingPage() {
           }
         }}
         trigger={<div />}
+        showFooter={false}
       >
-        <div className="space-y-4">
-          <FormField
-            label="Patient"
-            type="select"
-            value=""
-            onChange={() => {}}
-            options={[
-              { label: "Meera Iyer", value: "Meera Iyer" },
-              { label: "Arjun Menon", value: "Arjun Menon" },
-              { label: "Priya Nair", value: "Priya Nair" },
-              { label: "Vikram Singh", value: "Vikram Singh" },
-              { label: "Sneha Patel", value: "Sneha Patel" },
-            ]}
-          />
-          <div>
-            <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Service</label>
-            <input
-              type="text"
-              placeholder="e.g. Cardiology Consultation + ECG"
-              className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Amount (₹)</label>
-              <input
-                type="text"
-                placeholder="0.00"
-                className="w-full rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm"
-              />
-            </div>
-            <FormField
-              label="Insurance"
-              type="select"
-              value=""
-              onChange={() => {}}
-              options={[
-                { label: "None", value: "None" },
-                { label: "Star Health", value: "Star Health" },
-                { label: "HDFC Ergo", value: "HDFC Ergo" },
-                { label: "ICICI Lombard", value: "ICICI Lombard" },
-              ]}
-            />
-          </div>
-        </div>
+        <InvoiceForm 
+          invoice={editingInvoice} 
+          onClose={() => {
+            setIsAddModalOpen(false);
+            setEditingInvoice(null);
+          }} 
+        />
       </ActionModal>
     </PageShell>
   );

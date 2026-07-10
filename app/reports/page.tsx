@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { PageShell, PageHeader } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Download, Calendar } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
 import { FormField } from "@/components/ui/forms/form-field";
+import { DateRangePicker } from "@/components/ui/date-picker";
 
 const reportCategories = [
     {
@@ -103,6 +105,8 @@ const reportCategories = [
 ];
 
 export default function ReportsPage() {
+    const [dateRange, setDateRange] = useState({ from: "", to: "" });
+
     return (
         <PageShell activeHref="/reports">
             <PageHeader
@@ -169,23 +173,19 @@ export default function ReportsPage() {
                                 <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">
                                     Date Range
                                 </label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input
-                                        type="date"
-                                        className="rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm"
-                                    />
-                                    <input
-                                        type="date"
-                                        className="rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm"
-                                    />
-                                </div>
+                                <DateRangePicker
+                                    startValue={dateRange.from}
+                                    endValue={dateRange.to}
+                                    onChange={(range) => setDateRange(range)}
+                                    placeholder="Select date range..."
+                                />
                             </div>
                         </div>
                     </ActionModal>
                 }
             />
 
-            <div className="mt-6 grid gap-6">
+            <div className="mt-6 grid 2xl:grid-cols-2 gap-6">
                 {reportCategories.map((category) => (
                     <Card
                         key={category.title}
@@ -195,7 +195,7 @@ export default function ReportsPage() {
                         <div className="divide-y divide-[var(--table-divide)]">
                             {category.reports.map((report) => (
                                 <div
-                                    className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-[var(--hover-bg)]"
+                                    className="flex md:flex-row flex-col md:items-center justify-between gap-4 px-5 py-4 hover:bg-[var(--hover-bg)]"
                                     key={report.name}
                                 >
                                     <div className="min-w-0">
@@ -207,9 +207,9 @@ export default function ReportsPage() {
                                             Updated {report.updated}
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 justify-between">
                                         <span
-                                            className={`text-xs font-medium ${
+                                            className={`text-xs w-full md:w-auto font-medium ${
                                                 report.status === "Generated"
                                                     ? "text-[var(--care-secondary)]"
                                                     : report.status === "Draft"

@@ -70,16 +70,20 @@ export function ActionModal({
           </div>
         ) : undefined}
       >
-        <form
-          id={formId}
-          onSubmit={(e) => {
-            e.preventDefault();
-            onConfirm?.();
-            setOpen(false);
-          }}
-        >
+        {showFooter ? (
+          <form
+            id={formId}
+            onSubmit={(e) => {
+              e.preventDefault();
+              onConfirm?.();
+              setOpen(false);
+            }}
+          >
+            <div className="space-y-5">{children}</div>
+          </form>
+        ) : (
           <div className="space-y-5">{children}</div>
-        </form>
+        )}
       </Modal>
     </>
   );

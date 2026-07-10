@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FormField, FormSection } from "@/components/ui/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { useAppointmentStore } from "@/lib/stores";
@@ -10,9 +10,10 @@ import type { Appointment } from "@/types";
 type AppointmentFormProps = {
   appointment?: Appointment;
   onClose?: () => void;
+  onSubmit?: (submitFn: () => void) => void;
 };
 
-export function AppointmentForm({ appointment, onClose }: AppointmentFormProps) {
+export function AppointmentForm({ appointment, onClose, onSubmit }: AppointmentFormProps) {
   const [formData, setFormData] = useState({
     time: "",
     patient: "",
@@ -62,7 +63,9 @@ export function AppointmentForm({ appointment, onClose }: AppointmentFormProps) 
     return next;
   }
 
-  async function handleSubmit() {
+  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    
     const validationErrors = validate();
     setErrors(validationErrors);
 
@@ -85,13 +88,21 @@ export function AppointmentForm({ appointment, onClose }: AppointmentFormProps) 
         addToast("Appointment booked successfully", "success");
       }
 
+      // Close modal after successful creation
       onClose?.();
     } catch (error) {
       addToast("An error occurred. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }, [appointment, formData, onClose, addAppointment, updateAppointment, addToast]);
+
+  // Expose submit function to parent modal
+  useEffect(() => {
+    if (onSubmit) {
+      onSubmit(handleSubmit);
+    }
+  }, [onSubmit, handleSubmit]);
 
   return (
     <div className="space-y-6">

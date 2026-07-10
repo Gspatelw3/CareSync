@@ -33,10 +33,12 @@ export default function AppointmentsPage() {
   } = useAppointmentStore();
   
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize store with mock data
   useEffect(() => {
     initializeMockAppointments();
+    setIsInitialized(true);
   }, []);
 
   const filteredAppointments = getFilteredAppointments();
@@ -94,6 +96,16 @@ export default function AppointmentsPage() {
     { label: "ECG", value: "ECG" },
     { label: "Physiotherapy", value: "Physiotherapy" },
   ];
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/appointments">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/appointments">
@@ -161,7 +173,7 @@ export default function AppointmentsPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <div className="mt-6 space-y-6">
         <Card title="Today's Schedule" description="All appointments for today, 19 June 2026.">
           <EnhancedDataTable
             columns={columns}
@@ -189,13 +201,14 @@ export default function AppointmentsPage() {
             filterOptions={statusFilterOptions}
             currentFilter={filterStatus}
             onFilterChange={setFilterStatus}
-            onRowClick={handleEdit}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             onBulkDelete={handleBulkDelete}
             emptyMessage="No appointments found"
           />
         </Card>
 
-        <div className="space-y-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <section className="rounded-lg border border-[var(--care-border)] bg-[var(--card-bg)] p-5 shadow-sm shadow-[var(--shadow-card)]">
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">Weekly Volume</h2>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">Appointments by day this week.</p>
@@ -247,7 +260,10 @@ export default function AppointmentsPage() {
         trigger={<div />}
         showFooter={false}
       >
-        <AppointmentForm onClose={() => setIsAddModalOpen(false)} />
+        <AppointmentForm onClose={() => setIsAddModalOpen(false)} onSubmit={(submitFn) => {
+          // Store the submit function so the modal can call it
+          // The form's submit button will trigger the form's onSubmit
+        }} />
       </ActionModal>
 
       {/* Edit Appointment Modal */}
@@ -261,7 +277,9 @@ export default function AppointmentsPage() {
         showFooter={false}
       >
         {editingAppointment && (
-          <AppointmentForm appointment={editingAppointment} onClose={() => setEditingAppointment(null)} />
+          <AppointmentForm appointment={editingAppointment} onClose={() => setEditingAppointment(null)} onSubmit={(submitFn) => {
+            // Store the submit function so the modal can call it
+          }} />
         )}
       </ActionModal>
     </PageShell>

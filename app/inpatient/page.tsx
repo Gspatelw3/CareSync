@@ -13,6 +13,13 @@ import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table
 import { useToast } from "@/lib/use-toast";
 import { useEffect, useState } from "react";
 import type { Admission } from "@/types";
+import {
+  calculateBedStatistics,
+  calculateWardStats,
+  getWardCapacity,
+  validateBedCalculations,
+  getWardNames
+} from "@/lib/utils/bed-calculations";
 
 export default function InpatientPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -36,20 +43,52 @@ export default function InpatientPage() {
   const [tempFilterStatus, setTempFilterStatus] = useState(filterStatus);
   
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize store with mock data
   useEffect(() => {
     initializeMockAdmissions();
+    setIsInitialized(true);
   }, []);
 
   const filteredAdmissions = getFilteredAdmissions();
   const paginatedAdmissions = getPaginatedAdmissions();
 
+  // Calculate bed statistics from single source of truth
+  const bedStats = calculateBedStatistics(admissions);
+  const { totalBeds, occupiedBeds, availableBeds, occupancyRate, icuStats } = bedStats;
+
+  // Validate calculations
+  const isValid = validateBedCalculations(admissions);
+  if (!isValid) {
+    console.error("Bed calculation validation failed");
+  }
+
   const stats = [
-    { label: "Total Beds", value: "174", delta: "58 available", detail: "77% occupancy" },
-    { label: "ICU Beds", value: "24", delta: "3 available", detail: "87.5% occupancy" },
-    { label: "Admissions Today", value: admissions.filter(a => a.admitted === "2026-06-19").length.toString(), delta: "3 discharges", detail: "net +4" },
-    { label: "Avg. Stay", value: "5.8 days", delta: "ICU: 8.2 days", detail: "General: 4.1 days" },
+    {
+      label: "Total Beds",
+      value: totalBeds.toString(),
+      delta: `${availableBeds} available`,
+      detail: `${occupancyRate}% occupancy`
+    },
+    {
+      label: "ICU Beds",
+      value: icuStats.capacity.toString(),
+      delta: `${icuStats.available} available`,
+      detail: `${icuStats.occupancyPct}% occupancy`
+    },
+    {
+      label: "Admissions Today",
+      value: admissions.filter(a => a.admitted === "2026-06-19").length.toString(),
+      delta: "3 discharges",
+      detail: "net +4"
+    },
+    {
+      label: "Avg. Stay",
+      value: "5.8 days",
+      delta: "ICU: 8.2 days",
+      detail: "General: 4.1 days"
+    },
   ];
 
   const handleEdit = (admission: Admission) => {
@@ -101,6 +140,16 @@ export default function InpatientPage() {
     { label: "Isolation", value: "Isolation" },
     { label: "Recovery", value: "Recovery" },
   ];
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/inpatient">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/inpatient">
@@ -162,11 +211,9 @@ export default function InpatientPage() {
         <Card title="Ward Overview" description="Bed occupancy by ward.">
           <div className="p-5">
             <div className="grid gap-4">
-              {["ICU", "Emergency", "General A", "General B", "Maternity", "Pediatrics", "Isolation", "Recovery"].map((ward) => {
-                const occupied = admissions.filter(a => a.ward === ward).length;
-                const total = ward === "ICU" ? 24 : ward === "Emergency" ? 18 : ward === "General A" ? 40 : ward === "General B" ? 36 : ward === "Maternity" ? 20 : ward === "Pediatrics" ? 16 : ward === "Isolation" ? 8 : 12;
-                const available = total - occupied;
-                const occupancyPct = Math.round((occupied / total) * 100);
+              {getWardNames().map((ward) => {
+                const wardStats = calculateWardStats(ward, admissions);
+                const { capacity, occupied, available, occupancyPct } = wardStats;
                 return (
                   <div className="flex flex-col gap-2" key={ward}>
                     <div className="flex items-center justify-between">
@@ -174,7 +221,7 @@ export default function InpatientPage() {
                         <span className="text-sm font-semibold text-[var(--text-primary)] w-24">{ward}</span>
                       </div>
                       <div className="flex items-center gap-3 text-xs">
-                        <span className="font-semibold text-[var(--text-secondary)]">{occupied}/{total}</span>
+                        <span className="font-semibold text-[var(--text-secondary)]">{occupied}/{capacity}</span>
                         <span className={available > 0 ? "text-[var(--care-secondary)]" : "text-red-500"}>
                           {available} free
                         </span>
@@ -249,16 +296,13 @@ export default function InpatientPage() {
             type="select"
             value=""
             onChange={() => {}}
-            options={[
-              { label: "ICU (3 available)", value: "ICU" },
-              { label: "Emergency (4 available)", value: "Emergency" },
-              { label: "General A (12 available)", value: "General A" },
-              { label: "General B (6 available)", value: "General B" },
-              { label: "Maternity (4 available)", value: "Maternity" },
-              { label: "Pediatrics (5 available)", value: "Pediatrics" },
-              { label: "Isolation (3 available)", value: "Isolation" },
-              { label: "Recovery (4 available)", value: "Recovery" },
-            ]}
+            options={getWardNames().map(ward => {
+              const wardStats = calculateWardStats(ward, admissions);
+              return {
+                label: `${ward} (${wardStats.available} available)`,
+                value: ward
+              };
+            })}
           />
           <div>
             <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Diagnosis</label>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FormField, FormSection } from "@/components/ui/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { usePatientStore } from "@/lib/stores";
@@ -75,7 +75,7 @@ export function PatientForm({ patient, onClose, onSubmit }: PatientFormProps) {
     return next;
   }
 
-  async function handleSubmit() {
+  const handleSubmit = useCallback(async () => {
     const validationErrors = validate();
     setErrors(validationErrors);
 
@@ -108,7 +108,7 @@ export function PatientForm({ patient, onClose, onSubmit }: PatientFormProps) {
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }, [patient, formData, onClose, addPatient, updatePatient, addToast]);
 
   // Expose submit function to parent
   useEffect(() => {

@@ -11,9 +11,11 @@ export default function NotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const { notifications, markAsRead, markAllAsRead, deleteNotification, getFilteredNotifications } = useNotificationStore();
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     initializeMockNotifications();
+    setIsInitialized(true);
   }, []);
 
   const filteredNotifications = getFilteredNotifications(filter);
@@ -52,6 +54,16 @@ export default function NotificationsPage() {
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/notifications">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/notifications">

@@ -60,8 +60,12 @@ const selectStyles = {
     border: "1px solid var(--border-default)",
     backgroundColor: "var(--card-bg)",
     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-    zIndex: 60,
+    zIndex: 999999,
     overflow: "hidden",
+  }),
+  menuPortal: (base: Record<string, unknown>) => ({
+    ...base,
+    zIndex: 999999,
   }),
   menuList: (base: Record<string, unknown>) => ({
     ...base,
@@ -141,6 +145,8 @@ export function FormField({
           isClearable
           unstyled
           styles={selectStyles}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
         />
       ) : type === "textarea" ? (
         <textarea

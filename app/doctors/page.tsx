@@ -39,10 +39,12 @@ export default function DoctorsPage() {
   } = useDoctorStore();
   
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize store with mock data
   useEffect(() => {
     initializeMockDoctors();
+    setIsInitialized(true);
   }, []);
 
   const filteredDoctors = getFilteredDoctors();
@@ -151,6 +153,16 @@ export default function DoctorsPage() {
     { label: "Respiratory", value: "Respiratory" },
     { label: "Dermatology", value: "Dermatology" },
   ];
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/doctors">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/doctors">

@@ -33,10 +33,12 @@ export default function PharmacyPage() {
   } = useInventoryStore();
   
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize store with mock data
   useEffect(() => {
     initializeMockInventory();
+    setIsInitialized(true);
   }, []);
 
   const filteredInventory = getFilteredInventory();
@@ -93,6 +95,16 @@ export default function PharmacyPage() {
     { label: "IV Fluids", value: "IV Fluids" },
     { label: "PPE", value: "PPE" },
   ];
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/pharmacy">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/pharmacy">

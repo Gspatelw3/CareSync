@@ -31,10 +31,12 @@ export default function PatientsPage() {
   } = usePatientStore();
   
   const { addToast } = useToast();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize store with mock data
   useEffect(() => {
     initializeMockPatients();
+    setIsInitialized(true);
   }, []);
 
   const filteredPatients = getFilteredPatients();
@@ -83,6 +85,16 @@ export default function PatientsPage() {
     { label: "Discharged", value: "Discharged" },
     { label: "ICU", value: "ICU" },
   ];
+
+  if (!isInitialized) {
+    return (
+      <PageShell activeHref="/patients">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-sm text-[var(--text-muted)]">Loading...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell activeHref="/patients">
