@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { DayPicker } from "react-day-picker";
 import { format, parse, isValid } from "date-fns";
@@ -57,7 +57,7 @@ export function DatePicker({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const selected = value ? parseDate(value) : undefined;
+  const selected = useMemo(() => (value ? parseDate(value) : undefined), [value]);
 
   // Close the popover when clicking outside
   useEffect(() => {
@@ -111,13 +111,17 @@ export function DatePicker({
     [onChange],
   );
 
-  const displayValue = selected
-    ? format(selected, DISPLAY_FORMAT)
-    : "";
+  const displayValue = useMemo(
+    () => (selected ? format(selected, DISPLAY_FORMAT) : ""),
+    [selected],
+  );
 
-  const disabledDays = [];
-  if (minDate) disabledDays.push({ before: minDate });
-  if (maxDate) disabledDays.push({ after: maxDate });
+  const disabledDays = useMemo(() => {
+    const days = [];
+    if (minDate) days.push({ before: minDate });
+    if (maxDate) days.push({ after: maxDate });
+    return days;
+  }, [maxDate, minDate]);
 
   // Calculate popover position
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
@@ -249,10 +253,19 @@ export function DateRangePicker({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const startDate = startValue ? parseDate(startValue) : undefined;
-  const endDate = endValue ? parseDate(endValue) : undefined;
+  const startDate = useMemo(
+    () => (startValue ? parseDate(startValue) : undefined),
+    [startValue],
+  );
+  const endDate = useMemo(
+    () => (endValue ? parseDate(endValue) : undefined),
+    [endValue],
+  );
 
-  const selectedRange = startDate && endDate ? { from: startDate, to: endDate } : undefined;
+  const selectedRange = useMemo(
+    () => (startDate && endDate ? { from: startDate, to: endDate } : undefined),
+    [endDate, startDate],
+  );
 
   // Close the popover when clicking outside
   useEffect(() => {
@@ -306,7 +319,7 @@ export function DateRangePicker({
     [onChange],
   );
 
-  const displayValue = (() => {
+  const displayValue = useMemo(() => {
     if (startDate && endDate) {
       return `${format(startDate, DISPLAY_FORMAT)} - ${format(endDate, DISPLAY_FORMAT)}`;
     }
@@ -314,11 +327,14 @@ export function DateRangePicker({
       return `${format(startDate, DISPLAY_FORMAT)} - ...`;
     }
     return "";
-  })();
+  }, [endDate, startDate]);
 
-  const disabledDays = [];
-  if (minDate) disabledDays.push({ before: minDate });
-  if (maxDate) disabledDays.push({ after: maxDate });
+  const disabledDays = useMemo(() => {
+    const days = [];
+    if (minDate) days.push({ before: minDate });
+    if (maxDate) days.push({ after: maxDate });
+    return days;
+  }, [maxDate, minDate]);
 
   // Calculate popover position
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});

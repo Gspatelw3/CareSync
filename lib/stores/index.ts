@@ -12,8 +12,6 @@ import { initializeMockInvoices } from "./use-billing-store";
 import { initializeMockNotifications } from "./use-notification-store";
 
 export function initializeAllStores() {
-  // Initialize all stores with mock data
-  // This ensures the application has realistic data on first load
   initializeMockPatients();
   initializeMockDoctors();
   initializeMockAppointments();
@@ -22,8 +20,6 @@ export function initializeAllStores() {
   initializeMockLabTests();
   initializeMockInvoices();
   initializeMockNotifications();
-
-  console.log("✅ All stores initialized with mock data");
 }
 
 export { usePatientStore } from "./use-patient-store";

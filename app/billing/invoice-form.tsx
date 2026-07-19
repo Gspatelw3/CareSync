@@ -5,6 +5,8 @@ import { FormField, FormSection } from "@/components/ui/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { useBillingStore } from "@/lib/stores";
 import { useToast } from "@/lib/use-toast";
+import { validateRequired } from "@/lib/utils/validation";
+import { PATIENTS, INSURANCE_PROVIDERS, INVOICE_SERVICES, INVOICE_STATUSES } from "@/lib/constants/options";
 import type { Invoice } from "@/types";
 
 type InvoiceFormProps = {
@@ -52,23 +54,21 @@ export function InvoiceForm({ invoice, onClose, onSubmit }: InvoiceFormProps) {
         }
     }, [invoice]);
 
-    function validate() {
-        const next: Record<string, string> = {};
+  function validate() {
+    const next: Record<string, string> = {};
 
-        if (!formData.patient) {
-            next.patient = "Patient is required.";
-        }
+    const patientError = validateRequired(formData.patient, "Patient");
+    if (patientError) next.patient = patientError;
 
-        if (!formData.service) {
-            next.service = "Service is required.";
-        }
+    const serviceError = validateRequired(formData.service, "Service");
+    if (serviceError) next.service = serviceError;
 
-        if (!formData.amount) {
-            next.amount = "Amount is required.";
-        }
-
-        return next;
+    if (!formData.amount) {
+      next.amount = "Amount is required.";
     }
+
+    return next;
+  }
 
     const handleSubmit = useCallback(
         async (e?: React.FormEvent) => {
@@ -135,16 +135,7 @@ export function InvoiceForm({ invoice, onClose, onSubmit }: InvoiceFormProps) {
                         setFormData({ ...formData, patient: value })
                     }
                     error={errors.patient}
-                    options={[
-                        { label: "Meera Iyer", value: "Meera Iyer" },
-                        { label: "Arjun Menon", value: "Arjun Menon" },
-                        { label: "Priya Nair", value: "Priya Nair" },
-                        { label: "Vikram Singh", value: "Vikram Singh" },
-                        { label: "Sneha Patel", value: "Sneha Patel" },
-                        { label: "Ravi Kumar", value: "Ravi Kumar" },
-                        { label: "Neha Joshi", value: "Neha Joshi" },
-                        { label: "Mohan Das", value: "Mohan Das" },
-                    ]}
+                    options={PATIENTS}
                 />
             </FormSection>
 
@@ -157,37 +148,7 @@ export function InvoiceForm({ invoice, onClose, onSubmit }: InvoiceFormProps) {
                         setFormData({ ...formData, service: value })
                     }
                     error={errors.service}
-                    options={[
-                        {
-                            label: "Cardiology Consultation + ECG",
-                            value: "Cardiology Consultation + ECG",
-                        },
-                        {
-                            label: "Orthopedic Surgery",
-                            value: "Orthopedic Surgery",
-                        },
-                        {
-                            label: "General Check-up",
-                            value: "General Check-up",
-                        },
-                        { label: "ICU Care", value: "ICU Care" },
-                        {
-                            label: "Pediatric Vaccination",
-                            value: "Pediatric Vaccination",
-                        },
-                        {
-                            label: "Neurology Consultation",
-                            value: "Neurology Consultation",
-                        },
-                        {
-                            label: "Dermatology Treatment",
-                            value: "Dermatology Treatment",
-                        },
-                        {
-                            label: "Physiotherapy Session",
-                            value: "Physiotherapy Session",
-                        },
-                    ]}
+                    options={INVOICE_SERVICES}
                 />
                 <div className="grid grid-cols-2 gap-4">
                     <FormField
@@ -207,12 +168,7 @@ export function InvoiceForm({ invoice, onClose, onSubmit }: InvoiceFormProps) {
                         onChange={(value) =>
                             setFormData({ ...formData, insurance: value })
                         }
-                        options={[
-                            { label: "None", value: "None" },
-                            { label: "Star Health", value: "Star Health" },
-                            { label: "HDFC Ergo", value: "HDFC Ergo" },
-                            { label: "ICICI Lombard", value: "ICICI Lombard" },
-                        ]}
+                        options={INSURANCE_PROVIDERS}
                     />
                 </div>
             </FormSection>
@@ -259,11 +215,7 @@ export function InvoiceForm({ invoice, onClose, onSubmit }: InvoiceFormProps) {
                                 status: value as Invoice["status"],
                             })
                         }
-                        options={[
-                            { label: "Pending", value: "Pending" },
-                            { label: "Paid", value: "Paid" },
-                            { label: "Partial", value: "Partial" },
-                        ]}
+                        options={INVOICE_STATUSES}
                     />
                 </div>
             </FormSection>

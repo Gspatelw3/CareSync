@@ -1,34 +1,38 @@
 "use client";
 
+import { lazy } from "react";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { usePatientStore } from "@/lib/stores";
 import { initializeMockPatients } from "@/lib/stores/use-patient-store";
-import { PatientForm } from "@/components/patients/patient-form";
-import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Patient } from "@/types";
+import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
+
+// Lazy load PatientForm to reduce initial bundle size
+const LazyPatientForm = lazy(() => import("@/components/patients/patient-form").then(mod => ({ default: mod.PatientForm })));
 
 export default function PatientsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [patientToDelete, setPatientToDelete] = useState<string | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
-  const { 
-    patients, 
-    getFilteredPatients, 
-    getPaginatedPatients, 
-    deletePatient, 
-    bulkDelete,
-    searchQuery,
-    setSearchQuery,
-    filterStatus,
-    setFilterStatus
-  } = usePatientStore();
+  const patients = usePatientStore((state) => state.patients);
+  const getPaginatedPatients = usePatientStore((state) => state.getPaginatedPatients);
+  const deletePatient = usePatientStore((state) => state.deletePatient);
+  const bulkDelete = usePatientStore((state) => state.bulkDelete);
+  const bulkUpdateStatus = usePatientStore((state) => state.bulkUpdateStatus);
+  const filterStatus = usePatientStore((state) => state.filterStatus);
+  const setFilterStatus = usePatientStore((state) => state.setFilterStatus);
   
   const { addToast } = useToast();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -39,35 +43,54 @@ export default function PatientsPage() {
     setIsInitialized(true);
   }, []);
 
-  const filteredPatients = getFilteredPatients();
   const paginatedPatients = getPaginatedPatients();
 
-  const stats = [
-    { label: "Total Patients", value: patients.length.toLocaleString(), delta: "+8.2%", detail: `${patients.filter(p => p.status === "Active").length} active today` },
+  const stats = useMemo(() => {
+    const activeCount = patients.filter((p) => p.status === "Active").length;
+    const icuCount = patients.filter((p) => p.status === "ICU").length;
+
+    return [
+    { label: "Total Patients", value: patients.length.toLocaleString(), delta: "+8.2%", detail: `${activeCount} active today` },
     { label: "New This Week", value: "147", delta: "+12.5%", detail: "vs. last week" },
-    { label: "ICU / Critical", value: patients.filter(p => p.status === "ICU").length.toString(), delta: "11 observed", detail: "86% occupancy" },
+    { label: "ICU / Critical", value: icuCount.toString(), delta: "11 observed", detail: "86% occupancy" },
     { label: "Avg. Stay", value: "4.2 days", delta: "−0.6 days", detail: "reducing YTD" },
   ];
+  }, [patients]);
 
-  const handleEdit = (patient: Patient) => {
+  const handleEdit = useCallback((patient: Patient) => {
     setEditingPatient(patient);
-  };
+  }, []);
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this patient?")) {
-      deletePatient(id);
+  const handleDelete = useCallback((id: string) => {
+    setPatientToDelete(id);
+    setDeleteConfirmOpen(true);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (patientToDelete) {
+      deletePatient(patientToDelete);
       addToast("Patient deleted successfully", "success");
+      setPatientToDelete(null);
     }
-  };
+  }, [addToast, deletePatient, patientToDelete]);
 
-  const handleBulkDelete = (ids: string[]) => {
-    if (confirm(`Are you sure you want to delete ${ids.length} patients?`)) {
-      bulkDelete(ids);
-      addToast(`${ids.length} patients deleted successfully`, "success");
-    }
-  };
+  const handleBulkDelete = useCallback((ids: string[]) => {
+    setIdsToDelete(ids);
+    setBulkDeleteConfirmOpen(true);
+  }, []);
 
-  const columns = [
+  const confirmBulkDelete = useCallback(() => {
+    bulkDelete(idsToDelete);
+    addToast(`${idsToDelete.length} patients deleted successfully`, "success");
+    setIdsToDelete([]);
+  }, [addToast, bulkDelete, idsToDelete]);
+
+  const handleBulkStatusUpdate = useCallback((ids: string[], status: string) => {
+    bulkUpdateStatus(ids, status as Patient["status"]);
+    addToast(`Updated ${ids.length} patients to ${status}`, "success");
+  }, [addToast, bulkUpdateStatus]);
+
+  const columns = useMemo(() => [
     { key: "id", label: "ID", sortable: true },
     { key: "name", label: "Name", sortable: true },
     { key: "gender", label: "Gender", sortable: true },
@@ -77,14 +100,59 @@ export default function PatientsPage() {
     { key: "doctor", label: "Doctor", sortable: true },
     { key: "status", label: "Status", sortable: true },
     { key: "lastVisit", label: "Last Visit", sortable: true },
-  ];
+    { key: "actions", label: "Actions", sortable: false },
+  ], []);
 
-  const filterOptions = [
+  const filterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
     { label: "Active", value: "Active" },
     { label: "Discharged", value: "Discharged" },
     { label: "ICU", value: "ICU" },
-  ];
+  ], []);
+
+  const renderCell = useCallback((patient: Patient, column: { key: string }) => {
+    switch (column.key) {
+      case "id":
+        return <span className="font-semibold text-[var(--care-primary)]">{patient.id}</span>;
+      case "name":
+        return <span className="text-[var(--text-primary)] font-medium">{patient.name}</span>;
+      case "status":
+        return (
+          <StatusBadge
+            variant={patient.status === "Discharged" ? "info" : patient.status === "ICU" ? "danger" : "default"}
+          >
+            {patient.status}
+          </StatusBadge>
+        );
+      case "actions":
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(patient);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-[var(--care-primary)] hover:bg-[var(--care-primary)]/10 transition-colors"
+              title="Edit"
+            >
+              <Pencil className="size-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(patient.id);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-red-400 hover:bg-red-400/10 transition-colors"
+              title="Delete"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        );
+      default:
+        return <span className="text-[var(--text-secondary)]">{String(patient[column.key as keyof Patient] || "")}</span>;
+    }
+  }, [handleDelete, handleEdit]);
 
   if (!isInitialized) {
     return (
@@ -125,32 +193,14 @@ export default function PatientsPage() {
             columns={columns}
             data={paginatedPatients}
             getRowId={(patient) => patient.id}
-            renderCell={(patient, column) => {
-              switch (column.key) {
-                case "id":
-                  return <span className="font-semibold text-[var(--care-primary)]">{patient.id}</span>;
-                case "name":
-                  return <span className="text-[var(--text-primary)] font-medium">{patient.name}</span>;
-                case "status":
-                  return (
-                    <StatusBadge
-                      variant={patient.status === "Discharged" ? "info" : patient.status === "ICU" ? "danger" : "default"}
-                    >
-                      {patient.status}
-                    </StatusBadge>
-                  );
-                default:
-                  return <span className="text-[var(--text-secondary)]">{String(patient[column.key as keyof Patient] || "")}</span>;
-              }
-            }}
+            renderCell={renderCell}
             searchPlaceholder="Search patients..."
             filterOptions={filterOptions}
             currentFilter={filterStatus}
-            onFilterChange={setSearchQuery}
+            onFilterChange={setFilterStatus}
             onRowClick={handleEdit}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
             onBulkDelete={handleBulkDelete}
+            onBulkStatusUpdate={handleBulkStatusUpdate}
             emptyMessage="No patients found"
           />
         </Card>
@@ -166,7 +216,7 @@ export default function PatientsPage() {
         trigger={<div />}
         showFooter={false}
       >
-        <PatientForm onClose={() => setIsAddModalOpen(false)} />
+        <LazyPatientForm onClose={() => setIsAddModalOpen(false)} />
       </ActionModal>
 
       {/* Edit Patient Modal */}
@@ -180,9 +230,31 @@ export default function PatientsPage() {
         showFooter={false}
       >
         {editingPatient && (
-          <PatientForm patient={editingPatient} onClose={() => setEditingPatient(null)} />
+          <LazyPatientForm patient={editingPatient} onClose={() => setEditingPatient(null)} />
         )}
       </ActionModal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Patient"
+        description="Are you sure you want to delete this patient? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        variant="danger"
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={bulkDeleteConfirmOpen}
+        onOpenChange={setBulkDeleteConfirmOpen}
+        title="Delete Multiple Patients"
+        description={`Are you sure you want to delete ${idsToDelete.length} patients? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        onConfirm={confirmBulkDelete}
+        variant="danger"
+      />
     </PageShell>
   );
 }

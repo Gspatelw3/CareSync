@@ -3,34 +3,35 @@
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { Calendar, Plus } from "lucide-react";
+import { Calendar, Plus, Pencil, Trash2 } from "lucide-react";
 import { ActionButton, SecondaryButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAppointmentStore } from "@/lib/stores";
 import { initializeMockAppointments } from "@/lib/stores/use-appointment-store";
-import { AppointmentForm } from "@/components/appointments/appointment-form";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy } from "react";
 import type { Appointment } from "@/types";
+
+// Lazy load AppointmentForm to reduce initial bundle size
+const LazyAppointmentForm = lazy(() => import("@/components/appointments/appointment-form").then(mod => ({ default: mod.AppointmentForm })));
 
 export default function AppointmentsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
-  const { 
-    appointments, 
-    getFilteredAppointments, 
-    getPaginatedAppointments, 
-    deleteAppointment, 
-    bulkDelete,
-    searchQuery,
-    setSearchQuery,
-    filterStatus,
-    filterType,
-    setFilterStatus,
-    setFilterType
-  } = useAppointmentStore();
+  const appointments = useAppointmentStore((state) => state.appointments);
+  const getPaginatedAppointments = useAppointmentStore((state) => state.getPaginatedAppointments);
+  const deleteAppointment = useAppointmentStore((state) => state.deleteAppointment);
+  const bulkDelete = useAppointmentStore((state) => state.bulkDelete);
+  const bulkUpdateStatus = useAppointmentStore((state) => state.bulkUpdateStatus);
+  const filterStatus = useAppointmentStore((state) => state.filterStatus);
+  const setFilterStatus = useAppointmentStore((state) => state.setFilterStatus);
   
   const { addToast } = useToast();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -41,52 +42,72 @@ export default function AppointmentsPage() {
     setIsInitialized(true);
   }, []);
 
-  const filteredAppointments = getFilteredAppointments();
   const paginatedAppointments = getPaginatedAppointments();
 
-  const stats = [
-    { label: "Today's Appointments", value: appointments.length.toString(), delta: `${appointments.filter(a => a.status === "Waiting").length} pending`, detail: `${appointments.filter(a => a.status === "Checked in").length} completed check-ins` },
-    { label: "Checked In", value: appointments.filter(a => a.status === "Checked in").length.toString(), delta: "12 in waiting", detail: "avg. 14 min wait" },
+  const stats = useMemo(() => {
+    const waitingCount = appointments.filter((a) => a.status === "Waiting").length;
+    const checkedInCount = appointments.filter((a) => a.status === "Checked in").length;
+
+    return [
+    { label: "Today's Appointments", value: appointments.length.toString(), delta: `${waitingCount} pending`, detail: `${checkedInCount} completed check-ins` },
+    { label: "Checked In", value: checkedInCount.toString(), delta: "12 in waiting", detail: "avg. 14 min wait" },
     { label: "Cancelled Today", value: "0", delta: "0 rescheduled", detail: "0 no-shows" },
     { label: "Next Week", value: "418", delta: "24 open slots", detail: "89% booked" },
   ];
+  }, [appointments]);
 
-  const handleEdit = (appointment: Appointment) => {
+  const handleEdit = useCallback((appointment: Appointment) => {
     setEditingAppointment(appointment);
-  };
+  }, []);
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this appointment?")) {
-      deleteAppointment(id);
+  const handleDelete = useCallback((id: string) => {
+    setAppointmentToDelete(id);
+    setDeleteConfirmOpen(true);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (appointmentToDelete) {
+      deleteAppointment(appointmentToDelete);
       addToast("Appointment deleted successfully", "success");
+      setAppointmentToDelete(null);
     }
-  };
+  }, [addToast, deleteAppointment, appointmentToDelete]);
 
-  const handleBulkDelete = (ids: string[]) => {
-    if (confirm(`Are you sure you want to delete ${ids.length} appointments?`)) {
-      bulkDelete(ids);
-      addToast(`${ids.length} appointments deleted successfully`, "success");
-    }
-  };
+  const handleBulkDelete = useCallback((ids: string[]) => {
+    setIdsToDelete(ids);
+    setBulkDeleteConfirmOpen(true);
+  }, []);
 
-  const columns = [
+  const confirmBulkDelete = useCallback(() => {
+    bulkDelete(idsToDelete);
+    addToast(`${idsToDelete.length} appointments deleted successfully`, "success");
+    setIdsToDelete([]);
+  }, [addToast, bulkDelete, idsToDelete]);
+
+  const handleBulkStatusUpdate = useCallback((ids: string[], status: string) => {
+    bulkUpdateStatus(ids, status as Appointment["status"]);
+    addToast(`Updated ${ids.length} appointments to ${status}`, "success");
+  }, [addToast, bulkUpdateStatus]);
+
+  const columns = useMemo(() => [
     { key: "time", label: "Time", sortable: true },
     { key: "patient", label: "Patient", sortable: true },
     { key: "care", label: "Care", sortable: true },
     { key: "doctor", label: "Doctor", sortable: true },
     { key: "type", label: "Type", sortable: true },
     { key: "status", label: "Status", sortable: true },
-  ];
+    { key: "actions", label: "Actions", sortable: false },
+  ], []);
 
-  const statusFilterOptions = [
+  const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
     { label: "Checked in", value: "Checked in" },
     { label: "Waiting", value: "Waiting" },
     { label: "Confirmed", value: "Confirmed" },
     { label: "Sample due", value: "Sample due" },
-  ];
+  ], []);
 
-  const typeFilterOptions = [
+  const typeFilterOptions = useMemo(() => [
     { label: "All Types", value: "all" },
     { label: "Consultation", value: "Consultation" },
     { label: "Follow-up", value: "Follow-up" },
@@ -95,7 +116,51 @@ export default function AppointmentsPage() {
     { label: "Vaccination", value: "Vaccination" },
     { label: "ECG", value: "ECG" },
     { label: "Physiotherapy", value: "Physiotherapy" },
-  ];
+  ], []);
+
+  const renderCell = useCallback((appointment: Appointment, column: { key: string }) => {
+    switch (column.key) {
+      case "time":
+        return <span className="font-semibold text-[var(--text-primary)]">{appointment.time}</span>;
+      case "patient":
+        return <span className="text-[var(--text-secondary)] font-medium">{appointment.patient}</span>;
+      case "status":
+        return (
+          <StatusBadge
+            variant={appointment.status === "Waiting" || appointment.status === "Sample due" ? "warning" : "default"}
+          >
+            {appointment.status}
+          </StatusBadge>
+        );
+      case "actions":
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(appointment);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-[var(--care-primary)] hover:bg-[var(--care-primary)]/10 transition-colors"
+              title="Edit"
+            >
+              <Pencil className="size-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(appointment.id);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-red-400 hover:bg-red-400/10 transition-colors"
+              title="Delete"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        );
+      default:
+        return <span className="text-[var(--text-secondary)]">{String(appointment[column.key as keyof Appointment] || "")}</span>;
+    }
+  }, [handleDelete, handleEdit]);
 
   if (!isInitialized) {
     return (
@@ -179,31 +244,14 @@ export default function AppointmentsPage() {
             columns={columns}
             data={paginatedAppointments}
             getRowId={(appointment) => appointment.id}
-            renderCell={(appointment, column) => {
-              switch (column.key) {
-                case "time":
-                  return <span className="font-semibold text-[var(--text-primary)]">{appointment.time}</span>;
-                case "patient":
-                  return <span className="text-[var(--text-secondary)] font-medium">{appointment.patient}</span>;
-                case "status":
-                  return (
-                    <StatusBadge
-                      variant={appointment.status === "Waiting" || appointment.status === "Sample due" ? "warning" : "default"}
-                    >
-                      {appointment.status}
-                    </StatusBadge>
-                  );
-                default:
-                  return <span className="text-[var(--text-secondary)]">{String(appointment[column.key as keyof Appointment] || "")}</span>;
-              }
-            }}
+            renderCell={renderCell}
             searchPlaceholder="Search appointments..."
             filterOptions={statusFilterOptions}
             currentFilter={filterStatus}
             onFilterChange={setFilterStatus}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
+            onBulkStatusUpdate={handleBulkStatusUpdate}
             emptyMessage="No appointments found"
           />
         </Card>
@@ -260,10 +308,7 @@ export default function AppointmentsPage() {
         trigger={<div />}
         showFooter={false}
       >
-        <AppointmentForm onClose={() => setIsAddModalOpen(false)} onSubmit={(submitFn) => {
-          // Store the submit function so the modal can call it
-          // The form's submit button will trigger the form's onSubmit
-        }} />
+        <LazyAppointmentForm onClose={() => setIsAddModalOpen(false)} />
       </ActionModal>
 
       {/* Edit Appointment Modal */}
@@ -277,11 +322,31 @@ export default function AppointmentsPage() {
         showFooter={false}
       >
         {editingAppointment && (
-          <AppointmentForm appointment={editingAppointment} onClose={() => setEditingAppointment(null)} onSubmit={(submitFn) => {
-            // Store the submit function so the modal can call it
-          }} />
+          <LazyAppointmentForm appointment={editingAppointment} onClose={() => setEditingAppointment(null)} />
         )}
       </ActionModal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Appointment"
+        description="Are you sure you want to delete this appointment? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        variant="danger"
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={bulkDeleteConfirmOpen}
+        onOpenChange={setBulkDeleteConfirmOpen}
+        title="Delete Multiple Appointments"
+        description={`Are you sure you want to delete ${idsToDelete.length} appointments? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        onConfirm={confirmBulkDelete}
+        variant="danger"
+      />
     </PageShell>
   );
 }

@@ -3,34 +3,33 @@
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormField } from "@/components/ui/forms/form-field";
 import { useInventoryStore } from "@/lib/stores";
 import { initializeMockInventory } from "@/lib/stores/use-inventory-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { InventoryItem } from "@/types";
 
 export default function PharmacyPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
-  const { 
-    inventory, 
-    getFilteredInventory, 
-    getPaginatedInventory, 
-    deleteInventoryItem, 
-    bulkDelete,
-    searchQuery,
-    setSearchQuery,
-    filterStatus,
-    filterCategory,
-    setFilterStatus,
-    setFilterCategory
-  } = useInventoryStore();
+  const inventory = useInventoryStore((state) => state.inventory);
+  const getPaginatedInventory = useInventoryStore((state) => state.getPaginatedInventory);
+  const deleteInventoryItem = useInventoryStore((state) => state.deleteInventoryItem);
+  const bulkDelete = useInventoryStore((state) => state.bulkDelete);
+  const bulkUpdateStatus = useInventoryStore((state) => state.bulkUpdateStatus);
+  const filterStatus = useInventoryStore((state) => state.filterStatus);
+  const setFilterStatus = useInventoryStore((state) => state.setFilterStatus);
   
   const { addToast } = useToast();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -41,35 +40,60 @@ export default function PharmacyPage() {
     setIsInitialized(true);
   }, []);
 
-  const filteredInventory = getFilteredInventory();
   const paginatedInventory = getPaginatedInventory();
 
-  const stats = [
-    { label: "Total Items", value: inventory.length.toString(), delta: `${inventory.filter(i => i.status === "In stock").length} in stock`, detail: `${inventory.filter(i => i.status === "Critical").length} critical` },
-    { label: "Low Stock", value: inventory.filter(i => i.status === "Low stock").length.toString(), delta: "Needs reorder", detail: "Check expiry dates" },
-    { label: "Critical", value: inventory.filter(i => i.status === "Critical").length.toString(), delta: "Urgent action", detail: "Reorder immediately" },
-    { label: "Categories", value: [...new Set(inventory.map(i => i.category))].length.toString(), delta: "Active", detail: "All categories" },
-  ];
+  const stats = useMemo(() => {
+    const counts = inventory.reduce(
+      (acc, item) => {
+        acc.status[item.status] = (acc.status[item.status] ?? 0) + 1;
+        acc.categories.add(item.category);
+        return acc;
+      },
+      { categories: new Set<string>(), status: {} as Record<InventoryItem["status"], number> },
+    );
 
-  const handleEdit = (item: InventoryItem) => {
+    return [
+      { label: "Total Items", value: inventory.length.toString(), delta: `${counts.status["In stock"] ?? 0} in stock`, detail: `${counts.status.Critical ?? 0} critical` },
+      { label: "Low Stock", value: (counts.status["Low stock"] ?? 0).toString(), delta: "Needs reorder", detail: "Check expiry dates" },
+      { label: "Critical", value: (counts.status.Critical ?? 0).toString(), delta: "Urgent action", detail: "Reorder immediately" },
+      { label: "Categories", value: counts.categories.size.toString(), delta: "Active", detail: "All categories" },
+    ];
+  }, [inventory]);
+
+  const handleEdit = useCallback((item: InventoryItem) => {
     setEditingItem(item);
-  };
+  }, []);
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this inventory item?")) {
-      deleteInventoryItem(id);
+  const handleDelete = useCallback((id: string) => {
+    setItemToDelete(id);
+    setDeleteConfirmOpen(true);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (itemToDelete) {
+      deleteInventoryItem(itemToDelete);
       addToast("Inventory item deleted successfully", "success");
+      setItemToDelete(null);
     }
-  };
+  }, [addToast, deleteInventoryItem, itemToDelete]);
 
-  const handleBulkDelete = (ids: string[]) => {
-    if (confirm(`Are you sure you want to delete ${ids.length} items?`)) {
-      bulkDelete(ids);
-      addToast(`${ids.length} items deleted successfully`, "success");
-    }
-  };
+  const handleBulkDelete = useCallback((ids: string[]) => {
+    setIdsToDelete(ids);
+    setBulkDeleteConfirmOpen(true);
+  }, []);
 
-  const columns = [
+  const confirmBulkDelete = useCallback(() => {
+    bulkDelete(idsToDelete);
+    addToast(`${idsToDelete.length} items deleted successfully`, "success");
+    setIdsToDelete([]);
+  }, [addToast, bulkDelete, idsToDelete]);
+
+  const handleBulkStatusUpdate = useCallback((ids: string[], status: string) => {
+    bulkUpdateStatus(ids, status as InventoryItem["status"]);
+    addToast(`Updated ${ids.length} items to ${status}`, "success");
+  }, [addToast, bulkUpdateStatus]);
+
+  const columns = useMemo(() => [
     { key: "id", label: "ID", sortable: true },
     { key: "name", label: "Name", sortable: true },
     { key: "category", label: "Category", sortable: true },
@@ -78,23 +102,68 @@ export default function PharmacyPage() {
     { key: "unit", label: "Unit", sortable: false },
     { key: "expiry", label: "Expiry", sortable: true },
     { key: "status", label: "Status", sortable: true },
-  ];
+    { key: "actions", label: "Actions", sortable: false },
+  ], []);
 
-  const statusFilterOptions = [
+  const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
     { label: "In Stock", value: "In stock" },
     { label: "Low Stock", value: "Low stock" },
     { label: "Critical", value: "Critical" },
-  ];
+  ], []);
 
-  const categoryFilterOptions = [
+  const categoryFilterOptions = useMemo(() => [
     { label: "All Categories", value: "all" },
     { label: "Pain Relief", value: "Pain Relief" },
     { label: "Antibiotics", value: "Antibiotics" },
     { label: "Diabetes", value: "Diabetes" },
     { label: "IV Fluids", value: "IV Fluids" },
     { label: "PPE", value: "PPE" },
-  ];
+  ], []);
+
+  const renderCell = useCallback((item: InventoryItem, column: { key: string }) => {
+    switch (column.key) {
+      case "id":
+        return <span className="font-semibold text-[var(--care-primary)]">{item.id}</span>;
+      case "name":
+        return <span className="text-[var(--text-primary)] font-medium">{item.name}</span>;
+      case "status":
+        return (
+          <StatusBadge
+            variant={item.status === "Critical" ? "danger" : item.status === "Low stock" ? "warning" : "default"}
+          >
+            {item.status}
+          </StatusBadge>
+        );
+      case "actions":
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(item);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-[var(--care-primary)] hover:bg-[var(--care-primary)]/10 transition-colors"
+              title="Edit"
+            >
+              <Pencil className="size-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(item.id);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-red-400 hover:bg-red-400/10 transition-colors"
+              title="Delete"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        );
+      default:
+        return <span className="text-[var(--text-secondary)]">{String(item[column.key as keyof InventoryItem] || "")}</span>;
+    }
+  }, [handleDelete, handleEdit]);
 
   if (!isInitialized) {
     return (
@@ -135,30 +204,14 @@ export default function PharmacyPage() {
             columns={columns}
             data={paginatedInventory}
             getRowId={(item) => item.id}
-            renderCell={(item, column) => {
-              switch (column.key) {
-                case "id":
-                  return <span className="font-semibold text-[var(--care-primary)]">{item.id}</span>;
-                case "name":
-                  return <span className="text-[var(--text-primary)] font-medium">{item.name}</span>;
-                case "status":
-                  return (
-                    <StatusBadge
-                      variant={item.status === "Critical" ? "danger" : item.status === "Low stock" ? "warning" : "default"}
-                    >
-                      {item.status}
-                    </StatusBadge>
-                  );
-                default:
-                  return <span className="text-[var(--text-secondary)]">{String(item[column.key as keyof InventoryItem] || "")}</span>;
-              }
-            }}
+            renderCell={renderCell}
             searchPlaceholder="Search inventory..."
             filterOptions={statusFilterOptions}
             currentFilter={filterStatus}
             onFilterChange={setFilterStatus}
             onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
+            onBulkStatusUpdate={handleBulkStatusUpdate}
             emptyMessage="No inventory items found"
           />
         </Card>
@@ -177,6 +230,7 @@ export default function PharmacyPage() {
           }
         }}
         trigger={<div />}
+        showFooter={false}
       >
         <div className="space-y-4">
           <div>
@@ -242,6 +296,28 @@ export default function PharmacyPage() {
           </div>
         </div>
       </ActionModal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Inventory Item"
+        description="Are you sure you want to delete this item? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        variant="danger"
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={bulkDeleteConfirmOpen}
+        onOpenChange={setBulkDeleteConfirmOpen}
+        title="Delete Multiple Items"
+        description={`Are you sure you want to delete ${idsToDelete.length} items? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        onConfirm={confirmBulkDelete}
+        variant="danger"
+      />
     </PageShell>
   );
 }

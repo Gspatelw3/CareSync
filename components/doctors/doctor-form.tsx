@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FormField, FormSection } from "@/components/ui/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { useDoctorStore } from "@/lib/stores";
 import { useToast } from "@/lib/use-toast";
+import { validateRequired, validatePhone, validateEmail, validateNonNegative } from "@/lib/utils/validation";
+import { DEPARTMENTS, DOCTORS, DOCTOR_STATUSES } from "@/lib/constants/options";
 import type { Doctor } from "@/types";
 
 type DoctorFormProps = {
@@ -47,33 +49,23 @@ export function DoctorForm({ doctor, onClose }: DoctorFormProps) {
   function validate() {
     const next: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      next.name = "Doctor name is required.";
-    }
+    const nameError = validateRequired(formData.name, "Doctor name");
+    if (nameError) next.name = nameError;
 
-    if (!formData.specialization) {
-      next.specialization = "Specialization is required.";
-    }
+    const specError = validateRequired(formData.specialization, "Specialization");
+    if (specError) next.specialization = specError;
 
-    if (!formData.department) {
-      next.department = "Department is required.";
-    }
+    const deptError = validateRequired(formData.department, "Department");
+    if (deptError) next.department = deptError;
 
-    if (!formData.phone.trim()) {
-      next.phone = "Phone number is required.";
-    } else if (!/^[+]?[\d\s()-]+$/.test(formData.phone)) {
-      next.phone = "Please enter a valid phone number.";
-    }
+    const phoneError = validatePhone(formData.phone);
+    if (phoneError) next.phone = phoneError;
 
-    if (!formData.email.trim()) {
-      next.email = "Email is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      next.email = "Please enter a valid email address.";
-    }
+    const emailError = validateEmail(formData.email);
+    if (emailError) next.email = emailError;
 
-    if (formData.patients < 0) {
-      next.patients = "Patients count cannot be negative.";
-    }
+    const patientsError = validateNonNegative(formData.patients, "Patients count");
+    if (patientsError) next.patients = patientsError;
 
     return next;
   }
@@ -155,16 +147,7 @@ export function DoctorForm({ doctor, onClose }: DoctorFormProps) {
           value={formData.specialization}
           onChange={(value) => setFormData({ ...formData, specialization: value })}
           error={errors.specialization}
-          options={[
-            { label: "Cardiology", value: "Cardiology" },
-            { label: "Orthopedics", value: "Orthopedics" },
-            { label: "General Medicine", value: "General Medicine" },
-            { label: "Neurology", value: "Neurology" },
-            { label: "Pediatrics", value: "Pediatrics" },
-            { label: "Obstetrics", value: "Obstetrics" },
-            { label: "Pulmonology", value: "Pulmonology" },
-            { label: "Dermatology", value: "Dermatology" },
-          ]}
+          options={DEPARTMENTS}
         />
         <FormField
           label="Department"
@@ -172,28 +155,14 @@ export function DoctorForm({ doctor, onClose }: DoctorFormProps) {
           value={formData.department}
           onChange={(value) => setFormData({ ...formData, department: value })}
           error={errors.department}
-          options={[
-            { label: "Cardiology", value: "Cardiology" },
-            { label: "Orthopedics", value: "Orthopedics" },
-            { label: "General", value: "General" },
-            { label: "Neurology", value: "Neurology" },
-            { label: "Pediatrics", value: "Pediatrics" },
-            { label: "Obstetrics", value: "Obstetrics" },
-            { label: "Respiratory", value: "Respiratory" },
-            { label: "Dermatology", value: "Dermatology" },
-          ]}
+          options={DEPARTMENTS}
         />
         <FormField
           label="Status"
           type="select"
           value={formData.status}
           onChange={(value) => setFormData({ ...formData, status: value as "On duty" | "Off duty" | "On leave" | "Available" })}
-          options={[
-            { label: "On Duty", value: "On duty" },
-            { label: "Off Duty", value: "Off duty" },
-            { label: "On Leave", value: "On leave" },
-            { label: "Available", value: "Available" },
-          ]}
+          options={DOCTOR_STATUSES}
         />
       </FormSection>
 

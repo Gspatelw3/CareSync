@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useCallback,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -57,8 +58,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const contextValue = useMemo(
+    () => ({ theme, toggleTheme, mounted }),
+    [mounted, theme, toggleTheme],
+  );
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

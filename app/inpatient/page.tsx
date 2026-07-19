@@ -11,7 +11,7 @@ import { useAdmissionStore } from "@/lib/stores";
 import { initializeMockAdmissions } from "@/lib/stores/use-admission-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Admission } from "@/types";
 import {
   calculateBedStatistics,
@@ -25,19 +25,14 @@ export default function InpatientPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingAdmission, setEditingAdmission] = useState<Admission | null>(null);
   
-  const { 
-    admissions, 
-    getFilteredAdmissions, 
-    getPaginatedAdmissions, 
-    deleteAdmission, 
-    bulkDelete,
-    searchQuery,
-    setSearchQuery,
-    filterStatus,
-    filterWard,
-    setFilterStatus,
-    setFilterWard
-  } = useAdmissionStore();
+  const admissions = useAdmissionStore((state) => state.admissions);
+  const getPaginatedAdmissions = useAdmissionStore((state) => state.getPaginatedAdmissions);
+  const deleteAdmission = useAdmissionStore((state) => state.deleteAdmission);
+  const bulkDelete = useAdmissionStore((state) => state.bulkDelete);
+  const filterStatus = useAdmissionStore((state) => state.filterStatus);
+  const filterWard = useAdmissionStore((state) => state.filterWard);
+  const setFilterStatus = useAdmissionStore((state) => state.setFilterStatus);
+  const setFilterWard = useAdmissionStore((state) => state.setFilterWard);
 
   const [tempFilterWard, setTempFilterWard] = useState(filterWard);
   const [tempFilterStatus, setTempFilterStatus] = useState(filterStatus);
@@ -51,20 +46,42 @@ export default function InpatientPage() {
     setIsInitialized(true);
   }, []);
 
-  const filteredAdmissions = getFilteredAdmissions();
   const paginatedAdmissions = getPaginatedAdmissions();
 
-  // Calculate bed statistics from single source of truth
-  const bedStats = calculateBedStatistics(admissions);
-  const { totalBeds, occupiedBeds, availableBeds, occupancyRate, icuStats } = bedStats;
+  const bedStats = useMemo(() => calculateBedStatistics(admissions), [admissions]);
+  const { totalBeds, availableBeds, occupancyRate, icuStats } = bedStats;
 
-  // Validate calculations
-  const isValid = validateBedCalculations(admissions);
-  if (!isValid) {
-    console.error("Bed calculation validation failed");
-  }
+  useEffect(() => {
+    const isValid = validateBedCalculations(admissions);
+    if (!isValid) {
+      console.error("Bed calculation validation failed");
+    }
+  }, [admissions]);
 
-  const stats = [
+  const wardNames = useMemo(() => getWardNames(), []);
+  const wardOverview = useMemo(
+    () => wardNames.map((ward) => ({ ward, ...calculateWardStats(ward, admissions) })),
+    [admissions, wardNames],
+  );
+  const patientOptions = useMemo(
+    () => [
+      { label: "Select patient...", value: "" },
+      ...admissions.map((a) => ({ label: a.patient, value: a.patient })),
+    ],
+    [admissions],
+  );
+  const wardOptions = useMemo(
+    () => wardOverview.map(({ ward, available }) => ({
+      label: `${ward} (${available} available)`,
+      value: ward,
+    })),
+    [wardOverview],
+  );
+
+  const stats = useMemo(() => {
+    const admissionsToday = admissions.filter((a) => a.admitted === "2026-06-19").length;
+
+    return [
     {
       label: "Total Beds",
       value: totalBeds.toString(),
@@ -79,7 +96,7 @@ export default function InpatientPage() {
     },
     {
       label: "Admissions Today",
-      value: admissions.filter(a => a.admitted === "2026-06-19").length.toString(),
+      value: admissionsToday.toString(),
       delta: "3 discharges",
       detail: "net +4"
     },
@@ -90,26 +107,27 @@ export default function InpatientPage() {
       detail: "General: 4.1 days"
     },
   ];
+  }, [admissions, availableBeds, icuStats.available, icuStats.capacity, icuStats.occupancyPct, occupancyRate, totalBeds]);
 
-  const handleEdit = (admission: Admission) => {
+  const handleEdit = useCallback((admission: Admission) => {
     setEditingAdmission(admission);
-  };
+  }, []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     if (confirm("Are you sure you want to delete this admission record?")) {
       deleteAdmission(id);
       addToast("Admission record deleted successfully", "success");
     }
-  };
+  }, [addToast, deleteAdmission]);
 
-  const handleBulkDelete = (ids: string[]) => {
+  const handleBulkDelete = useCallback((ids: string[]) => {
     if (confirm(`Are you sure you want to delete ${ids.length} admission records?`)) {
       bulkDelete(ids);
       addToast(`${ids.length} admission records deleted successfully`, "success");
     }
-  };
+  }, [addToast, bulkDelete]);
 
-  const columns = [
+  const columns = useMemo(() => [
     { key: "id", label: "ID", sortable: true },
     { key: "patient", label: "Patient", sortable: true },
     { key: "ward", label: "Ward", sortable: true },
@@ -118,18 +136,18 @@ export default function InpatientPage() {
     { key: "admitted", label: "Admitted", sortable: true },
     { key: "diagnosis", label: "Diagnosis", sortable: false },
     { key: "status", label: "Status", sortable: true },
-  ];
+  ], []);
 
-  const statusFilterOptions = [
+  const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
     { label: "Critical", value: "Critical" },
     { label: "Stable", value: "Stable" },
     { label: "Observation", value: "Observation" },
     { label: "Recovering", value: "Recovering" },
     { label: "Discharge soon", value: "Discharge soon" },
-  ];
+  ], []);
 
-  const wardFilterOptions = [
+  const wardFilterOptions = useMemo(() => [
     { label: "All Wards", value: "all" },
     { label: "ICU", value: "ICU" },
     { label: "Emergency", value: "Emergency" },
@@ -139,7 +157,7 @@ export default function InpatientPage() {
     { label: "Pediatrics", value: "Pediatrics" },
     { label: "Isolation", value: "Isolation" },
     { label: "Recovery", value: "Recovery" },
-  ];
+  ], []);
 
   if (!isInitialized) {
     return (
@@ -211,9 +229,7 @@ export default function InpatientPage() {
         <Card title="Ward Overview" description="Bed occupancy by ward.">
           <div className="p-5">
             <div className="grid gap-4">
-              {getWardNames().map((ward) => {
-                const wardStats = calculateWardStats(ward, admissions);
-                const { capacity, occupied, available, occupancyPct } = wardStats;
+              {wardOverview.map(({ ward, capacity, occupied, available, occupancyPct }) => {
                 return (
                   <div className="flex flex-col gap-2" key={ward}>
                     <div className="flex items-center justify-between">
@@ -287,8 +303,7 @@ export default function InpatientPage() {
             value=""
             onChange={() => {}}
             options={[
-              { label: "Select patient...", value: "" },
-              ...admissions.map(a => ({ label: a.patient, value: a.patient }))
+              ...patientOptions
             ]}
           />
           <FormField
@@ -296,13 +311,7 @@ export default function InpatientPage() {
             type="select"
             value=""
             onChange={() => {}}
-            options={getWardNames().map(ward => {
-              const wardStats = calculateWardStats(ward, admissions);
-              return {
-                label: `${ward} (${wardStats.available} available)`,
-                value: ward
-              };
-            })}
+            options={wardOptions}
           />
           <div>
             <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Diagnosis</label>

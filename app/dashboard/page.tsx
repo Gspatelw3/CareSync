@@ -12,54 +12,51 @@ import { usePatientStore } from "@/lib/stores";
 import { useDoctorStore } from "@/lib/stores";
 import { useAppointmentStore } from "@/lib/stores";
 import { useAdmissionStore } from "@/lib/stores";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { calculateBedStatistics, validateBedCalculations } from "@/lib/utils/bed-calculations";
 
 export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false);
   
-  const { patients } = usePatientStore();
-  const { doctors } = useDoctorStore();
-  const { appointments } = useAppointmentStore();
-  const { admissions } = useAdmissionStore();
+  const patients = usePatientStore((state) => state.patients);
+  const doctors = useDoctorStore((state) => state.doctors);
+  const appointments = useAppointmentStore((state) => state.appointments);
+  const admissions = useAdmissionStore((state) => state.admissions);
 
   useEffect(() => {
     // Data is auto-initialized via store-initializer component in layout
     setIsClient(true);
   }, []);
 
-  // Calculate dynamic stats
-  const totalPatients = patients.length;
-  const totalDoctors = doctors.length;
-  const doctorsOnDuty = doctors.filter(d => d.status === "On duty").length;
-  const todayAppointments = appointments.length;
-  const pendingAppointments = appointments.filter(a => a.status === "Waiting" || a.status === "Confirmed").length;
-  const completedCheckins = appointments.filter(a => a.status === "Checked in").length;
-  
-  // Calculate bed statistics from single source of truth
-  const bedStats = calculateBedStatistics(admissions);
-  const { totalBeds, occupiedBeds, availableBeds, occupancyRate, icuStats } = bedStats;
+  const bedStats = useMemo(() => calculateBedStatistics(admissions), [admissions]);
+  const { availableBeds, occupancyRate, icuStats } = bedStats;
 
-  // Validate calculations
-  if (isClient) {
+  useEffect(() => {
+    if (!isClient) return;
     const isValid = validateBedCalculations(admissions);
     if (!isValid) {
       console.error("Bed calculation validation failed");
     }
-  }
+  }, [admissions, isClient]);
 
-  const stats = [
+  const stats = useMemo(() => {
+    const activePatients = patients.filter((p) => p.status === "Active").length;
+    const doctorsOnDuty = doctors.filter((d) => d.status === "On duty").length;
+    const pendingAppointments = appointments.filter((a) => a.status === "Waiting" || a.status === "Confirmed").length;
+    const completedCheckins = appointments.filter((a) => a.status === "Checked in").length;
+
+    return [
     {
       label: "Total Patients",
-      value: totalPatients.toLocaleString(),
+      value: patients.length.toLocaleString(),
       delta: "+8.2%",
-      detail: `${patients.filter(p => p.status === "Active").length} active today`,
+      detail: `${activePatients} active today`,
       icon: Users,
       href: "/patients",
     },
     {
       label: "Total Doctors",
-      value: totalDoctors.toString(),
+      value: doctors.length.toString(),
       delta: `${doctorsOnDuty} on duty`,
       detail: "14 departments covered",
       icon: UserPlus,
@@ -67,7 +64,7 @@ export default function DashboardPage() {
     },
     {
       label: "Today's Appointments",
-      value: todayAppointments.toString(),
+      value: appointments.length.toString(),
       delta: `${pendingAppointments} pending`,
       detail: `${completedCheckins} completed check-ins`,
       icon: Calendar,
@@ -82,9 +79,10 @@ export default function DashboardPage() {
       href: "/inpatient",
     },
   ];
+  }, [appointments, availableBeds, doctors, icuStats.available, occupancyRate, patients]);
 
   // Get today's appointments (first 4)
-  const todayAppts = appointments.slice(0, 4);
+  const todayAppts = useMemo(() => appointments.slice(0, 4), [appointments]);
 
   // Recent activities based on data
   const activities = [
@@ -95,7 +93,6 @@ export default function DashboardPage() {
   ];
 
   // Critical alerts based on data
-  const criticalPatients = patients.filter(p => p.status === "ICU").length;
   const criticalInventory = 9; // This would come from pharmacy store
   const pendingLabReports = 31; // This would come from lab store
 

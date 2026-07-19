@@ -3,32 +3,35 @@
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { ActionButton } from "@/components/ui/action-buttons";
 import { ActionModal } from "@/components/ui/action-modal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useBillingStore } from "@/lib/stores";
 import { initializeMockInvoices } from "@/lib/stores/use-billing-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useEffect, useState } from "react";
-import { InvoiceForm } from "./invoice-form";
+import { useCallback, useEffect, useMemo, useState, lazy } from "react";
 import type { Invoice } from "@/types";
+
+// Lazy load InvoiceForm to reduce initial bundle size
+const LazyInvoiceForm = lazy(() => import("./invoice-form").then(mod => ({ default: mod.InvoiceForm })));
 
 export default function BillingPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
-  const { 
-    invoices, 
-    getFilteredInvoices, 
-    getPaginatedInvoices, 
-    deleteInvoice, 
-    bulkDelete,
-    searchQuery,
-    setSearchQuery,
-    filterStatus,
-    setFilterStatus
-  } = useBillingStore();
+  const invoices = useBillingStore((state) => state.invoices);
+  const getPaginatedInvoices = useBillingStore((state) => state.getPaginatedInvoices);
+  const deleteInvoice = useBillingStore((state) => state.deleteInvoice);
+  const bulkDelete = useBillingStore((state) => state.bulkDelete);
+  const bulkUpdateStatus = useBillingStore((state) => state.bulkUpdateStatus);
+  const filterStatus = useBillingStore((state) => state.filterStatus);
+  const setFilterStatus = useBillingStore((state) => state.setFilterStatus);
   
   const { addToast } = useToast();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -39,44 +42,62 @@ export default function BillingPage() {
     setIsInitialized(true);
   }, []);
 
-  const filteredInvoices = getFilteredInvoices();
   const paginatedInvoices = getPaginatedInvoices();
 
-  const totalRevenue = invoices.reduce((sum, inv) => sum + parseFloat(inv.amount.replace(/[₹,]/g, '')), 0);
-  const totalPaid = invoices.reduce((sum, inv) => sum + parseFloat(inv.paid.replace(/[₹,]/g, '')), 0);
-  const totalPending = invoices.reduce((sum, inv) => sum + parseFloat(inv.balance.replace(/[₹,]/g, '')), 0);
+  const stats = useMemo(() => {
+    const totals = invoices.reduce(
+      (acc, inv) => {
+        acc.revenue += parseFloat(inv.amount.replace(/[₹,]/g, ""));
+        acc.paid += parseFloat(inv.paid.replace(/[₹,]/g, ""));
+        acc.pending += parseFloat(inv.balance.replace(/[₹,]/g, ""));
+        acc.status[inv.status] = (acc.status[inv.status] ?? 0) + 1;
+        return acc;
+      },
+      { revenue: 0, paid: 0, pending: 0, status: {} as Record<Invoice["status"], number> },
+    );
 
-  const stats = [
-    { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString('en-IN')}`, delta: "This month", detail: "All invoices" },
-    { label: "Collected", value: `₹${totalPaid.toLocaleString('en-IN')}`, delta: "Payments received", detail: `${invoices.filter(i => i.status === "Paid").length} paid invoices` },
-    { label: "Pending", value: `₹${totalPending.toLocaleString('en-IN')}`, delta: "Outstanding", detail: `${invoices.filter(i => i.status === "Pending").length} pending` },
-    { label: "Total Invoices", value: invoices.length.toString(), delta: `${invoices.filter(i => i.status === "Partial").length} partial`, detail: "All time" },
+    return [
+    { label: "Total Revenue", value: `₹${totals.revenue.toLocaleString('en-IN')}`, delta: "This month", detail: "All invoices" },
+    { label: "Collected", value: `₹${totals.paid.toLocaleString('en-IN')}`, delta: "Payments received", detail: `${totals.status.Paid ?? 0} paid invoices` },
+    { label: "Pending", value: `₹${totals.pending.toLocaleString('en-IN')}`, delta: "Outstanding", detail: `${totals.status.Pending ?? 0} pending` },
+    { label: "Total Invoices", value: invoices.length.toString(), delta: `${totals.status.Partial ?? 0} partial`, detail: "All time" },
   ];
+  }, [invoices]);
 
-  const handleEdit = (invoice: Invoice) => {
+  const handleEdit = useCallback((invoice: Invoice) => {
     setEditingInvoice(invoice);
-  };
+  }, []);
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this invoice?")) {
-      deleteInvoice(id);
+  const handleDelete = useCallback((id: string) => {
+    setInvoiceToDelete(id);
+    setDeleteConfirmOpen(true);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (invoiceToDelete) {
+      deleteInvoice(invoiceToDelete);
       addToast("Invoice deleted successfully", "success");
+      setInvoiceToDelete(null);
     }
-  };
+  }, [addToast, deleteInvoice, invoiceToDelete]);
 
-  const handleBulkDelete = (ids: string[]) => {
-    if (confirm(`Are you sure you want to delete ${ids.length} invoices?`)) {
-      bulkDelete(ids);
-      addToast(`${ids.length} invoices deleted successfully`, "success");
-    }
-  };
+  const handleBulkDelete = useCallback((ids: string[]) => {
+    setIdsToDelete(ids);
+    setBulkDeleteConfirmOpen(true);
+  }, []);
 
-  const handleInvoiceSubmit = () => {
-    // This will be called by the InvoiceForm
-    // The form handles its own submission logic
-  };
+  const confirmBulkDelete = useCallback(() => {
+    bulkDelete(idsToDelete);
+    addToast(`${idsToDelete.length} invoices deleted successfully`, "success");
+    setIdsToDelete([]);
+  }, [addToast, bulkDelete, idsToDelete]);
 
-  const columns = [
+  const handleBulkStatusUpdate = useCallback((ids: string[], status: string) => {
+    bulkUpdateStatus(ids, status as Invoice["status"]);
+    addToast(`Updated ${ids.length} invoices to ${status}`, "success");
+  }, [addToast, bulkUpdateStatus]);
+
+  const columns = useMemo(() => [
     { key: "id", label: "Invoice ID", sortable: true },
     { key: "patient", label: "Patient", sortable: true },
     { key: "service", label: "Service", sortable: false },
@@ -85,14 +106,59 @@ export default function BillingPage() {
     { key: "balance", label: "Balance", sortable: true },
     { key: "date", label: "Date", sortable: true },
     { key: "status", label: "Status", sortable: true },
-  ];
+    { key: "actions", label: "Actions", sortable: false },
+  ], []);
 
-  const statusFilterOptions = [
+  const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
     { label: "Paid", value: "Paid" },
     { label: "Partial", value: "Partial" },
     { label: "Pending", value: "Pending" },
-  ];
+  ], []);
+
+  const renderCell = useCallback((invoice: Invoice, column: { key: string }) => {
+    switch (column.key) {
+      case "id":
+        return <span className="font-semibold text-[var(--care-primary)]">{invoice.id}</span>;
+      case "patient":
+        return <span className="text-[var(--text-primary)] font-medium">{invoice.patient}</span>;
+      case "status":
+        return (
+          <StatusBadge
+            variant={invoice.status === "Paid" ? "info" : invoice.status === "Partial" ? "warning" : "default"}
+          >
+            {invoice.status}
+          </StatusBadge>
+        );
+      case "actions":
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(invoice);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-[var(--care-primary)] hover:bg-[var(--care-primary)]/10 transition-colors"
+              title="Edit"
+            >
+              <Pencil className="size-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(invoice.id);
+              }}
+              className="rounded-md p-1.5 cursor-pointer text-red-400 hover:bg-red-400/10 transition-colors"
+              title="Delete"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        );
+      default:
+        return <span className="text-[var(--text-secondary)]">{String(invoice[column.key as keyof Invoice] || "")}</span>;
+    }
+  }, [handleDelete, handleEdit]);
 
   if (!isInitialized) {
     return (
@@ -133,30 +199,14 @@ export default function BillingPage() {
             columns={columns}
             data={paginatedInvoices}
             getRowId={(invoice) => invoice.id}
-            renderCell={(invoice, column) => {
-              switch (column.key) {
-                case "id":
-                  return <span className="font-semibold text-[var(--care-primary)]">{invoice.id}</span>;
-                case "patient":
-                  return <span className="text-[var(--text-primary)] font-medium">{invoice.patient}</span>;
-                case "status":
-                  return (
-                    <StatusBadge
-                      variant={invoice.status === "Paid" ? "info" : invoice.status === "Partial" ? "warning" : "default"}
-                    >
-                      {invoice.status}
-                    </StatusBadge>
-                  );
-                default:
-                  return <span className="text-[var(--text-secondary)]">{String(invoice[column.key as keyof Invoice] || "")}</span>;
-              }
-            }}
+            renderCell={renderCell}
             searchPlaceholder="Search invoices..."
             filterOptions={statusFilterOptions}
             currentFilter={filterStatus}
             onFilterChange={setFilterStatus}
             onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
+            onBulkStatusUpdate={handleBulkStatusUpdate}
             emptyMessage="No invoices found"
           />
         </Card>
@@ -166,6 +216,7 @@ export default function BillingPage() {
       <ActionModal
         title={editingInvoice ? "Edit Invoice" : "New Invoice"}
         subtitle={editingInvoice ? "Update invoice details." : "Create a new invoice."}
+        confirmLabel={editingInvoice ? "Update" : "Create"}
         open={isAddModalOpen || !!editingInvoice}
         onOpenChange={(open) => {
           if (!open) {
@@ -176,7 +227,7 @@ export default function BillingPage() {
         trigger={<div />}
         showFooter={false}
       >
-        <InvoiceForm 
+        <LazyInvoiceForm 
           invoice={editingInvoice} 
           onClose={() => {
             setIsAddModalOpen(false);
@@ -184,6 +235,28 @@ export default function BillingPage() {
           }} 
         />
       </ActionModal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Invoice"
+        description="Are you sure you want to delete this invoice? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        variant="danger"
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={bulkDeleteConfirmOpen}
+        onOpenChange={setBulkDeleteConfirmOpen}
+        title="Delete Multiple Invoices"
+        description={`Are you sure you want to delete ${idsToDelete.length} invoices? This action cannot be undone.`}
+        confirmLabel="Delete All"
+        onConfirm={confirmBulkDelete}
+        variant="danger"
+      />
     </PageShell>
   );
 }

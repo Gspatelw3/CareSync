@@ -5,11 +5,15 @@ import { Card } from "@/components/ui/card";
 import { Bell, Check, Trash2 } from "lucide-react";
 import { useNotificationStore, initializeMockNotifications } from "@/lib/stores";
 import { useToast } from "@/lib/use-toast";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
-  const { notifications, markAsRead, markAllAsRead, deleteNotification, getFilteredNotifications } = useNotificationStore();
+  const notifications = useNotificationStore((state) => state.notifications);
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const markAsRead = useNotificationStore((state) => state.markAsRead);
+  const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
+  const deleteNotification = useNotificationStore((state) => state.deleteNotification);
   const { addToast } = useToast();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -18,10 +22,13 @@ export default function NotificationsPage() {
     setIsInitialized(true);
   }, []);
 
-  const filteredNotifications = getFilteredNotifications(filter);
+  const filteredNotifications = useMemo(
+    () => filter === "unread" ? notifications.filter((notification) => !notification.read) : notifications,
+    [filter, notifications],
+  );
 
   // Format timestamp
-  function formatTime(timestamp: string) {
+  const formatTime = useCallback((timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -34,26 +41,24 @@ export default function NotificationsPage() {
     if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
     if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
+  }, []);
 
-  const handleMarkAsRead = (id: string) => {
+  const handleMarkAsRead = useCallback((id: string) => {
     markAsRead(id);
     addToast("Notification marked as read", "success");
-  };
+  }, [addToast, markAsRead]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     if (confirm("Are you sure you want to delete this notification?")) {
       deleteNotification(id);
       addToast("Notification deleted", "success");
     }
-  };
+  }, [addToast, deleteNotification]);
 
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = useCallback(() => {
     markAllAsRead();
     addToast("All notifications marked as read", "success");
-  };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
+  }, [addToast, markAllAsRead]);
 
   if (!isInitialized) {
     return (

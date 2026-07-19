@@ -5,6 +5,8 @@ import { FormField, FormSection } from "@/components/ui/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { useAppointmentStore } from "@/lib/stores";
 import { useToast } from "@/lib/use-toast";
+import { validateRequired } from "@/lib/utils/validation";
+import { DEPARTMENTS, DOCTORS, PATIENTS, APPOINTMENT_TYPES, APPOINTMENT_STATUSES } from "@/lib/constants/options";
 import type { Appointment } from "@/types";
 
 type AppointmentFormProps = {
@@ -48,17 +50,14 @@ export function AppointmentForm({ appointment, onClose, onSubmit }: AppointmentF
       next.time = "Time is required.";
     }
 
-    if (!formData.patient) {
-      next.patient = "Patient is required.";
-    }
+    const patientError = validateRequired(formData.patient, "Patient");
+    if (patientError) next.patient = patientError;
 
-    if (!formData.doctor) {
-      next.doctor = "Doctor is required.";
-    }
+    const doctorError = validateRequired(formData.doctor, "Doctor");
+    if (doctorError) next.doctor = doctorError;
 
-    if (!formData.care) {
-      next.care = "Department is required.";
-    }
+    const careError = validateRequired(formData.care, "Department");
+    if (careError) next.care = careError;
 
     return next;
   }
@@ -113,16 +112,7 @@ export function AppointmentForm({ appointment, onClose, onSubmit }: AppointmentF
           value={formData.patient}
           onChange={(value) => setFormData({ ...formData, patient: value })}
           error={errors.patient}
-          options={[
-            { label: "Ravi Kumar", value: "Ravi Kumar" },
-            { label: "Neha Joshi", value: "Neha Joshi" },
-            { label: "Mohan Das", value: "Mohan Das" },
-            { label: "Sita Verma", value: "Sita Verma" },
-            { label: "Aisha Patel", value: "Aisha Patel" },
-            { label: "Vikram Singh", value: "Vikram Singh" },
-            { label: "Lakshmi Nair", value: "Lakshmi Nair" },
-            { label: "Deepak Kumar", value: "Deepak Kumar" },
-          ]}
+          options={PATIENTS}
         />
       </FormSection>
 
@@ -141,15 +131,7 @@ export function AppointmentForm({ appointment, onClose, onSubmit }: AppointmentF
             type="select"
             value={formData.type}
             onChange={(value) => setFormData({ ...formData, type: value as Appointment["type"] })}
-            options={[
-              { label: "Consultation", value: "Consultation" },
-              { label: "Follow-up", value: "Follow-up" },
-              { label: "Check-up", value: "Check-up" },
-              { label: "Surgery prep", value: "Surgery prep" },
-              { label: "Vaccination", value: "Vaccination" },
-              { label: "ECG", value: "ECG" },
-              { label: "Physiotherapy", value: "Physiotherapy" },
-            ]}
+            options={APPOINTMENT_TYPES}
           />
         </div>
       </FormSection>
@@ -161,16 +143,7 @@ export function AppointmentForm({ appointment, onClose, onSubmit }: AppointmentF
           value={formData.care}
           onChange={(value) => setFormData({ ...formData, care: value })}
           error={errors.care}
-          options={[
-            { label: "Cardiology", value: "Cardiology" },
-            { label: "Orthopedics", value: "Orthopedics" },
-            { label: "General", value: "General" },
-            { label: "Neurology", value: "Neurology" },
-            { label: "Pediatrics", value: "Pediatrics" },
-            { label: "Obstetrics", value: "Obstetrics" },
-            { label: "Dermatology", value: "Dermatology" },
-            { label: "Pulmonology", value: "Pulmonology" },
-          ]}
+          options={DEPARTMENTS}
         />
         <FormField
           label="Doctor"
@@ -178,28 +151,14 @@ export function AppointmentForm({ appointment, onClose, onSubmit }: AppointmentF
           value={formData.doctor}
           onChange={(value) => setFormData({ ...formData, doctor: value })}
           error={errors.doctor}
-          options={[
-            { label: "Dr. Kavya Rao", value: "Dr. Kavya Rao" },
-            { label: "Dr. Neil Shah", value: "Dr. Neil Shah" },
-            { label: "Dr. Amina Khan", value: "Dr. Amina Khan" },
-            { label: "Dr. Amit Verma", value: "Dr. Amit Verma" },
-            { label: "Dr. Sneha Kapoor", value: "Dr. Sneha Kapoor" },
-            { label: "Dr. Priya Mehta", value: "Dr. Priya Mehta" },
-            { label: "Dr. Rajesh Gupta", value: "Dr. Rajesh Gupta" },
-            { label: "Dr. Sunita Reddy", value: "Dr. Sunita Reddy" },
-          ]}
+          options={DOCTORS}
         />
         <FormField
           label="Status"
           type="select"
           value={formData.status}
           onChange={(value) => setFormData({ ...formData, status: value as Appointment["status"] })}
-          options={[
-            { label: "Confirmed", value: "Confirmed" },
-            { label: "Waiting", value: "Waiting" },
-            { label: "Checked in", value: "Checked in" },
-            { label: "Sample due", value: "Sample due" },
-          ]}
+          options={APPOINTMENT_STATUSES}
         />
       </FormSection>
 

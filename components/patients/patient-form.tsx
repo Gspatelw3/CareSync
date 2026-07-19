@@ -5,6 +5,8 @@ import { FormField, FormSection } from "@/components/ui/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { usePatientStore } from "@/lib/stores";
 import { useToast } from "@/lib/use-toast";
+import { validateRequired, validatePhone, validateAge } from "@/lib/utils/validation";
+import { DEPARTMENTS, DOCTORS, GENDERS, PATIENT_STATUSES } from "@/lib/constants/options";
 import type { Patient } from "@/types";
 
 type PatientFormProps = {
@@ -48,29 +50,20 @@ export function PatientForm({ patient, onClose, onSubmit }: PatientFormProps) {
   function validate() {
     const next: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      next.name = "Patient name is required.";
-    }
+    const nameError = validateRequired(formData.name, "Patient name");
+    if (nameError) next.name = nameError;
 
-    if (!formData.age) {
-      next.age = "Age is required.";
-    } else if (isNaN(Number(formData.age)) || Number(formData.age) < 0 || Number(formData.age) > 150) {
-      next.age = "Please enter a valid age (0-150).";
-    }
+    const ageError = validateAge(formData.age);
+    if (ageError) next.age = ageError;
 
-    if (!formData.contact.trim()) {
-      next.contact = "Contact number is required.";
-    } else if (!/^[+]?[\d\s()-]+$/.test(formData.contact)) {
-      next.contact = "Please enter a valid phone number.";
-    }
+    const phoneError = validatePhone(formData.contact);
+    if (phoneError) next.contact = phoneError;
 
-    if (!formData.department) {
-      next.department = "Department is required.";
-    }
+    const deptError = validateRequired(formData.department, "Department");
+    if (deptError) next.department = deptError;
 
-    if (!formData.doctor) {
-      next.doctor = "Doctor is required.";
-    }
+    const doctorError = validateRequired(formData.doctor, "Doctor");
+    if (doctorError) next.doctor = doctorError;
 
     return next;
   }
@@ -133,11 +126,7 @@ export function PatientForm({ patient, onClose, onSubmit }: PatientFormProps) {
             type="select"
             value={formData.gender}
             onChange={(value) => setFormData({ ...formData, gender: value as "M" | "F" | "Other" })}
-            options={[
-              { label: "Male", value: "M" },
-              { label: "Female", value: "F" },
-              { label: "Other", value: "Other" },
-            ]}
+            options={GENDERS}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -166,16 +155,7 @@ export function PatientForm({ patient, onClose, onSubmit }: PatientFormProps) {
           value={formData.department}
           onChange={(value) => setFormData({ ...formData, department: value })}
           error={errors.department}
-          options={[
-            { label: "Cardiology", value: "Cardiology" },
-            { label: "Orthopedics", value: "Orthopedics" },
-            { label: "General Medicine", value: "General" },
-            { label: "Neurology", value: "Neurology" },
-            { label: "Pediatrics", value: "Pediatrics" },
-            { label: "Obstetrics", value: "Obstetrics" },
-            { label: "Dermatology", value: "Dermatology" },
-            { label: "Pulmonology", value: "Pulmonology" },
-          ]}
+          options={DEPARTMENTS}
         />
         <FormField
           label="Assigned Doctor"
@@ -183,27 +163,14 @@ export function PatientForm({ patient, onClose, onSubmit }: PatientFormProps) {
           value={formData.doctor}
           onChange={(value) => setFormData({ ...formData, doctor: value })}
           error={errors.doctor}
-          options={[
-            { label: "Dr. Kavya Rao", value: "Dr. Kavya Rao" },
-            { label: "Dr. Neil Shah", value: "Dr. Neil Shah" },
-            { label: "Dr. Amina Khan", value: "Dr. Amina Khan" },
-            { label: "Dr. Amit Verma", value: "Dr. Amit Verma" },
-            { label: "Dr. Sneha Kapoor", value: "Dr. Sneha Kapoor" },
-            { label: "Dr. Priya Mehta", value: "Dr. Priya Mehta" },
-            { label: "Dr. Rajesh Gupta", value: "Dr. Rajesh Gupta" },
-            { label: "Dr. Sunita Reddy", value: "Dr. Sunita Reddy" },
-          ]}
+          options={DOCTORS}
         />
         <FormField
           label="Status"
           type="select"
           value={formData.status}
           onChange={(value) => setFormData({ ...formData, status: value as "Active" | "Discharged" | "ICU" })}
-          options={[
-            { label: "Active", value: "Active" },
-            { label: "Discharged", value: "Discharged" },
-            { label: "ICU", value: "ICU" },
-          ]}
+          options={PATIENT_STATUSES}
         />
         <FormField
           label="Last Visit"

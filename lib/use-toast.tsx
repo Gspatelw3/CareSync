@@ -1,6 +1,15 @@
 "use client";
 
-import { useState, createContext, useContext, useCallback, useRef, type ReactNode } from "react";
+import {
+  useState,
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from "react";
 import { TOAST } from "@/lib/config";
 
 type Toast = {
@@ -19,17 +28,30 @@ const ToastContext = createContext<ToastContextType | null>(null);
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const idCounter = useRef(0);
+  const timeoutIds = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   const addToast = useCallback((message: string, type: Toast["type"] = "success") => {
     const id = `toast-${Date.now()}-${idCounter.current++}`;
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
+      timeoutIds.current.delete(timeoutId);
     }, TOAST.durationMs);
+    timeoutIds.current.add(timeoutId);
   }, []);
 
+  useEffect(() => {
+    const ids = timeoutIds.current;
+    return () => {
+      ids.forEach(clearTimeout);
+      ids.clear();
+    };
+  }, []);
+
+  const contextValue = useMemo(() => ({ toasts, addToast }), [addToast, toasts]);
+
   return (
-    <ToastContext.Provider value={{ toasts, addToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       {toasts.length > 0 && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState, memo } from "react";
 import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,8 @@ type EnhancedDataTableProps<T> = {
     isLoading?: boolean;
 };
 
-function Checkbox({
+// Memoize Checkbox component to prevent unnecessary re-renders
+const Checkbox = memo(function Checkbox({
     checked,
     onChange,
     ariaLabel,
@@ -51,21 +52,14 @@ function Checkbox({
     onChange: () => void;
     ariaLabel: string;
 }) {
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
     return (
         <div className="relative inline-flex items-center">
             <input
                 type="checkbox"
-                checked={isMounted ? checked : false}
+                checked={checked}
                 onChange={onChange}
                 className="peer size-4 cursor-pointer appearance-none rounded border-2 border-[var(--border-default)] bg-transparent transition-all checked:border-[var(--care-primary)] checked:bg-[var(--care-primary)]"
                 aria-label={ariaLabel}
-                suppressHydrationWarning
             />
             <svg
                 className="pointer-events-none absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 transition-opacity peer-checked:opacity-100"
@@ -80,10 +74,83 @@ function Checkbox({
             </svg>
         </div>
     );
-}
+});
+
+const selectStyles = {
+    control: (base: any) => ({
+        ...base,
+        backgroundColor: "var(--input-bg)",
+        borderColor: "var(--border-default)",
+        borderRadius: "0.5rem",
+        minHeight: "42px",
+        color: "var(--text-primary)",
+    }),
+    menu: (base: any) => ({
+        ...base,
+        backgroundColor: "var(--card-bg)",
+        border: "1px solid var(--border-default)",
+        borderRadius: "0.5rem",
+    }),
+    option: (base: any, state: any) => ({
+        ...base,
+        backgroundColor: state.isFocused
+            ? "var(--care-primary)"
+            : "var(--card-bg)",
+        color: state.isFocused ? "white" : "var(--text-primary)",
+    }),
+    singleValue: (base: any) => ({
+        ...base,
+        color: "var(--text-primary)",
+    }),
+    placeholder: (base: any) => ({
+        ...base,
+        color: "var(--text-muted)",
+    }),
+    dropdownIndicator: (base: any) => ({
+        ...base,
+        color: "var(--text-muted)",
+    }),
+    indicatorSeparator: (base: any) => ({
+        ...base,
+        backgroundColor: "var(--border-default)",
+    }),
+};
+
+const compactSelectStyles = {
+    ...selectStyles,
+    control: (base: any) => ({
+        ...selectStyles.control(base),
+        minHeight: "32px",
+    }),
+};
+
+const statusSelectStyles = {
+    ...selectStyles,
+    control: (base: any) => ({
+        ...selectStyles.control(base),
+        whiteSpace: "nowrap",
+    }),
+    placeholder: (base: any) => ({
+        ...selectStyles.placeholder(base),
+        whiteSpace: "nowrap",
+    }),
+};
+
+const bulkStatusOptions = [
+    { value: "On duty", label: "On Duty" },
+    { value: "Off duty", label: "Off Duty" },
+    { value: "On leave", label: "On Leave" },
+    { value: "Available", label: "Available" },
+];
+
+const pageSizeOptions = [
+    { value: "5", label: "5" },
+    { value: "10", label: "10" },
+    { value: "25", label: "25" },
+    { value: "50", label: "50" },
+];
 
 // Client-only wrapper for react-select to prevent hydration mismatches
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ClientSelect(props: any) {
     const [isMounted, setIsMounted] = useState(false);
 
@@ -101,7 +168,8 @@ function ClientSelect(props: any) {
     return <Select {...props} />;
 }
 
-export function EnhancedDataTable<T>({
+// Export a memoized generic table component
+export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
     columns,
     data,
     onRowClick,
@@ -129,59 +197,64 @@ export function EnhancedDataTable<T>({
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const { addToast } = useToast();
 
-    // Filter data based on search query
-    const filteredData = data.filter((row) => {
+    const filteredData = useMemo(() => data.filter((row) => {
         if (!searchQuery) return true;
         const query = searchQuery.toLowerCase();
         const rowValues = Object.values(row as Record<string, unknown>);
         return rowValues.some((value) =>
             String(value).toLowerCase().includes(query),
         );
-    });
+    }), [data, searchQuery]);
 
-    // Sort data
-    const sortedData = [...filteredData].sort((a, b) => {
+    const sortedData = useMemo(() => [...filteredData].sort((a, b) => {
         if (!sortBy) return 0;
         const aVal = a[sortBy as keyof T];
         const bVal = b[sortBy as keyof T];
         if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
         if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
         return 0;
-    });
+    }), [filteredData, sortBy, sortOrder]);
 
-    // Paginate data
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedData = sortedData.slice(
-        startIndex,
-        startIndex + itemsPerPage,
+    const paginatedData = useMemo(
+        () => sortedData.slice(startIndex, startIndex + itemsPerPage),
+        [sortedData, startIndex, itemsPerPage],
     );
+    const paginatedIds = useMemo(
+        () => paginatedData.map((row) => getRowId(row)),
+        [getRowId, paginatedData],
+    );
+    const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-    const handleSort = (key: string) => {
+    useEffect(() => {
+        setCurrentPage((page) => Math.min(Math.max(page, 1), totalPages || 1));
+    }, [totalPages]);
+
+    const handleSort = useCallback((key: string) => {
         if (sortBy === key) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
         } else {
             setSortBy(key);
             setSortOrder("asc");
         }
-    };
+    }, [sortBy, sortOrder]);
 
-    const handleSelectAll = () => {
-        if (selectedIds.length === paginatedData.length) {
+    const handleSelectAll = useCallback(() => {
+        if (selectedIds.length === paginatedIds.length) {
             setSelectedIds([]);
         } else {
-            const allIds = paginatedData.map((row) => getRowId(row));
-            setSelectedIds(allIds);
+            setSelectedIds(paginatedIds);
         }
-    };
+    }, [paginatedIds, selectedIds.length]);
 
-    const handleSelectRow = (id: string) => {
+    const handleSelectRow = useCallback((id: string) => {
         setSelectedIds((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
         );
-    };
+    }, []);
 
-    const handleBulkDelete = () => {
+    const handleBulkDelete = useCallback(() => {
         if (onBulkDelete && selectedIds.length > 0) {
             onBulkDelete(selectedIds);
             setSelectedIds([]);
@@ -190,13 +263,10 @@ export function EnhancedDataTable<T>({
                 "success",
             );
         }
-    };
+    }, [addToast, onBulkDelete, selectedIds]);
 
     const isAllSelected =
         paginatedData.length > 0 && selectedIds.length === paginatedData.length;
-    const isPartiallySelected =
-        selectedIds.length > 0 && selectedIds.length < paginatedData.length;
-
     if (isLoading) {
         return (
             <div className="space-y-4">
@@ -227,48 +297,7 @@ export function EnhancedDataTable<T>({
                                     selected && onFilterChange(selected.value)
                                 }
                                 options={filterOptions}
-                                styles={{
-                                    control: (base: any) => ({
-                                        ...base,
-                                        backgroundColor: "var(--input-bg)",
-                                        borderColor: "var(--border-default)",
-                                        borderRadius: "0.5rem",
-                                        minHeight: "42px",
-                                        color: "var(--text-primary)",
-                                    }),
-                                    menu: (base: any) => ({
-                                        ...base,
-                                        backgroundColor: "var(--card-bg)",
-                                        border: "1px solid var(--border-default)",
-                                        borderRadius: "0.5rem",
-                                    }),
-                                    option: (base: any, state: any) => ({
-                                        ...base,
-                                        backgroundColor: state.isFocused
-                                            ? "var(--care-primary)"
-                                            : "var(--card-bg)",
-                                        color: state.isFocused
-                                            ? "white"
-                                            : "var(--text-primary)",
-                                    }),
-                                    singleValue: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-primary)",
-                                    }),
-                                    placeholder: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-muted)",
-                                    }),
-                                    dropdownIndicator: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-muted)",
-                                    }),
-                                    indicatorSeparator: (base: any) => ({
-                                        ...base,
-                                        backgroundColor:
-                                            "var(--border-default)",
-                                    }),
-                                }}
+                                styles={selectStyles}
                             />
                         </div>
                     )}
@@ -284,48 +313,7 @@ export function EnhancedDataTable<T>({
                                     onDepartmentFilterChange(selected.value)
                                 }
                                 options={departmentFilterOptions}
-                                styles={{
-                                    control: (base: any) => ({
-                                        ...base,
-                                        backgroundColor: "var(--input-bg)",
-                                        borderColor: "var(--border-default)",
-                                        borderRadius: "0.5rem",
-                                        minHeight: "42px",
-                                        color: "var(--text-primary)",
-                                    }),
-                                    menu: (base: any) => ({
-                                        ...base,
-                                        backgroundColor: "var(--card-bg)",
-                                        border: "1px solid var(--border-default)",
-                                        borderRadius: "0.5rem",
-                                    }),
-                                    option: (base: any, state: any) => ({
-                                        ...base,
-                                        backgroundColor: state.isFocused
-                                            ? "var(--care-primary)"
-                                            : "var(--card-bg)",
-                                        color: state.isFocused
-                                            ? "white"
-                                            : "var(--text-primary)",
-                                    }),
-                                    singleValue: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-primary)",
-                                    }),
-                                    placeholder: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-muted)",
-                                    }),
-                                    dropdownIndicator: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-muted)",
-                                    }),
-                                    indicatorSeparator: (base: any) => ({
-                                        ...base,
-                                        backgroundColor:
-                                            "var(--border-default)",
-                                    }),
-                                }}
+                                styles={selectStyles}
                             />
                         </div>
                     )}
@@ -348,68 +336,10 @@ export function EnhancedDataTable<T>({
                                             );
                                         }
                                     }}
-                                    options={[
-                                        { value: "On duty", label: "On Duty" },
-                                        {
-                                            value: "Off duty",
-                                            label: "Off Duty",
-                                        },
-                                        {
-                                            value: "On leave",
-                                            label: "On Leave",
-                                        },
-                                        {
-                                            value: "Available",
-                                            label: "Available",
-                                        },
-                                    ]}
+                                    options={bulkStatusOptions}
                                     placeholder="Update Status"
                                     isClearable
-                                    styles={{
-                                        control: (base: any) => ({
-                                            ...base,
-                                            backgroundColor: "var(--input-bg)",
-                                            borderColor:
-                                                "var(--border-default)",
-                                            borderRadius: "0.5rem",
-                                            minHeight: "42px",
-                                            color: "var(--text-primary)",
-                                            whiteSpace: "nowrap",
-                                        }),
-                                        menu: (base: any) => ({
-                                            ...base,
-                                            backgroundColor: "var(--card-bg)",
-                                            border: "1px solid var(--border-default)",
-                                            borderRadius: "0.5rem",
-                                        }),
-                                        option: (base: any, state: any) => ({
-                                            ...base,
-                                            backgroundColor: state.isFocused
-                                                ? "var(--care-primary)"
-                                                : "var(--card-bg)",
-                                            color: state.isFocused
-                                                ? "white"
-                                                : "var(--text-primary)",
-                                        }),
-                                        singleValue: (base: any) => ({
-                                            ...base,
-                                            color: "var(--text-primary)",
-                                        }),
-                                        placeholder: (base: any) => ({
-                                            ...base,
-                                            color: "var(--text-muted)",
-                                            whiteSpace: "nowrap",
-                                        }),
-                                        dropdownIndicator: (base: any) => ({
-                                            ...base,
-                                            color: "var(--text-muted)",
-                                        }),
-                                        indicatorSeparator: (base: any) => ({
-                                            ...base,
-                                            backgroundColor:
-                                                "var(--border-default)",
-                                        }),
-                                    }}
+                                    styles={statusSelectStyles}
                                 />
                             </div>
                         )}
@@ -486,7 +416,7 @@ export function EnhancedDataTable<T>({
                         ) : (
                             paginatedData.map((row) => {
                                 const id = getRowId(row);
-                                const isSelected = selectedIds.includes(id);
+                                const isSelected = selectedIdSet.has(id);
                                 return (
                                     <tr
                                         key={id}
@@ -567,54 +497,8 @@ export function EnhancedDataTable<T>({
                                         setCurrentPage(1);
                                     }
                                 }}
-                                options={[
-                                    { value: "5", label: "5" },
-                                    { value: "10", label: "10" },
-                                    { value: "25", label: "25" },
-                                    { value: "50", label: "50" },
-                                ]}
-                                styles={{
-                                    control: (base: any) => ({
-                                        ...base,
-                                        backgroundColor: "var(--input-bg)",
-                                        borderColor: "var(--border-default)",
-                                        borderRadius: "0.5rem",
-                                        minHeight: "32px",
-                                        color: "var(--text-primary)",
-                                    }),
-                                    menu: (base: any) => ({
-                                        ...base,
-                                        backgroundColor: "var(--card-bg)",
-                                        border: "1px solid var(--border-default)",
-                                        borderRadius: "0.5rem",
-                                    }),
-                                    option: (base: any, state: any) => ({
-                                        ...base,
-                                        backgroundColor: state.isFocused
-                                            ? "var(--care-primary)"
-                                            : "var(--card-bg)",
-                                        color: state.isFocused
-                                            ? "white"
-                                            : "var(--text-primary)",
-                                    }),
-                                    singleValue: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-primary)",
-                                    }),
-                                    placeholder: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-muted)",
-                                    }),
-                                    dropdownIndicator: (base: any) => ({
-                                        ...base,
-                                        color: "var(--text-muted)",
-                                    }),
-                                    indicatorSeparator: (base: any) => ({
-                                        ...base,
-                                        backgroundColor:
-                                            "var(--border-default)",
-                                    }),
-                                }}
+                                options={pageSizeOptions}
+                                styles={compactSelectStyles}
                             />
                         </div>
                         <span className="text-sm text-[var(--text-secondary)]">
@@ -654,4 +538,4 @@ export function EnhancedDataTable<T>({
             )}
         </div>
     );
-}
+}) as <T>(props: EnhancedDataTableProps<T>) => React.ReactElement;

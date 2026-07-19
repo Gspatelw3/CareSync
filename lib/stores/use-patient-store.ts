@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { v4 as uuidv4 } from "uuid";
 import type { Patient } from "@/types";
 
 type PatientStore = {
@@ -33,10 +32,6 @@ type PatientStore = {
   getFilteredPatients: () => Patient[];
   getPaginatedPatients: () => Patient[];
 };
-
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/patients endpoint
-// TODO: Add real-time updates via WebSocket
 
 export const usePatientStore = create<PatientStore>()(
   persist(
