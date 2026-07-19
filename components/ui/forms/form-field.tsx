@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Select from "react-select";
 import { DatePicker } from "@/components/ui/date-picker";
 
@@ -108,6 +108,7 @@ export function FormField({
   error,
 }: FormFieldProps) {
   const id = label.toLowerCase().replace(/\s+/g, "-");
+  const [mounted, setMounted] = useState(false);
 
   // Internal state for uncontrolled usage (when no external value/onChange is provided).
   // This allows form fields to track user input even without parent state management.
@@ -115,6 +116,10 @@ export function FormField({
 
   const isControlled = externalValue !== undefined;
   const value = isControlled ? externalValue : internalValue;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChange = (newValue: string) => {
     if (!isControlled) {
@@ -145,7 +150,7 @@ export function FormField({
           isClearable
           unstyled
           styles={selectStyles}
-          menuPortalTarget={document.body}
+          menuPortalTarget={mounted ? document.body : undefined}
           menuPosition="fixed"
         />
       ) : type === "textarea" ? (
