@@ -14,9 +14,9 @@ The application uses the following LocalStorage keys for data persistence:
 - `care-sync-lab-tests` - Laboratory test requests
 - `care-sync-invoices` - Billing invoices
 - `care-sync-notifications` - Notification records
-- `care-sync-settings` - Organization and notification settings
 - `care-sync-auth` - Authentication session data
-- `care-sync-theme` - Theme preference (light/dark)
+- `care-sync-theme` - Theme preference (light/dark/system)
+- `care-sync-profile-preferences` - Account language and time zone preferences
 
 ## Authentication Endpoints
 
@@ -194,24 +194,20 @@ POST   /api/notifications/send   - Send notification (admin)
 - `lib/stores/use-notification-store.ts` - Replace all store methods with API calls
 - `app/notifications/page.tsx` - Line 24: Replace `initializeMockNotifications()`
 
-## Settings Endpoints
+## Account Settings Endpoints
 
-**Current Implementation:** `lib/stores/use-settings-store.ts`
+**Current Implementation:** `app/settings/page.tsx`
 
 **Recommended Endpoints:**
 ```
-GET    /api/settings/organization - Get organization settings
-PUT    /api/settings/organization - Update organization settings
-GET    /api/settings/notifications - Get notification preferences
-PUT    /api/settings/notifications - Update notification preferences
-GET    /api/settings/theme        - Get theme settings
-PUT    /api/settings/theme        - Update theme settings
+GET    /api/account/profile       - Get current user profile
+PUT    /api/account/preferences   - Update language and time zone preferences
+PUT    /api/account/password      - Change current user password
 ```
 
 **Integration Points:**
-- `lib/stores/use-settings-store.ts` - Replace all store methods with API calls
-- `app/settings/page.tsx` - Line 59: Replace `updateOrganization()` call
-- `app/settings/page.tsx` - Line 63: Replace `updateNotificationSettings()` call
+- `lib/stores/use-auth-store.ts` - Replace mock user profile with API-backed session data
+- `app/settings/page.tsx` - Replace local profile preference persistence with account preference API calls
 
 ## Dashboard Analytics Endpoints
 
