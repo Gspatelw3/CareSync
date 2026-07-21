@@ -31,4 +31,3 @@ export { useLabStore } from "./use-lab-store";
 export { useBillingStore } from "./use-billing-store";
 export { useAuthStore, initializeMockAuth } from "./use-auth-store";
 export { useNotificationStore, initializeMockNotifications } from "./use-notification-store";
-export { useSettingsStore, initializeMockSettings } from "./use-settings-store";

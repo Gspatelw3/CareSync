@@ -153,13 +153,6 @@ export type ReportCategory = {
   reports: Report[];
 };
 
-// ── Settings Entry ──
-export type SettingsGroup = {
-  title: string;
-  description: string;
-  fields: { label: string; value: string }[];
-};
-
 // ── Stat Card (Dashboard / Page Stats) ──
 export type StatCardData = {
   label: string;
