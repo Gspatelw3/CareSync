@@ -24,7 +24,6 @@ export default function LaboratoryPage() {
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
   const labTests = useLabStore((state) => state.labTests);
-  const getPaginatedLabTests = useLabStore((state) => state.getPaginatedLabTests);
   const deleteLabTest = useLabStore((state) => state.deleteLabTest);
   const bulkDelete = useLabStore((state) => state.bulkDelete);
   const bulkUpdateStatus = useLabStore((state) => state.bulkUpdateStatus);
@@ -39,8 +38,6 @@ export default function LaboratoryPage() {
     initializeMockLabTests();
     setIsInitialized(true);
   }, []);
-
-  const paginatedTests = getPaginatedLabTests();
 
   const stats = useMemo(() => {
     const counts = labTests.reduce(
@@ -111,6 +108,14 @@ export default function LaboratoryPage() {
 
   const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
+    { label: "Awaiting sample", value: "Awaiting sample" },
+    { label: "Sample collected", value: "Sample collected" },
+    { label: "In progress", value: "In progress" },
+    { label: "Report ready", value: "Report ready" },
+    { label: "Reviewed", value: "Reviewed" },
+  ], []);
+
+  const bulkStatusOptions = useMemo(() => [
     { label: "Awaiting sample", value: "Awaiting sample" },
     { label: "Sample collected", value: "Sample collected" },
     { label: "In progress", value: "In progress" },
@@ -214,7 +219,7 @@ export default function LaboratoryPage() {
         <Card title="Lab Test Requests" description="All laboratory test requests and their status.">
           <EnhancedDataTable
             columns={columns}
-            data={paginatedTests}
+            data={labTests}
             getRowId={(test) => test.id}
             renderCell={renderCell}
             searchPlaceholder="Search lab tests..."
@@ -224,6 +229,7 @@ export default function LaboratoryPage() {
             onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
             onBulkStatusUpdate={handleBulkStatusUpdate}
+            bulkStatusOptions={bulkStatusOptions}
             emptyMessage="No lab tests found"
           />
         </Card>

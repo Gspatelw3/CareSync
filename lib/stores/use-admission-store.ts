@@ -35,10 +35,6 @@ type AdmissionStore = {
   getPaginatedAdmissions: () => Admission[];
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/inpatient/admissions endpoint
-// TODO: Add real-time bed status updates via WebSocket
-
 export const useAdmissionStore = create<AdmissionStore>()(
   persist(
     (set, get) => ({

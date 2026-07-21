@@ -35,10 +35,6 @@ type InventoryStore = {
   getPaginatedInventory: () => InventoryItem[];
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/pharmacy/inventory endpoint
-// TODO: Add real-time stock updates via WebSocket
-
 export const useInventoryStore = create<InventoryStore>()(
   persist(
     (set, get) => ({

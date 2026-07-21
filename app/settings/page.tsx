@@ -56,9 +56,13 @@ export default function SettingsPage() {
 
       <div className="mt-6">
         <Card title="Settings" description="Manage your organization and notification preferences">
-          <div className="flex border-b border-[var(--border-default)]">
+          <div className="flex border-b border-[var(--border-default)]" role="tablist" aria-label="Settings sections">
             <button
               onClick={() => setActiveTab("organization")}
+              role="tab"
+              type="button"
+              aria-controls="organization-settings-panel"
+              aria-selected={activeTab === "organization"}
               className={`px-6 py-3 text-sm font-medium transition ${
                 activeTab === "organization"
                   ? "border-b-2 border-[var(--care-primary)] text-[var(--care-primary)]"
@@ -69,6 +73,10 @@ export default function SettingsPage() {
             </button>
             <button
               onClick={() => setActiveTab("notifications")}
+              role="tab"
+              type="button"
+              aria-controls="notifications-settings-panel"
+              aria-selected={activeTab === "notifications"}
               className={`px-6 py-3 text-sm font-medium transition ${
                 activeTab === "notifications"
                   ? "border-b-2 border-[var(--care-primary)] text-[var(--care-primary)]"
@@ -81,7 +89,7 @@ export default function SettingsPage() {
 
           <div className="p-6">
             {activeTab === "organization" && (
-              <div className="space-y-6">
+              <div className="space-y-6" id="organization-settings-panel" role="tabpanel">
                 <div>
                   <h3 className="text-lg font-semibold text-[var(--text-primary)]">Organization Information</h3>
                   <p className="mt-1 text-sm text-[var(--text-secondary)]">Basic information about your healthcare facility.</p>
@@ -94,11 +102,13 @@ export default function SettingsPage() {
                   </div>
                   <button
                     onClick={toggleTheme}
+                    type="button"
+                    aria-label={`Switch to ${mounted && theme === "dark" ? "light" : "dark"} mode`}
                     className="flex items-center gap-2 rounded-md border border-[var(--border-default)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--care-primary)] hover:bg-[var(--care-surface)]"
                   >
                     {mounted && theme === "dark" ? (
                       <>
-                        < Sun className="size-4" />
+                        <Sun className="size-4" />
                         Light Mode
                       </>
                     ) : (
@@ -112,8 +122,9 @@ export default function SettingsPage() {
 
                 <div className="grid gap-4">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Organization Name</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]" htmlFor="organization-name">Organization Name</label>
                     <input
+                      id="organization-name"
                       type="text"
                       value={orgForm.name}
                       onChange={(e) => setOrgForm({ ...orgForm, name: e.target.value })}
@@ -122,8 +133,9 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Address</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]" htmlFor="organization-address">Address</label>
                     <textarea
+                      id="organization-address"
                       value={orgForm.address}
                       onChange={(e) => setOrgForm({ ...orgForm, address: e.target.value })}
                       rows={3}
@@ -133,8 +145,9 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Phone</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]" htmlFor="organization-phone">Phone</label>
                       <input
+                        id="organization-phone"
                         type="text"
                         value={orgForm.phone}
                         onChange={(e) => setOrgForm({ ...orgForm, phone: e.target.value })}
@@ -142,8 +155,9 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Email</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]" htmlFor="organization-email">Email</label>
                       <input
+                        id="organization-email"
                         type="email"
                         value={orgForm.email}
                         onChange={(e) => setOrgForm({ ...orgForm, email: e.target.value })}
@@ -181,8 +195,9 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Working Hours Start</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]" htmlFor="working-hours-start">Working Hours Start</label>
                       <input
+                        id="working-hours-start"
                         type="time"
                         value={orgForm.workingHoursStart}
                         onChange={(e) => setOrgForm({ ...orgForm, workingHoursStart: e.target.value })}
@@ -190,8 +205,9 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Working Hours End</label>
+                      <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]" htmlFor="working-hours-end">Working Hours End</label>
                       <input
+                        id="working-hours-end"
                         type="time"
                         value={orgForm.workingHoursEnd}
                         onChange={(e) => setOrgForm({ ...orgForm, workingHoursEnd: e.target.value })}
@@ -201,8 +217,9 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]">Registration Number</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--text-secondary)]" htmlFor="registration-number">Registration Number</label>
                     <input
+                      id="registration-number"
                       type="text"
                       value={orgForm.registrationNo}
                       onChange={(e) => setOrgForm({ ...orgForm, registrationNo: e.target.value })}
@@ -220,7 +237,7 @@ export default function SettingsPage() {
             )}
 
             {activeTab === "notifications" && (
-              <div className="space-y-6">
+              <div className="space-y-6" id="notifications-settings-panel" role="tabpanel">
                 <div>
                   <h3 className="text-lg font-semibold text-[var(--text-primary)]">Notification Preferences</h3>
                   <p className="mt-1 text-sm text-[var(--text-secondary)]">Configure how you receive notifications and alerts.</p>
@@ -235,6 +252,7 @@ export default function SettingsPage() {
                     <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
+                        aria-label="Email notifications"
                         checked={notifForm.emailNotifications}
                         onChange={(e) => setNotifForm({ ...notifForm, emailNotifications: e.target.checked })}
                         className="peer sr-only"
@@ -251,6 +269,7 @@ export default function SettingsPage() {
                     <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
+                        aria-label="SMS notifications"
                         checked={notifForm.smsNotifications}
                         onChange={(e) => setNotifForm({ ...notifForm, smsNotifications: e.target.checked })}
                         className="peer sr-only"
@@ -267,6 +286,7 @@ export default function SettingsPage() {
                     <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
+                        aria-label="Appointment reminders"
                         checked={notifForm.appointmentReminders}
                         onChange={(e) => setNotifForm({ ...notifForm, appointmentReminders: e.target.checked })}
                         className="peer sr-only"
@@ -283,6 +303,7 @@ export default function SettingsPage() {
                     <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
+                        aria-label="Lab result alerts"
                         checked={notifForm.labResultAlerts}
                         onChange={(e) => setNotifForm({ ...notifForm, labResultAlerts: e.target.checked })}
                         className="peer sr-only"
@@ -299,6 +320,7 @@ export default function SettingsPage() {
                     <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
+                        aria-label="Billing alerts"
                         checked={notifForm.billingAlerts}
                         onChange={(e) => setNotifForm({ ...notifForm, billingAlerts: e.target.checked })}
                         className="peer sr-only"
@@ -315,6 +337,7 @@ export default function SettingsPage() {
                     <label className="relative inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
+                        aria-label="Inventory alerts"
                         checked={notifForm.inventoryAlerts}
                         onChange={(e) => setNotifForm({ ...notifForm, inventoryAlerts: e.target.checked })}
                         className="peer sr-only"

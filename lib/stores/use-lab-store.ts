@@ -35,10 +35,6 @@ type LabStore = {
   getPaginatedLabTests: () => LabTestRequest[];
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/laboratory/tests endpoint
-// TODO: Add real-time lab result updates via WebSocket
-
 export const useLabStore = create<LabStore>()(
   persist(
     (set, get) => ({

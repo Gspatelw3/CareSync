@@ -33,10 +33,6 @@ type BillingStore = {
   getPaginatedInvoices: () => Invoice[];
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/billing/invoices endpoint
-// TODO: Integrate with payment gateway
-
 export const useBillingStore = create<BillingStore>()(
   persist(
     (set, get) => ({

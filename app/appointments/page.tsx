@@ -11,7 +11,7 @@ import { useAppointmentStore } from "@/lib/stores";
 import { initializeMockAppointments } from "@/lib/stores/use-appointment-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useCallback, useEffect, useMemo, useState, lazy } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import type { Appointment } from "@/types";
 
 // Lazy load AppointmentForm to reduce initial bundle size
@@ -26,7 +26,6 @@ export default function AppointmentsPage() {
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
   const appointments = useAppointmentStore((state) => state.appointments);
-  const getPaginatedAppointments = useAppointmentStore((state) => state.getPaginatedAppointments);
   const deleteAppointment = useAppointmentStore((state) => state.deleteAppointment);
   const bulkDelete = useAppointmentStore((state) => state.bulkDelete);
   const bulkUpdateStatus = useAppointmentStore((state) => state.bulkUpdateStatus);
@@ -41,8 +40,6 @@ export default function AppointmentsPage() {
     initializeMockAppointments();
     setIsInitialized(true);
   }, []);
-
-  const paginatedAppointments = getPaginatedAppointments();
 
   const stats = useMemo(() => {
     const waitingCount = appointments.filter((a) => a.status === "Waiting").length;
@@ -101,6 +98,13 @@ export default function AppointmentsPage() {
 
   const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
+    { label: "Checked in", value: "Checked in" },
+    { label: "Waiting", value: "Waiting" },
+    { label: "Confirmed", value: "Confirmed" },
+    { label: "Sample due", value: "Sample due" },
+  ], []);
+
+  const bulkStatusOptions = useMemo(() => [
     { label: "Checked in", value: "Checked in" },
     { label: "Waiting", value: "Waiting" },
     { label: "Confirmed", value: "Confirmed" },
@@ -242,7 +246,7 @@ export default function AppointmentsPage() {
         <Card title="Today's Schedule" description="All appointments for today, 19 June 2026.">
           <EnhancedDataTable
             columns={columns}
-            data={paginatedAppointments}
+            data={appointments}
             getRowId={(appointment) => appointment.id}
             renderCell={renderCell}
             searchPlaceholder="Search appointments..."
@@ -252,6 +256,7 @@ export default function AppointmentsPage() {
             onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
             onBulkStatusUpdate={handleBulkStatusUpdate}
+            bulkStatusOptions={bulkStatusOptions}
             emptyMessage="No appointments found"
           />
         </Card>
@@ -308,7 +313,9 @@ export default function AppointmentsPage() {
         trigger={<div />}
         showFooter={false}
       >
-        <LazyAppointmentForm onClose={() => setIsAddModalOpen(false)} />
+        <Suspense fallback={<div className="text-sm text-[var(--text-muted)]">Loading form...</div>}>
+          <LazyAppointmentForm onClose={() => setIsAddModalOpen(false)} />
+        </Suspense>
       </ActionModal>
 
       {/* Edit Appointment Modal */}
@@ -322,7 +329,9 @@ export default function AppointmentsPage() {
         showFooter={false}
       >
         {editingAppointment && (
-          <LazyAppointmentForm appointment={editingAppointment} onClose={() => setEditingAppointment(null)} />
+          <Suspense fallback={<div className="text-sm text-[var(--text-muted)]">Loading form...</div>}>
+            <LazyAppointmentForm appointment={editingAppointment} onClose={() => setEditingAppointment(null)} />
+          </Suspense>
         )}
       </ActionModal>
 

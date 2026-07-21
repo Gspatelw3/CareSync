@@ -76,7 +76,6 @@ export function AppointmentForm({ appointment, onClose, onSubmit }: AppointmentF
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual API call
       if (appointment) {
         updateAppointment(appointment.id, formData);
         addToast("Appointment updated successfully", "success");

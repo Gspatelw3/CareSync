@@ -80,7 +80,6 @@ export function PatientForm({ patient, onClose, onSubmit }: PatientFormProps) {
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual API call
       if (patient) {
         updatePatient(patient.id, {
           ...formData,

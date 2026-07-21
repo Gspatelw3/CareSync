@@ -15,7 +15,7 @@ import { useDoctorStore } from "@/lib/stores";
 import { initializeMockDoctors } from "@/lib/stores/use-doctor-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useCallback, useEffect, useMemo, useState, lazy } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import type { Doctor } from "@/types";
 
 // Lazy load DoctorForm to reduce initial bundle size
@@ -34,9 +34,6 @@ export default function DoctorsPage() {
     const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
 
     const doctors = useDoctorStore((state) => state.doctors);
-    const getPaginatedDoctors = useDoctorStore(
-        (state) => state.getPaginatedDoctors,
-    );
     const deleteDoctor = useDoctorStore((state) => state.deleteDoctor);
     const bulkDelete = useDoctorStore((state) => state.bulkDelete);
     const bulkUpdateStatus = useDoctorStore((state) => state.bulkUpdateStatus);
@@ -55,8 +52,6 @@ export default function DoctorsPage() {
         initializeMockDoctors();
         setIsInitialized(true);
     }, []);
-
-    const paginatedDoctors = getPaginatedDoctors();
 
     const stats = useMemo(() => {
         const totalDoctors = doctors.length;
@@ -144,7 +139,6 @@ export default function DoctorsPage() {
 
     const handleBulkStatusUpdate = useCallback(
         (ids: string[], status: string) => {
-            // TODO: Replace with API call
             bulkUpdateStatus(ids, status as Doctor["status"]);
             addToast(`Updated ${ids.length} doctors to ${status}`, "success");
         },
@@ -170,6 +164,16 @@ export default function DoctorsPage() {
     const statusFilterOptions = useMemo(
         () => [
             { label: "All Status", value: "all" },
+            { label: "On Duty", value: "On duty" },
+            { label: "Off Duty", value: "Off duty" },
+            { label: "On Leave", value: "On leave" },
+            { label: "Available", value: "Available" },
+        ],
+        [],
+    );
+
+    const bulkStatusOptions = useMemo(
+        () => [
             { label: "On Duty", value: "On duty" },
             { label: "Off Duty", value: "Off duty" },
             { label: "On Leave", value: "On leave" },
@@ -320,7 +324,7 @@ export default function DoctorsPage() {
                 >
                     <EnhancedDataTable
                         columns={columns}
-                        data={paginatedDoctors}
+                        data={doctors}
                         getRowId={(doctor) => doctor.id}
                         renderCell={renderCell}
                         searchPlaceholder="Search by name, ID, department, or specialization..."
@@ -332,6 +336,7 @@ export default function DoctorsPage() {
                         onDepartmentFilterChange={setFilterDepartment}
                         onBulkDelete={handleBulkDelete}
                         onBulkStatusUpdate={handleBulkStatusUpdate}
+                        bulkStatusOptions={bulkStatusOptions}
                         emptyMessage="No doctors found"
                     />
                 </Card>
@@ -347,7 +352,9 @@ export default function DoctorsPage() {
                 trigger={<div />}
                 showFooter={false}
             >
-                <LazyDoctorForm onClose={() => setIsAddModalOpen(false)} />
+                <Suspense fallback={<div className="text-sm text-[var(--text-muted)]">Loading form...</div>}>
+                    <LazyDoctorForm onClose={() => setIsAddModalOpen(false)} />
+                </Suspense>
             </ActionModal>
 
             {/* Edit Doctor Modal */}
@@ -361,10 +368,12 @@ export default function DoctorsPage() {
                 showFooter={false}
             >
                 {editingDoctor && (
-                    <LazyDoctorForm
-                        doctor={editingDoctor}
-                        onClose={() => setEditingDoctor(null)}
-                    />
+                    <Suspense fallback={<div className="text-sm text-[var(--text-muted)]">Loading form...</div>}>
+                        <LazyDoctorForm
+                            doctor={editingDoctor}
+                            onClose={() => setEditingDoctor(null)}
+                        />
+                    </Suspense>
                 )}
             </ActionModal>
 

@@ -82,7 +82,6 @@ export function DoctorForm({ doctor, onClose }: DoctorFormProps) {
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual API call
       if (doctor) {
         updateDoctor(doctor.id, formData);
         addToast("Doctor updated successfully", "success");

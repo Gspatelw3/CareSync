@@ -28,10 +28,6 @@ type NotificationStore = {
   getFilteredNotifications: (filter: "all" | "unread") => Notification[];
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/notifications endpoint
-// TODO: Add real-time notifications via WebSocket
-
 export const useNotificationStore = create<NotificationStore>()(
   persist(
     (set, get) => ({

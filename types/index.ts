@@ -177,9 +177,6 @@ export type NavigationItem = {
   icon: React.ComponentType<{ className?: string }>;
 };
 
-// ── Status Badge Variant ──
-export type StatusBadgeVariant = "default" | "warning" | "danger" | "info";
-
 // ── Alert ──
 export type Alert = {
   label: string;

@@ -9,7 +9,6 @@ import { ActionModal } from "@/components/ui/action-modal";
 import { FormField } from "@/components/ui/forms/form-field";
 import { useAdmissionStore } from "@/lib/stores";
 import { initializeMockAdmissions } from "@/lib/stores/use-admission-store";
-import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Admission } from "@/types";

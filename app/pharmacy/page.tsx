@@ -24,7 +24,6 @@ export default function PharmacyPage() {
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
   const inventory = useInventoryStore((state) => state.inventory);
-  const getPaginatedInventory = useInventoryStore((state) => state.getPaginatedInventory);
   const deleteInventoryItem = useInventoryStore((state) => state.deleteInventoryItem);
   const bulkDelete = useInventoryStore((state) => state.bulkDelete);
   const bulkUpdateStatus = useInventoryStore((state) => state.bulkUpdateStatus);
@@ -39,8 +38,6 @@ export default function PharmacyPage() {
     initializeMockInventory();
     setIsInitialized(true);
   }, []);
-
-  const paginatedInventory = getPaginatedInventory();
 
   const stats = useMemo(() => {
     const counts = inventory.reduce(
@@ -107,6 +104,12 @@ export default function PharmacyPage() {
 
   const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
+    { label: "In Stock", value: "In stock" },
+    { label: "Low Stock", value: "Low stock" },
+    { label: "Critical", value: "Critical" },
+  ], []);
+
+  const bulkStatusOptions = useMemo(() => [
     { label: "In Stock", value: "In stock" },
     { label: "Low Stock", value: "Low stock" },
     { label: "Critical", value: "Critical" },
@@ -202,7 +205,7 @@ export default function PharmacyPage() {
         <Card title="Inventory" description="Pharmacy stock and medication inventory.">
           <EnhancedDataTable
             columns={columns}
-            data={paginatedInventory}
+            data={inventory}
             getRowId={(item) => item.id}
             renderCell={renderCell}
             searchPlaceholder="Search inventory..."
@@ -212,6 +215,7 @@ export default function PharmacyPage() {
             onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
             onBulkStatusUpdate={handleBulkStatusUpdate}
+            bulkStatusOptions={bulkStatusOptions}
             emptyMessage="No inventory items found"
           />
         </Card>

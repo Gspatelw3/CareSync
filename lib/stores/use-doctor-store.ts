@@ -35,10 +35,6 @@ type DoctorStore = {
   getPaginatedDoctors: () => Doctor[];
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/doctors endpoint
-// TODO: Add real-time updates via WebSocket
-
 export const useDoctorStore = create<DoctorStore>()(
   persist(
     (set, get) => ({

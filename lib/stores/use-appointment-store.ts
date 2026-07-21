@@ -35,10 +35,6 @@ type AppointmentStore = {
   getPaginatedAppointments: () => Appointment[];
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/appointments endpoint
-// TODO: Add real-time updates via WebSocket
-
 export const useAppointmentStore = create<AppointmentStore>()(
   persist(
     (set, get) => ({

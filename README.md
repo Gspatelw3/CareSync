@@ -43,7 +43,7 @@ Care Sync is a frontend web application designed for hospital administrators, cl
 - **Reports** — clinical, financial, operational, and compliance reports
 - **Settings** — hospital profile, departments, notification rules, and access control
 
-> **Current State**: The application uses hardcoded mock data across all pages. No backend API or database integration has been implemented yet. Authentication forms exist but do not perform real validation against any service.
+> **Current State**: The application uses mock data initialized into local Zustand stores and persisted in `localStorage`. No backend API or database integration has been implemented yet. Authentication forms exist but do not perform real validation against any service.
 
 ---
 
@@ -166,15 +166,21 @@ care-sync/
 │   │       └── form-field.tsx        # FormField (text/select/textarea/date/number)
 │   │                                 # + FormSection wrapper
 │   ├── data-display/
-│   │   ├── data-table.tsx            # Standard table with header row
-│   │   └── status-badge.tsx          # Colored status pill (default/warning/danger/info)
+│   │   ├── enhanced-data-table.tsx   # Searchable, sortable, paginated table with bulk actions
+│   │   └── status-badge.tsx          # Colored status pill (default/warning/danger/info/success)
 │   ├── charts/
 │   │   └── bar-chart.tsx             # BarChart + CompactBarChart components
 │   ├── patients/
-│   │   └── add-patient-form.tsx      # Patient intake form fields
-│   └── dashboard/                    # Empty — reserved for dashboard widgets
+│   │   └── patient-form.tsx          # Patient create/edit form
+│   ├── appointments/
+│   │   └── appointment-form.tsx      # Appointment create/edit form
+│   └── doctors/
+│       └── doctor-form.tsx           # Doctor create/edit form
 │
-├── lib/                              # Utilities and providers
+├── lib/                              # Utilities, stores, providers, and config
+│   ├── stores/                       # Zustand stores with localStorage persistence
+│   ├── utils/                        # Validation and bed-calculation helpers
+│   ├── constants/                    # Shared select options
 │   ├── theme-provider.tsx            # Light/dark theme context + toggle
 │   └── use-toast.tsx                 # Toast notification context
 │
@@ -187,6 +193,7 @@ care-sync/
 ├── next.config.ts                    # Next.js configuration
 ├── postcss.config.mjs                # PostCSS configuration (Tailwind)
 ├── eslint.config.mjs                 # ESLint flat config
+├── .env.example
 ├── .gitignore
 ├── design.md                         # Original design notes/spec
 ├── AGENTS.md                         # Empty file
@@ -219,7 +226,7 @@ User Browser
 │  ┌─────────────────────────────────────┐ │
 │  │        Shared Components            │ │
 │  │  PageHeader, StatCard, Card,        │ │
-│  │  DataTable, StatusBadge, Modal,     │ │
+│  │  EnhancedDataTable, StatusBadge,    │ │
 │  │  ActionModal, FormField, Charts     │ │
 │  └─────────────────────────────────────┘ │
 │                                          │
@@ -252,7 +259,7 @@ Every main application page (non-auth) follows this structure:
 │  │          │  StatCards (2×2 or 4-col)  ││
 │  │          │                            ││
 │  │          │  Data Section              ││
-│  │          │  ├─ Card + DataTable       ││
+│  │          │  ├─ Card + EnhancedDataTable││
 │  │          │  └─ Card + List/Charts     ││
 │  └──────────┴───────────────────────────┘│
 └──────────────────────────────────────────┘
@@ -342,7 +349,7 @@ RootLayout (app/layout.tsx)
     │           ├── description
     │           └── actions (SearchInput + ActionButton + ActionModal)
     │       └── StatCard grid
-    │       └── Card + DataTable
+    │       └── Card + EnhancedDataTable
     │       └── Card + side panels
 ```
 
@@ -350,9 +357,16 @@ RootLayout (app/layout.tsx)
 
 ## State Management
 
-Care Sync does **not** use a dedicated state management library. State is managed through:
+Care Sync uses **Zustand** for domain data and React Context for cross-cutting UI state.
 
-### 1. React Context (Global State)
+### 1. Zustand Stores
+
+| Store Area | Files | Purpose |
+|---------|------|---------|
+| Domain data | `lib/stores/use-*-store.ts` | Patients, doctors, appointments, inventory, admissions, labs, billing, notifications, settings, and auth |
+| Persistence | `zustand/middleware` | Demo data is persisted to `localStorage` so CRUD actions survive refreshes |
+
+### 2. React Context (Global UI State)
 
 | Context | File | Purpose |
 |---------|------|---------|
@@ -361,16 +375,16 @@ Care Sync does **not** use a dedicated state management library. State is manage
 
 Both contexts are wired in the root layout (`app/layout.tsx`) so they are available throughout the entire app.
 
-### 2. Component Local State (useState)
+### 3. Component Local State (useState)
 
 - **Login form**: `email`, `password`, `errors` state
 - **Modal open/close**: Each `ActionModal` manages its own `isOpen` state (with support for controlled and uncontrolled modes)
-- **Search inputs**: Current input values (though search is not functional yet)
-- **Form fields**: Individual field values within forms
+- **Table controls**: Current search, sort, selected rows, and page size in `EnhancedDataTable`
+- **Form fields**: Controlled form state in entity forms
 
-### 3. No Server State / Data Fetching
+### 4. No Server State / Data Fetching
 
-There is currently no data fetching layer. All data displayed in tables, charts, and stat cards is hardcoded JavaScript arrays within each page file. When a backend is integrated, consider:
+There is currently no backend data fetching layer. Mock data is initialized in Zustand stores and persisted in `localStorage`. When a backend is integrated, consider:
 
 - **React Query / TanStack Query** for server state management
 - **SWR** as a lighter alternative
@@ -499,8 +513,8 @@ addToast("Stock is running low", "warning");
 
 | Component | Props | Notes |
 |-----------|-------|-------|
-| **`DataTable`** | `headers`, `children` | Renders a table with header row and scrollable body. Child `<tr>` elements go directly as children |
-| **`StatusBadge`** | `children`, `variant?` | Colored pill badge. Variants: `default` (green/teal), `warning` (amber), `danger` (red), `info` (blue) |
+| **`EnhancedDataTable`** | `columns`, `data`, `getRowId`, `renderCell`, filters, bulk actions | Searchable, sortable, paginated table with checkbox selection and domain-specific bulk status options |
+| **`StatusBadge`** | `children`, `variant?` | Colored pill badge. Variants: `default` (green/teal), `warning` (amber), `danger` (red), `info` (blue), `success` |
 
 ### Chart Components
 
@@ -770,7 +784,7 @@ export default function SomePage() {
       </div>
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card title="..." description="...">
-          <DataTable headers={[...]}>...</DataTable>
+          <EnhancedDataTable columns={[...]} data={...} />
         </Card>
         {/* Side panel with secondary content */}
       </div>
@@ -848,29 +862,25 @@ There are **two** `StatusBadge` implementations:
 
 Both render colored pills but have different styles. If you change one, the other won't update.
 
-### 3. ActionModal Form ID Conflict
+### 3. Demo-Only Authentication
 
-`ActionModal` renders `<form id="action-modal-form">` with a hardcoded ID. If a page has multiple `ActionModal` instances, the submit button in the second modal will submit the first form. This has not caused issues yet because modals are stacked (only one is open at a time), but it's fragile.
+Authentication is simulated for portfolio/demo use. The auth store accepts valid-looking credentials and persists the mock user locally; replace this with a real auth provider before handling real users.
 
-### 4. No Search/Filter Functionality
+### 4. Mock Data Persistence
 
-The `SearchInput` component renders a styled input field but does not actually filter any data. Search and filter functionality has not been implemented yet.
+CRUD actions update Zustand stores and persist to `localStorage`, but no backend API or database is connected yet. The included `BACKEND_INTEGRATION.md` outlines a suggested API migration path.
 
-### 5. Form Fields Are Uncontrolled
+### 5. Test Coverage
 
-`FormField` uses `defaultValue` (not `value`), making all form inputs **uncontrolled**. Form data is never collected or submitted — the "Confirm" buttons just close the modal. There's no form state management.
+No automated tests are included yet. Add focused component tests for forms/tables and E2E coverage for core CRUD flows before production use.
 
-### 6. All Data Is Mock Data
+### 6. Accessibility Audit
 
-Every page has hardcoded data arrays. When a "Create" modal is submitted, no data is actually persisted. New records don't appear in the tables. This is by design (backend not yet integrated).
+Core modal and form semantics are in place, but a full axe/keyboard pass should still be run before production deployment.
 
-### 7. Patient ID Duplication
+### 7. Documentation Drift
 
-In the `AddPatientForm` and several select dropdowns across the app, patient ID `P-1021` is used for both "Sita Verma" and a duplicate entry. This is a data error in the mock data.
-
-### 8. Missing `lib/` Directory Documentation
-
-The `lib/` directory contains only two files: `theme-provider.tsx` and `use-toast.tsx`. The original `design.md` references a `hooks/`, `types/`, and `services/` directory that don't exist yet.
+`DOCUMENTATION.md` and `design.md` are useful historical references, but `README.md` should be treated as the current source of truth.
 
 ### 9. Sidebar Navigation Label vs Page Title
 
@@ -893,16 +903,15 @@ Tailwind 4's `@theme inline` block maps CSS variables to Tailwind utility classe
 
 ### 🟡 Important / Consistency
 
-5. **Refactor Dashboard Layout**: Make the dashboard use `PageShell` and `PageHeader` like all other pages.
-6. **Consolidate StatusBadge**: Remove the inline `StatusBadge` from the dashboard and use the shared component.
-7. **Add Search/Filter**: Wire up the `SearchInput` components to actually filter data.
-8. **Create Type Definitions**: Move shared types (Patient, Doctor, Appointment, etc.) into a `types/` directory.
-9. **Create an `.env.example`**: Document environment variables needed for API URLs, auth config, etc.
+5. **Add Backend Integration**: Replace localStorage persistence with API-backed server state.
+6. **Add Automated Tests**: Cover form validation, table search/sort/bulk actions, and key auth flows.
+7. **Run Accessibility Tooling**: Add axe or Playwright accessibility checks for modals, forms, and navigation.
+8. **Harden Authentication**: Replace mock auth with a real provider and session handling.
+9. **Refresh Secondary Docs**: Bring `DOCUMENTATION.md` and `design.md` in line with the current Zustand-based implementation.
 
 ### 🟢 Nice to Have / Polish
 
-10. **Fix Duplicate Patient IDs**: Clean up mock data to avoid duplicate `P-1021` entries.
-11. **Add Loading/Error States**: Pages currently render immediately with mock data. Add loading skeletons and error boundaries.
+10. **Add Loading/Error States**: Pages currently render local mock data. Add backend-ready loading skeletons and error boundaries.
 12. **Add Unit Tests**: No test files exist. Consider Vitest + React Testing Library.
 13. **Add E2E Tests**: Consider Playwright or Cypress for critical user flows.
 14. **Add a `components/dashboard/` Widget**: The directory exists but is empty. Extract dashboard-specific components.
@@ -987,7 +996,7 @@ Auth routes (separate from main shell):
                       │
               ┌───────┼────────┐
               │                │
-          DataTable       StatusBadge
+          EnhancedDataTable       StatusBadge
               │
          {children}
          (<tr> rows)

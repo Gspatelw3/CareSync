@@ -13,7 +13,16 @@ import {
     Pencil,
 } from "lucide-react";
 import { useToast } from "@/lib/use-toast";
-import Select from "react-select";
+import Select, {
+    type Props as SelectProps,
+    type SingleValue,
+    type StylesConfig,
+} from "react-select";
+
+type SelectOption = {
+    label: string;
+    value: string;
+};
 
 type Column = {
     key: string;
@@ -29,13 +38,14 @@ type EnhancedDataTableProps<T> = {
     onDelete?: (id: string) => void;
     onBulkDelete?: (ids: string[]) => void;
     onBulkStatusUpdate?: (ids: string[], status: string) => void;
+    bulkStatusOptions?: SelectOption[];
     getRowId: (row: T) => string;
     renderCell: (row: T, column: Column) => React.ReactNode;
     searchPlaceholder?: string;
-    filterOptions?: { label: string; value: string }[];
+    filterOptions?: SelectOption[];
     currentFilter?: string;
     onFilterChange?: (value: string) => void;
-    departmentFilterOptions?: { label: string; value: string }[];
+    departmentFilterOptions?: SelectOption[];
     currentDepartmentFilter?: string;
     onDepartmentFilterChange?: (value: string) => void;
     emptyMessage?: string;
@@ -76,72 +86,71 @@ const Checkbox = memo(function Checkbox({
     );
 });
 
-const selectStyles = {
-    control: (base: any) => ({
+const controlStyle: NonNullable<StylesConfig<SelectOption, false>["control"]> =
+    (base) => ({
         ...base,
         backgroundColor: "var(--input-bg)",
         borderColor: "var(--border-default)",
         borderRadius: "0.5rem",
         minHeight: "42px",
         color: "var(--text-primary)",
-    }),
-    menu: (base: any) => ({
+    });
+
+const placeholderStyle: NonNullable<StylesConfig<SelectOption, false>["placeholder"]> =
+    (base) => ({
+        ...base,
+        color: "var(--text-muted)",
+    });
+
+const selectStyles: StylesConfig<SelectOption, false> = {
+    control: controlStyle,
+    menu: (base) => ({
         ...base,
         backgroundColor: "var(--card-bg)",
         border: "1px solid var(--border-default)",
         borderRadius: "0.5rem",
     }),
-    option: (base: any, state: any) => ({
+    option: (base, state) => ({
         ...base,
         backgroundColor: state.isFocused
             ? "var(--care-primary)"
             : "var(--card-bg)",
         color: state.isFocused ? "white" : "var(--text-primary)",
     }),
-    singleValue: (base: any) => ({
+    singleValue: (base) => ({
         ...base,
         color: "var(--text-primary)",
     }),
-    placeholder: (base: any) => ({
+    placeholder: placeholderStyle,
+    dropdownIndicator: (base) => ({
         ...base,
         color: "var(--text-muted)",
     }),
-    dropdownIndicator: (base: any) => ({
-        ...base,
-        color: "var(--text-muted)",
-    }),
-    indicatorSeparator: (base: any) => ({
+    indicatorSeparator: (base) => ({
         ...base,
         backgroundColor: "var(--border-default)",
     }),
 };
 
-const compactSelectStyles = {
+const compactSelectStyles: StylesConfig<SelectOption, false> = {
     ...selectStyles,
-    control: (base: any) => ({
-        ...selectStyles.control(base),
+    control: (base, state) => ({
+        ...controlStyle(base, state),
         minHeight: "32px",
     }),
 };
 
-const statusSelectStyles = {
+const statusSelectStyles: StylesConfig<SelectOption, false> = {
     ...selectStyles,
-    control: (base: any) => ({
-        ...selectStyles.control(base),
+    control: (base, state) => ({
+        ...controlStyle(base, state),
         whiteSpace: "nowrap",
     }),
-    placeholder: (base: any) => ({
-        ...selectStyles.placeholder(base),
+    placeholder: (base, state) => ({
+        ...placeholderStyle(base, state),
         whiteSpace: "nowrap",
     }),
 };
-
-const bulkStatusOptions = [
-    { value: "On duty", label: "On Duty" },
-    { value: "Off duty", label: "Off Duty" },
-    { value: "On leave", label: "On Leave" },
-    { value: "Available", label: "Available" },
-];
 
 const pageSizeOptions = [
     { value: "5", label: "5" },
@@ -150,8 +159,19 @@ const pageSizeOptions = [
     { value: "50", label: "50" },
 ];
 
+function compareCellValues(aVal: unknown, bVal: unknown) {
+    if (typeof aVal === "number" && typeof bVal === "number") {
+        return aVal - bVal;
+    }
+
+    return String(aVal ?? "").localeCompare(String(bVal ?? ""), undefined, {
+        numeric: true,
+        sensitivity: "base",
+    });
+}
+
 // Client-only wrapper for react-select to prevent hydration mismatches
-function ClientSelect(props: any) {
+function ClientSelect(props: SelectProps<SelectOption, false>) {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -165,7 +185,7 @@ function ClientSelect(props: any) {
         );
     }
 
-    return <Select {...props} />;
+    return <Select<SelectOption, false> {...props} />;
 }
 
 // Export a memoized generic table component
@@ -177,6 +197,7 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
     onDelete,
     onBulkDelete,
     onBulkStatusUpdate,
+    bulkStatusOptions = [],
     getRowId,
     renderCell,
     searchPlaceholder = "Search...",
@@ -210,9 +231,8 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
         if (!sortBy) return 0;
         const aVal = a[sortBy as keyof T];
         const bVal = b[sortBy as keyof T];
-        if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
-        return 0;
+        const comparison = compareCellValues(aVal, bVal);
+        return sortOrder === "asc" ? comparison : -comparison;
     }), [filteredData, sortBy, sortOrder]);
 
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -241,12 +261,18 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
     }, [sortBy, sortOrder]);
 
     const handleSelectAll = useCallback(() => {
-        if (selectedIds.length === paginatedIds.length) {
-            setSelectedIds([]);
+        const allPageRowsSelected = paginatedIds.every((id) =>
+            selectedIdSet.has(id),
+        );
+
+        if (allPageRowsSelected) {
+            setSelectedIds((prev) =>
+                prev.filter((id) => !paginatedIds.includes(id)),
+            );
         } else {
-            setSelectedIds(paginatedIds);
+            setSelectedIds((prev) => Array.from(new Set([...prev, ...paginatedIds])));
         }
-    }, [paginatedIds, selectedIds.length]);
+    }, [paginatedIds, selectedIdSet]);
 
     const handleSelectRow = useCallback((id: string) => {
         setSelectedIds((prev) =>
@@ -256,17 +282,16 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
 
     const handleBulkDelete = useCallback(() => {
         if (onBulkDelete && selectedIds.length > 0) {
+            const deletedCount = selectedIds.length;
             onBulkDelete(selectedIds);
             setSelectedIds([]);
-            addToast(
-                `Deleted ${selectedIds.length} items successfully`,
-                "success",
-            );
+            addToast(`Deleted ${deletedCount} items successfully`, "success");
         }
     }, [addToast, onBulkDelete, selectedIds]);
 
     const isAllSelected =
-        paginatedData.length > 0 && selectedIds.length === paginatedData.length;
+        paginatedData.length > 0 &&
+        paginatedIds.every((id) => selectedIdSet.has(id));
     if (isLoading) {
         return (
             <div className="space-y-4">
@@ -293,7 +318,7 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
                                 value={filterOptions.find(
                                     (opt) => opt.value === currentFilter,
                                 )}
-                                onChange={(selected: any) =>
+                                onChange={(selected: SingleValue<SelectOption>) =>
                                     selected && onFilterChange(selected.value)
                                 }
                                 options={filterOptions}
@@ -308,7 +333,7 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
                                     (opt) =>
                                         opt.value === currentDepartmentFilter,
                                 )}
-                                onChange={(selected: any) =>
+                                onChange={(selected: SingleValue<SelectOption>) =>
                                     selected &&
                                     onDepartmentFilterChange(selected.value)
                                 }
@@ -320,18 +345,19 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
                 </div>
                 {selectedIds.length > 0 && (
                     <div className="flex items-center gap-2 pt-3 border-t border-[var(--border-default)]">
-                        {onBulkStatusUpdate && (
+                        {onBulkStatusUpdate && bulkStatusOptions.length > 0 && (
                             <div className="w-56">
                                 <ClientSelect
-                                    onChange={(selected: any) => {
+                                    onChange={(selected: SingleValue<SelectOption>) => {
                                         if (selected) {
+                                            const updatedCount = selectedIds.length;
                                             onBulkStatusUpdate(
                                                 selectedIds,
                                                 selected.value,
                                             );
                                             setSelectedIds([]);
                                             addToast(
-                                                `Updated ${selectedIds.length} items`,
+                                                `Updated ${updatedCount} items`,
                                                 "success",
                                             );
                                         }
@@ -372,16 +398,25 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
                             {columns.map((column) => (
                                 <th
                                     key={column.key}
-                                    className={`px-5 py-3 font-semibold ${column.sortable !== false ? "cursor-pointer hover:text-[var(--text-primary)]" : ""}`}
-                                    onClick={() =>
-                                        column.sortable !== false &&
-                                        handleSort(column.key)
+                                    aria-sort={
+                                        sortBy === column.key
+                                            ? sortOrder === "asc"
+                                                ? "ascending"
+                                                : "descending"
+                                            : "none"
                                     }
+                                    className="px-5 py-3 font-semibold"
                                 >
-                                    <div className="flex items-center gap-2">
-                                        {column.label}
-                                        {column.sortable !== false &&
-                                            sortBy === column.key && (
+                                    {column.sortable === false ? (
+                                        column.label
+                                    ) : (
+                                        <button
+                                            className="flex items-center gap-2 hover:text-[var(--text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--care-primary)]"
+                                            type="button"
+                                            onClick={() => handleSort(column.key)}
+                                        >
+                                            {column.label}
+                                            {sortBy === column.key && (
                                                 <span className="text-[var(--care-primary)]">
                                                     {sortOrder === "asc" ? (
                                                         <ChevronUp className="size-4" />
@@ -390,7 +425,8 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
                                                     )}
                                                 </span>
                                             )}
-                                    </div>
+                                        </button>
+                                    )}
                                 </th>
                             ))}
                             {(onEdit || onDelete) && (
@@ -422,6 +458,16 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
                                         key={id}
                                         className="hover:bg-[var(--hover-bg)]"
                                         onClick={() => onRowClick?.(row)}
+                                        onKeyDown={(event) => {
+                                            if (
+                                                onRowClick &&
+                                                (event.key === "Enter" || event.key === " ")
+                                            ) {
+                                                event.preventDefault();
+                                                onRowClick(row);
+                                            }
+                                        }}
+                                        tabIndex={onRowClick ? 0 : undefined}
                                     >
                                         <td className="px-4 py-4">
                                             <Checkbox
@@ -491,7 +537,7 @@ export const EnhancedDataTable = memo(function EnhancedDataTable<T>({
                                     value: itemsPerPage.toString(),
                                     label: itemsPerPage.toString(),
                                 }}
-                                onChange={(selected: any) => {
+                                onChange={(selected: SingleValue<SelectOption>) => {
                                     if (selected) {
                                         setItemsPerPage(Number(selected.value));
                                         setCurrentPage(1);

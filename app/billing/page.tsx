@@ -11,7 +11,7 @@ import { useBillingStore } from "@/lib/stores";
 import { initializeMockInvoices } from "@/lib/stores/use-billing-store";
 import { EnhancedDataTable } from "@/components/data-display/enhanced-data-table";
 import { useToast } from "@/lib/use-toast";
-import { useCallback, useEffect, useMemo, useState, lazy } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import type { Invoice } from "@/types";
 
 // Lazy load InvoiceForm to reduce initial bundle size
@@ -26,7 +26,6 @@ export default function BillingPage() {
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
   const invoices = useBillingStore((state) => state.invoices);
-  const getPaginatedInvoices = useBillingStore((state) => state.getPaginatedInvoices);
   const deleteInvoice = useBillingStore((state) => state.deleteInvoice);
   const bulkDelete = useBillingStore((state) => state.bulkDelete);
   const bulkUpdateStatus = useBillingStore((state) => state.bulkUpdateStatus);
@@ -41,8 +40,6 @@ export default function BillingPage() {
     initializeMockInvoices();
     setIsInitialized(true);
   }, []);
-
-  const paginatedInvoices = getPaginatedInvoices();
 
   const stats = useMemo(() => {
     const totals = invoices.reduce(
@@ -111,6 +108,12 @@ export default function BillingPage() {
 
   const statusFilterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
+    { label: "Paid", value: "Paid" },
+    { label: "Partial", value: "Partial" },
+    { label: "Pending", value: "Pending" },
+  ], []);
+
+  const bulkStatusOptions = useMemo(() => [
     { label: "Paid", value: "Paid" },
     { label: "Partial", value: "Partial" },
     { label: "Pending", value: "Pending" },
@@ -197,7 +200,7 @@ export default function BillingPage() {
         <Card title="Invoices" description="All billing invoices and payment status.">
           <EnhancedDataTable
             columns={columns}
-            data={paginatedInvoices}
+            data={invoices}
             getRowId={(invoice) => invoice.id}
             renderCell={renderCell}
             searchPlaceholder="Search invoices..."
@@ -207,6 +210,7 @@ export default function BillingPage() {
             onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
             onBulkStatusUpdate={handleBulkStatusUpdate}
+            bulkStatusOptions={bulkStatusOptions}
             emptyMessage="No invoices found"
           />
         </Card>
@@ -227,13 +231,15 @@ export default function BillingPage() {
         trigger={<div />}
         showFooter={false}
       >
-        <LazyInvoiceForm 
-          invoice={editingInvoice} 
-          onClose={() => {
-            setIsAddModalOpen(false);
-            setEditingInvoice(null);
-          }} 
-        />
+        <Suspense fallback={<div className="text-sm text-[var(--text-muted)]">Loading form...</div>}>
+          <LazyInvoiceForm
+            invoice={editingInvoice}
+            onClose={() => {
+              setIsAddModalOpen(false);
+              setEditingInvoice(null);
+            }}
+          />
+        </Suspense>
       </ActionModal>
 
       {/* Delete Confirmation Dialog */}

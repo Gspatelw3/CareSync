@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { PageShell, PageHeader, StatCard } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/data-display/status-badge";
@@ -27,7 +27,6 @@ export default function PatientsPage() {
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   
   const patients = usePatientStore((state) => state.patients);
-  const getPaginatedPatients = usePatientStore((state) => state.getPaginatedPatients);
   const deletePatient = usePatientStore((state) => state.deletePatient);
   const bulkDelete = usePatientStore((state) => state.bulkDelete);
   const bulkUpdateStatus = usePatientStore((state) => state.bulkUpdateStatus);
@@ -42,8 +41,6 @@ export default function PatientsPage() {
     initializeMockPatients();
     setIsInitialized(true);
   }, []);
-
-  const paginatedPatients = getPaginatedPatients();
 
   const stats = useMemo(() => {
     const activeCount = patients.filter((p) => p.status === "Active").length;
@@ -105,6 +102,12 @@ export default function PatientsPage() {
 
   const filterOptions = useMemo(() => [
     { label: "All Status", value: "all" },
+    { label: "Active", value: "Active" },
+    { label: "Discharged", value: "Discharged" },
+    { label: "ICU", value: "ICU" },
+  ], []);
+
+  const bulkStatusOptions = useMemo(() => [
     { label: "Active", value: "Active" },
     { label: "Discharged", value: "Discharged" },
     { label: "ICU", value: "ICU" },
@@ -191,7 +194,7 @@ export default function PatientsPage() {
         <Card title="Patient Registry" description="All registered patients sorted by last visit.">
           <EnhancedDataTable
             columns={columns}
-            data={paginatedPatients}
+            data={patients}
             getRowId={(patient) => patient.id}
             renderCell={renderCell}
             searchPlaceholder="Search patients..."
@@ -201,6 +204,7 @@ export default function PatientsPage() {
             onRowClick={handleEdit}
             onBulkDelete={handleBulkDelete}
             onBulkStatusUpdate={handleBulkStatusUpdate}
+            bulkStatusOptions={bulkStatusOptions}
             emptyMessage="No patients found"
           />
         </Card>
@@ -216,7 +220,9 @@ export default function PatientsPage() {
         trigger={<div />}
         showFooter={false}
       >
-        <LazyPatientForm onClose={() => setIsAddModalOpen(false)} />
+        <Suspense fallback={<div className="text-sm text-[var(--text-muted)]">Loading form...</div>}>
+          <LazyPatientForm onClose={() => setIsAddModalOpen(false)} />
+        </Suspense>
       </ActionModal>
 
       {/* Edit Patient Modal */}
@@ -230,7 +236,9 @@ export default function PatientsPage() {
         showFooter={false}
       >
         {editingPatient && (
-          <LazyPatientForm patient={editingPatient} onClose={() => setEditingPatient(null)} />
+          <Suspense fallback={<div className="text-sm text-[var(--text-muted)]">Loading form...</div>}>
+            <LazyPatientForm patient={editingPatient} onClose={() => setEditingPatient(null)} />
+          </Suspense>
         )}
       </ActionModal>
 

@@ -38,10 +38,6 @@ type SettingsStore = {
   resetToDefaults: () => void;
 };
 
-// TODO: Replace LocalStorage with API calls to backend
-// TODO: Connect to /api/settings endpoint
-// TODO: Add multi-tenant support
-
 const defaultOrganization: OrganizationSettings = {
   name: "Care Sync Medical Centre",
   address: "42 Health Avenue, Medical District",

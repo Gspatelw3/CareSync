@@ -55,7 +55,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call to /api/auth/login
       const success = await login(email, password, rememberMe);
       
       if (success) {

@@ -24,15 +24,9 @@ type AuthStore = {
   setLoading: (loading: boolean) => void;
 };
 
-// TODO: Replace with real authentication API
-// TODO: Connect to /api/auth/login endpoint
-// TODO: Implement JWT token management
-// TODO: Add OAuth integration (Google, Microsoft)
-// TODO: Implement password reset flow with email
-
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -41,7 +35,6 @@ export const useAuthStore = create<AuthStore>()(
       login: async (email, password, rememberMe) => {
         set({ isLoading: true });
 
-        // TODO: Replace with actual API call
         // Mock authentication - accept any email/password for demo
         await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
 
@@ -65,7 +58,6 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: () => {
-        // TODO: Call /api/auth/logout endpoint
         set({
           user: null,
           isAuthenticated: false,
